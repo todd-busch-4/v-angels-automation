@@ -1,0 +1,99 @@
+'##############################################################
+'##   			GLOBAL PARAMETERS							 ##
+'##############################################################
+
+'-------------------- automation config paths
+iEnvironment = 1																		'used to determine environment runnng in (1): for todd's thinkpad or (2): for angelhypdsktp
+packagePath$ = "C:\v-angels-automation\"												'base or root path for all resources
+localWinUser$ = "c:\users\busch\"														'path to use when running from todd's thinkpad
+'localWinUser$ = "c:\Users\Administrator\"												'path to use when running from angelhypdsktp
+
+
+'-------------------- credentials/accts
+adobeUsername$ = "caremgr@v-angels.com"
+corpEmail$ = "caremgr@v-angels.com"
+adobePassword$ = "NoInsub1!"
+zipWhipPassword$ = "Text123!"
+zipWhipUsername$ = "dnelson@(614) 802-6435"
+gmsUsername$ = "dnelson"
+gmsPassword$ = "WinBig1!"
+'sTargetCompany$ = "01351"																'company to use when testing in gms
+sTargetCompany$ = "01352"																'company to use when processing live data in gms
+gensUsername$ = "administrator@v-angels.com"											'generations username
+gensPassword$ = "0ff!ceAutomation"														'generations password
+gensAgencyID$ = "VISI5371"																'generations agency id
+arcsUsername$ = "employment"
+arcsPassword$ = "NoInsub1!"
+
+
+'-------------------- automation folder paths
+employmentInquiryPath$ = packagePath$ + "downloads\Employment Inquiry List.xlsx"		'path to local copy of employment inquiry.xlsx
+logsPath$ = packagePath$ + "logs\"
+scriptsPath$ = packagePath$ + "scripts\"
+executionLogPath$ = packagePath$ + "logs\execution_log.log"
+debugLogPath$ = packagePath$ + "logs\debug_log.log"
+screenshotsPath$ = packagePath$ + "logs\screenshots\"
+imagePath$ = packagePath$ + "images\busch-thinkpad\"									'use this path when running from todd's thinkpad
+'imagePath$ = packagePath$ + "images\angelhypdsktp\"									'use this path when running from angelhypdsktp
+scanFailuresPath$ = packagePath$ + "logs\scan_failures.log"
+successLogPath$ = packagePath$ + "logs\processed_log.log"
+logsArchivePath$ = logsPath$ + "archive\"
+emplInquiryArchivePath$ = packagePath$ + "downloads\archive\"							'path to archive each version of employment inquiry list.xlsx downloaded
+
+
+'-------------------- target application url's
+adobeURL$ = "https://acrobat.adobe.com/link/home/?isNativeFlow=true"
+zipWhipURL$ = "https://app.zipwhip.com"
+gmsURL$ = "https://gms.prismhr.com/gms/dbweb.asp?dbcgm=1"
+generationsURL$ = "https://generations.idb-sys.com/"
+arcsURL$ = "https://arcs.ohio.gov/BCS/"
+
+
+'-------------------- date/time variable definitions
+currDate$ = Date$(0)																	'todays date in short date format
+currTime$ = Time$()
+dayPriorAppHour$ = "01"																	'hour to use when scheduling day before confirmation text
+dayPriorAppMinutes$ = "00"																'minutes to use when scheduling day before confirmation text
+dayPriorDayNight$ = "PM"																'designator to use when scheduling day before confirmation text
+dayOfAppHour$ = "07"																	'hour to use when scheduling day of confirmation text
+dayOfAppMinutes$ = "00"																	'minutes to use when scheduling day of confirmation text
+dayOfDayNight$ = "AM"																	'designator to use when scheduling day of confirmation text
+
+
+'-------------------- employment inquiry excel column definitions
+employmentInquiryIdCol$ = "B2:B5001"													'mapping for id column
+employmentInquiryFNameCol$ = "C2:C5001"													'mapping for first name column
+employmentInquiryLNameCol$ = "D2:D5001"													'mapping for last name column
+employmentInquiryEmailCol$ = "L2:L5001"													'mapping for applicant email column
+employmentInquiryPhoneCol$ = "I2:I5001"													'mapping for applicant phone number column
+employmentInquiry1stAppCol$ = "E2:E5001"												'mapping for scheduled 1st appointment column
+employmentInquiryAdobeCol$ = "H2:H5001"													'mapping for adobe packet status column
+employmentInquiryStageCol$ = "A2:A5001"													'mapping for stage column
+employmentInquiryTextMsgCol$ = "F2:F5001"												'mapping for text messages status column
+employmentInquiryChangeEventCol$ = "AC2:AC5001"											'mapping for wintask change event column
+employmentInquiryGMSCol$ = "O2:O5001"													'mapping for gms status column
+employmentInquiryBackGroundChkCol$ = "M2:M5001"											'mapping for background check received column
+employmentInquirySSNCol$ = "AD2:AD5001"													'mapping for social security column
+
+
+
+'-------------------- workflow data
+'------- gms data
+position$ = "OH8835"
+employStatus$ = "A"
+employType$ = "PB"
+benefitGroup$ = "1"
+payGroup$ = "B"
+payMethod$ = "Hourly"
+payRate$ = "8.8000"
+stdHours$ = "80.00"
+gmsRehireType$ = "PB"
+gmsRehireStatus$ = "ACTIVE"
+gmsReasonCode$ = "REHIRE"
+gmsPayRate$ = "10.10"
+startDateCompany$ = datetodate$("d", 7, date$())											'7 days from current date
+
+'-------------------- misc.
+basicLogHdr$ = currDate$ + "-" + currTime$ + ": "
+employmentInquirySharePointPath$ = "https://visitingangels4889.sharepoint.com/:f:/s/CareGiverPortal/EirZqWiZdCNEmCzhQz3bjZkBtL7kN_SdhmS7iyidNTNO2A?e=ZYz6vT"
+

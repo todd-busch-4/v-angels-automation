@@ -1,0 +1,21 @@
+
+
+
+
+
+
+
+
+
+
+
+UsePage("Zipwhip | Daniel Nelson")
+	ClickHTMLElement("BUTTON[CLASS='zk-button zk-button-transparent z']")
+	WriteHTML("INPUT TEXT[NAME='contactSearch']", "Seth Adkins")
+
+
+
+
+
+
+

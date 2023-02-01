@@ -1,0 +1,54 @@
+'#############################################################################################################################
+'## author:                 todd busch
+'##
+'## date:                   01/19/2023
+'##
+'## description:            this script will download the latest copy of the employment inquiry.xlsx doc and then moves
+'##							it into the automation package downloads folder and deletes the copy in the users downloads
+'##							folder
+'##
+'## run in:					n/a
+'##
+'## notes:                  MUST make sure default downloads location in browser is set to users 'downloads' folder
+'##							CG-globalVariables stores the path to the windows user directory
+'##
+'## chg control:    ver     name        description
+'##--------------------------------------------------------------------------------------------------------------------------
+'## 01/19/2023      1.0     tbusch      initial version
+'##
+'#############################################################################################################################
+include "C:\office_automation\framework\CG-globalDimDeclarations\CG-globalDimDeclarations-v1.0.src"
+include "C:\office_automation\framework\CG-globalFunctions\CG-globalFunctions-v1.0.src"
+include "C:\office_automation\framework\CG-globalSubDefinitions\CG-globalSubDefinitions-v1.0.src"
+include "C:\office_automation\framework\CG-globalVariables\CG-globalVariables-v1.0.src"
+
+
+'-------------------------------------------------------------------------------------------------------------------------------- download latest employment inquiry doc
+
+'-------------------- invoke sharepoint page
+res = StartBrowser("CH", employmentInquirySharePointPath$, 3)
+
+
+'-------------------- select employment inquiry doc
+UseWindow( "CHROME.EXE|Chrome_WidgetWin_1|CareGiver Portal - WinTask Data - All Documents - Google Chrome", 1)
+res = ClickOnBitmap(imagePath$ + "sharepoint-excelIcon.bmp", left, single )	'easiest way to set focus to row given issues wintask has seeing/clicking certain containing elements
+
+
+'-------------------- click download link
+UsePage("CareGiver Portal - WinTask Data - All Documents")
+res = ClickHTMLElement("SPAN[OUTERTEXT='Download',INDEX=2]")
+
+
+'-------------------- click save
+UseWindow("CHROME.EXE|#32770|Save As", 4)
+res = Click(Button, "&Save")
+
+pause 3		'allow doc to complete download
+
+'-------------------- copy to package directory
+res = FileCopy(localWinUser$ + "Downloads\Employment Inquiry List.xlsx", employmentInquiryPath$, forced)
+
+closebrowser()
+
+res = Kill(localWinUser$ + "Downloads\Employment Inquiry List.xlsx")
+

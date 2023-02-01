@@ -1,0 +1,16 @@
+'##############################################################
+'##   			DIM STATEMENTS								 ##
+'##############################################################
+Dim arrApplicantEmail$(5000)
+Dim arrApplicantFName$(5000)
+Dim arrApplicantLName$(5000)
+Dim arrApplicantPhone$(5000)
+Dim arrApplicantID$(5000)
+Dim arrApplicant1stApp$(5000)
+Dim arrAdobePcktStatus$(5000)
+Dim arrCurrentStage$(5000)
+Dim arrTextMsgStatus$(5000)
+Dim arrChangeEvents$(5000)
+Dim arrGMSStatus$(5000)
+Dim arrBackGroundChk$(5000)
+Dim arrApplicantSSN$(5000)

@@ -1,0 +1,1172 @@
+'###############################################################################################################################################
+'## author:                 todd busch
+'##
+'## date:                   12/05/2022
+'##
+'## description:            scans the change event column in employment inquiry list.xlsx spreadsheet in package downloads folder; it will 
+'##							send the appropriate packets (pre and 1st int or 2nd int) for rows flagged 'yes' that have a 1st or 2nd  
+'##							interview stage and do not have any reference to those packets in the adobe status column (e.g. [1st int pkt sent]) 
+'##
+'## run in:					chrome
+'##
+'## notes:                  it checks the status of each packet individually so in the case of 1st interview, if one or the other has already
+'##							been sent it will send the one that hasn't. It will not send a packet that has ANY reference to it in the adobe
+'##							status column, regardless of what the actual status is (sent, viewed, cancelled, etc.)
+'##							
+'###############################################################################################################################################
+
+'###############################################################################################################################################
+'##   													script prep																			  ##
+'###############################################################################################################################################
+include "C:\v-angels-automation\framework\CG-globalDimDeclarations\CG-globalDimDeclarations.src"
+include "C:\v-angels-automation\framework\CG-globalFunctions\CG-globalFunctions.src"
+include "C:\v-angels-automation\framework\CG-globalSubDefinitions\CG-globalSubDefinitions.src"
+include "C:\v-angels-automation\framework\CG-globalVariables\CG-globalVariables.src"
+
+
+currScript$ = "CG-adobeSendPackets"
+
+
+#IgnoreErrors = 1
+
+
+OnAction error
+dosub Process_Error
+endaction
+
+
+iRetry = 0
+iAttempt = 0
+
+
+'-------------------------------------------------------------------------------------------------------------------------------- read in columns from employment inquiry doc
+'-------------------- record id
+cnt = readexcel (employmentInquiryPath$, employmentInquiryIdCol$, arrApplicantID$())
+if instr(str$(cnt), "-") <> 0 then				'look for dash which would indicate an error code
+	write(debugLogPath$, basicLogHdr$ + currScript$ + ": error reading ID column.  error_code: (" + str$(cnt) + ")", crlf)
+	write(executionLogPath$, basicLogHdr$ + currScript$ + ": scan failed reading in data (id column)", crlf)
+	criticalStop()
+else
+	write(debugLogPath$, basicLogHdr$ + currScript$ + ": (" + str$(cnt) + ") rows read into array.", crlf)
+endif
+'-------------------- applicant first name
+res = readexcel (employmentInquiryPath$, employmentInquiryFNameCol$, arrApplicantFName$())	
+if instr(str$(res), "-") <> 0 then
+	write(debugLogPath$, basicLogHdr$ + currScript$ + ": error reading first name column.  error_code: (" + str$(cnt) + ")", crlf)
+	write(executionLogPath$, basicLogHdr$ + currScript$ + ": scan failed reading in data (applicant first name)", crlf)
+	criticalStop()
+endif
+'-------------------- applicant last name
+res = readexcel (employmentInquiryPath$, employmentInquiryLNameCol$, arrApplicantLName$())	
+if instr(str$(res), "-") <> 0 then
+	write(debugLogPath$, basicLogHdr$ + currScript$ + ": error reading last name column.  error_code: (" + str$(cnt) + ")", crlf)
+	write(executionLogPath$, basicLogHdr$ + currScript$ + ": scan failed reading in data (applicant last name)", crlf)
+	criticalStop()
+endif
+'-------------------- applicant email
+res = readexcel (employmentInquiryPath$, employmentInquiryEmailCol$, arrApplicantEmail$())	
+if instr(str$(res), "-") <> 0 then
+	write(debugLogPath$, basicLogHdr$ + currScript$ + ": error reading email column.  error_code: (" + str$(cnt) + ")", crlf)
+	write(executionLogPath$, basicLogHdr$ + currScript$ + ": scan failed reading in data (applicant email)", crlf)
+	criticalStop()
+endif
+'-------------------- adobe packet status
+res = readexcel (employmentInquiryPath$, employmentInquiryAdobeCol$, arrAdobePcktStatus$())
+if instr(str$(res), "-") <> 0 then
+	write(debugLogPath$, basicLogHdr$ + currScript$ + ": error reading adobe packet status column.  error_code: (" + str$(cnt) + ")", crlf)
+	write(executionLogPath$, basicLogHdr$ + currScript$ + ": scan failed reading in data (adobe packet status)", crlf)
+	criticalStop()
+endif
+'-------------------- stage
+res = readexcel (employmentInquiryPath$, employmentInquiryStageCol$, arrCurrentStage$())
+if instr(str$(res), "-") <> 0 then
+	write(debugLogPath$, basicLogHdr$ + currScript$ + ": error reading stage column.  error_code: (" + str$(cnt) + ")", crlf)
+	write(executionLogPath$, basicLogHdr$ + currScript$ + ": scan failed reading in data (stage)", crlf)
+	criticalStop()
+endif
+'-------------------- change events
+res = readexcel (employmentInquiryPath$, employmentInquiryChangeEventCol$, arrChangeEvents$())
+if instr(str$(res), "-") <> 0 then
+	write(debugLogPath$, basicLogHdr$ + currScript$ + ": error reading change events column.  error_code: (" + str$(cnt) + ")", crlf)
+	write(executionLogPath$, basicLogHdr$ + currScript$ + ": scan failed reading in data (change events)", crlf)
+	criticalStop()
+endif
+
+
+'#############################################################################################################################
+'##   													script start								 						##
+'#############################################################################################################################
+write(debugLogPath$, basicLogHdr$ + currScript$ + ": starting scan for adobe packet send change events", crlf)
+write(executionLogPath$, basicLogHdr$ + currScript$ + ": starting scan of (" + str$(cnt) + ") rows for adobe packet send change events", crlf + crlf)
+write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": starting scan of (" + str$(cnt) + ") rows for adobe packet send change events", crlf + crlf)
+write(successLogPath$, basicLogHdr$ + currScript$ + ": starting scan of (" + str$(cnt) + ") rows for adobe packet send change events", crlf + crlf)
+if iEnvironment = 1 then
+	write(debugLogPath$, basicLogHdr$ + currScript$ + ": using settings for environment 1", crlf)
+	write(debugLogPath$, basicLogHdr$ + currScript$ + ": --------------------------------------------------------", crlf)
+endif
+if iEnvironment = 2 then
+	write(debugLogPath$, basicLogHdr$ + currScript$ + ": using settings for environment 2", crlf)
+	write(debugLogPath$, basicLogHdr$ + currScript$ + ": --------------------------------------------------------", crlf)
+endif
+
+
+'--------------------------------------------------------------------------------------------------------------------------------------------------------------- begin iterating through change event column
+i = 0
+
+
+repeat
+
+	
+	'-------------------- get change status of current row
+	curr_status$ = arrChangeEvents$(i)
+
+
+	if curr_status$ = "Yes" then
+		iEventCnt = iEventCnt + 1	'change event counter
+		iExcelRow = i + 2			'add 1 for header row and 1 for zero indexed arrays
+		write(debugLogPath$, basicLogHdr$ + currScript$ + ": change event found at row: [" + str$(iExcelRow) + "]", crlf)
+
+
+		'-------------------- get the stage for the current change event
+		curr_stage$ = arrCurrentStage$(i)
+
+
+'------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- 1st interview stage
+		if curr_stage$ = "1st Interview" then
+			iFirstCnt = iFirstCnt + 1		'stage counter
+			write(debugLogPath$, basicLogHdr$ + currScript$ + ": stage: '1st interview' for change event triggers workflow", crlf)
+			write(executionLogPath$, basicLogHdr$ + currScript$ + ": change event for stage '1st interview' at row: [" + str$(iExcelRow) + "] triggered workflow", crlf)
+			write(debugLogPath$, basicLogHdr$ + currScript$ + ": getting data from employment inquiry for current row", crlf)
+
+
+			'-------------------- get data values for current record from employment inquiry
+			applicantID$ = arrApplicantID$(i)
+			applicantFName$ = arrApplicantFName$(i)
+			applicantLName$ = arrApplicantLName$(i)
+			applicantEmail$ = arrApplicantEmail$(i)
+			adobePcktStatus$ = arrAdobePcktStatus$(i)
+			write(debugLogPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+			write(debugLogPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+			write(executionLogPath$, basicLogHdr$ + currScript$ + ": starting workflow for:" + applicantFName$ + " " + applicantLName$ + " record id: " + "[" + applicantID$ + "]", crlf)
+
+
+			'-------------------- check for already sent packets
+			write(debugLogPath$, basicLogHdr$ + currScript$ + ": checking packet status", crlf)
+			write(debugLogPath$, basicLogHdr$ + currScript$ + ": value of adobePcktStatus: " + adobePcktStatus$, crlf)
+			if instr(adobePcktStatus$, "Pre 1st Pkt") <> 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": status indicates pre 1st packet has already been sent", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": skipping to 1st interview packet", crlf)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": pre 1st packet has been sent, skipping to 1st interview packet", crlf)
+				goto firstInterviewSend
+			endif
+
+
+			'-------------------------------------------------------------------------------------------------------------------------------- send pre 1st interview packet
+			'-------------------- invoke browser window
+			while iRetry <= 2
+				res = startbrowser("CH", adobeURL$, 3)
+				pause 3
+				iAttempt = iRetry + 1
+
+				if res = 0 then
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) start browser was successful", crlf)
+					iRetry = 3
+				endif
+
+				if res <> 0 then
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) error starting browser on attempt #: [" + str$(iAttempt) + "]", crlf)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) error_code: (" + str$(res) + "), retrying", crlf)
+					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre_invoke_browser-" + str$(iAttempt) + ".bmp", 1, 1)
+					closebrowser()
+					pause 1
+					iRetry = iRetry + 1
+				endif
+			wend
+			if res <> 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) browser could not be invoked after [" + str$(iAttempt) + "] attempts", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				closebrowser()
+				nextScript()
+				goto nextIteration
+			endif
+	
+
+			iRetry = 0
+			iAttempt = 0
+
+
+			'-------------------- check for login page
+			if existhtmlelement("INPUT EMAIL[NAME='username', ID='EmailPage-EmailField']") = 1 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) adobe acct was not signed in", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) logging in", crlf)
+				usepage("Adobe ID")
+				writehtml("INPUT EMAIL[NAME='username']", adobeUsername$)
+				writehtml("INPUT TEXT[NAME='password']", adobePassword$)
+				clickhtmlelement("SPAN[OUTERTEXT='Continue']")
+				pause 3
+				if currentpage$() <> "Adobe Acrobat Home" then
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) error logging in. browser not loaded to expected page", crlf)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) expected: 'Adobe Acrobat Home'  actual: '" + currentpage$() + "'", crlf)
+					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre_login_error.bmp", 1, 1)
+					closebrowser()
+					nextScript()
+					goto nextIteration
+				else
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) browser invoked and log in successfull", crlf)
+				endif
+			endif
+
+
+			if currentpage$() = "Adobe Acrobat Home" then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) browser invoked. account already logged in", crlf)
+			endif
+
+
+			'-------------------- load pre 1st int packet
+			res = navigate("https://acrobat.adobe.com/link/signatures?isNativeFlow=true&signUri=%2Fpublic%2Fcompose%3FagrId%3DCBJCHBCAABAA-WwTEygU2xDRx_-4VPb8ZkqYkgBKuBll%26authoringRequested%3Dtrue%26client_id%3D69U26F6M6A4Z3U%26showAuthoringOption%3Dfalse")
+			pause 6
+			'------- error handling
+			if instr(str$(res), "-") <> 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) error loading pre 1st int packet", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) resuming scan for next change event", crlf + crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre_load_pre_1st_pckt.bmp", 1, 1)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": (pre) workflow failed; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - load pre 1st packet", crlf + crlf)
+				closebrowser()
+				goto nextIteration
+			endif
+			'------- validation
+			ret = useocrengine(3)
+			pause 10 secs until
+				textocr("Get documents signed")
+				inwindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+				inarea(497, 178, 105, 679)
+			pausefalse
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) loading pre 1st int packet validation failed", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) expected text (get document signed) not found", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) resuming scan for next change event", crlf + crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre_load_pre_1st_pckt.bmp", 1, 1)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": (pre) workflow failed; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - load pre 1st packet", crlf + crlf)
+				closebrowser()
+				goto nextIteration
+			endpause
+			'------- debug logging
+			if res = 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) clicked 'continue' button", crlf)
+			endif
+
+
+			'-------------------- enter applicant email
+			ret = useocrengine(3)
+			usewindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+			if iEnvironment = 1 then
+				clickontextocr("Enter recipient email", left, single, inarea(655, 358, 165, 21))
+			endif
+			if iEnvironment = 2 then
+				clickontextocr("Enter recipient email", left, single, inarea(520, 312, 759, 46))
+			endif
+			res = sendkeys(applicantEmail$)
+			pause 2
+			'------- error handling
+			if res <> 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) error entering applicant email", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) resuming scan for next change event", crlf + crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre_enter_applicant_email.bmp", 1, 1)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": (pre) workflow failed; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - pre enter applicant email", crlf + crlf)
+				closebrowser()
+				goto nextIteration
+			endif
+			'------- debug logging
+			if res = 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) entered applicant email", crlf)
+			endif
+
+
+			'-------------------- add company email
+			ret = useocrengine(3)
+			usewindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat E-Sign - Google Chrome", 1)
+			if iEnvironment = 1 then
+				clickontextocr("Enter recipient email", left, single, inarea(645, 407, 166, 29))
+			endif
+			if iEnvironment = 2 then
+				clickmouse(left, double, 665, 390, absolute)
+			endif
+			res = sendkeys(corpEmail$)
+			pause 2
+			'------- error handling
+			if res <> 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) error entering corporate email", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) resuming scan for next change event", crlf + crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre_enter_corporate_email.bmp", 1, 1)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": (pre) workflow failed; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - pre enter corporate email", crlf + crlf)
+				closebrowser()
+				goto nextIteration
+			endif
+			'------- debug logging
+			if res = 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) entered corporate email", crlf)
+			endif
+
+
+			'-------------------- add applicant name to message box
+			ret = useocrengine(3)
+			usewindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+			if iEnvironment = 1 then
+				clickontextocr("PRE", left, single, inarea(529, 575, 177, 32), -85, 0) 'offset to place cursor at beginning of text.
+			endif
+			if iEnvironment = 2 then
+				clickmouse(left, down, 535, 560, absolute)
+				clickmouse(left, up, 535, 560, absolute)
+			endif
+			res = sendkeys(applicantFName$ + " " + applicantLName$ + " ")
+			pause 2
+			'------- error handling
+			if res <> 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) error adding applicant name to message box", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) resuming scan for next change event", crlf + crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre_add_applicant_name.bmp", 1, 1)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": (pre) workflow failed; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - pre add applicant name", crlf + crlf)
+				closebrowser()
+				goto nextIteration
+			endif
+			'------- debug logging
+			if res = 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) added applicant name to message box", crlf)
+			endif
+
+
+			'-------------------- click 'next' button
+			ret = useocrengine(3)
+			usewindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat E-Sign - Google Chrome", 1)
+			if iEnvironment = 1 then
+				res = clickontextocr("ocd", left, single, inarea(496, 935, 149, 80))
+				'------- error handling
+				if res <> 0 then
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) error clicking 'next' button", crlf)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) resuming scan for next change event", crlf + crlf)
+					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre_click_next.bmp", 1, 1)
+					write(executionLogPath$, basicLogHdr$ + currScript$ + ": (pre) workflow failed; proceeding to next change event", crlf + crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - pre click next", crlf + crlf)
+					closebrowser()
+					goto nextIteration
+				endif
+			endif
+			if iEnvironment = 2 then
+				clickmouse(left, double, 560, 940, absolute)
+			endif
+			pause 2
+			'------- validation
+			ret = useocrengine(3)
+			pause 30 secs until
+				textocr("CONFIDENTIALITY OF PROTECTED")
+				inwindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+				inarea(526, 313, 151, 685)
+			pausefalse
+				result = useocrengine(3)
+				var$ = captureocr$("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", topinstance())
+				if instr(var$, "Email provided is invalid") <> 0 then
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) email provided is invalid; resuming scan for next change event", crlf + crlf)
+					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre_invalid_email.bmp", 1, 1)
+					write(executionLogPath$, basicLogHdr$ + currScript$ + ": (pre) workflow failed; proceeding to next change event", crlf + crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: pre invalid email", crlf + crlf)
+					closebrowser()
+					goto nextIteration
+				else
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) clicking 'next' button validation failed", crlf)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) expected text (confidentiality of protected) not found", crlf)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) resuming scan for next change event", crlf + crlf)
+					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre_click_next_button.bmp", 1, 1)
+					write(executionLogPath$, basicLogHdr$ + currScript$ + ": (pre) workflow failed; proceeding to next change event", crlf + crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - pre click next", crlf + crlf)
+					closebrowser()
+					goto nextIteration
+				endif
+			endpause
+			'------- debug logging
+			if res = 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) clicked 'next' button", crlf)
+			endif
+
+
+			'-------------------- click 'send' button
+			ret = useocrengine(3)
+			usewindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat E-Sign - Google Chrome", 1)
+			if iEnvironment = 1 then
+				res = clickontextocr("D>", left, single, inarea(1779, 933, 139, 76))
+				'------- error handling
+				if res <> 0 then
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) error clicking 'send' button", crlf)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) resuming scan for next change event", crlf + crlf)
+					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre_click_send_button.bmp", 1, 1)
+					write(executionLogPath$, basicLogHdr$ + currScript$ + ": (pre) workflow failed; proceeding to next change event", crlf + crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - pre click send", crlf + crlf)
+					closebrowser()
+					goto nextIteration
+				endif
+			endif
+			if iEnvironment = 2 then
+				clickmouse(left, double, 1850, 970, absolute)
+			endif
+			pause 2
+			'------- validation
+			ret = useocrengine(3)
+			pause 20 secs until
+				textocr(applicantFName$)
+				inwindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+				inarea(568, 270, 148, 832)
+			pausefalse
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) clicking 'send' button validation failed", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) expected text (send confirmation) not found", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) resuming scan for next change event", crlf + crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre_click_send_button.bmp", 1, 1)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": (pre) workflow failed; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - pre click send", crlf + crlf)
+				closebrowser()
+				goto nextIteration
+			endpause
+			'------- debug logging
+			if res = 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": pre 1st interview packet sent", crlf)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": pre 1st Interview packet sent", crlf)
+				write(successLogPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(successLogPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(successLogPath$, basicLogHdr$ + currScript$ + ": pre 1st Interview packet sent", crlf + crlf)
+			endif
+
+
+			closebrowser()		'use browser invoke retry for next packet send in case of 400 errors navigating back to home
+
+
+firstInterviewSend:
+			'-------------------- check for already sent packets
+			write(debugLogPath$, basicLogHdr$ + currScript$ + ": checking packet status", crlf)
+			write(debugLogPath$, basicLogHdr$ + currScript$ + ": value of adobePcktStatus: " + adobePcktStatus$, crlf)
+			if instr(adobePcktStatus$, "1st Int Pkt") <> 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": status indicates 1st interview packet has already been sent", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": 1st interview packet has been sent, proceeding to next change event", crlf + crlf)
+				goto nextIteration
+			endif
+
+
+			'-------------------------------------------------------------------------------------------------------------------------------- send 1st interview packet
+			'-------------------- invoke browser window
+			while iRetry <= 2
+				res = startbrowser("CH", adobeURL$, 3)
+				pause 3
+				iAttempt = iRetry + 1
+
+				if res = 0 then
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) start browser was successful", crlf)
+					iRetry = 3
+				endif
+
+				if res <> 0 then
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) error starting browser on attempt #: [" + str$(iAttempt) + "]", crlf)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) error_code: (" + str$(res) + "), retrying", crlf)
+					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st_invoke_browser-" + str$(iAttempt) + ".bmp", 1, 1)
+					closebrowser()
+					pause 1
+					iRetry = iRetry + 1
+				endif
+			wend
+			if res <> 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) browser could not be invoked after [" + str$(iAttempt) + "] attempts", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				closebrowser()
+				nextScript()
+				goto nextIteration
+			endif
+
+	
+			iRetry = 0
+			iAttempt = 0
+
+
+			'-------------------- check for login page
+			if existhtmlelement("INPUT EMAIL[NAME='username', ID='EmailPage-EmailField']") = 1 then	
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) adobe acct was not signed in", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) logging in", crlf)
+				usepage("Adobe ID")
+				writehtml("INPUT EMAIL[NAME='username']", adobeUsername$)
+				writehtml("INPUT TEXT[NAME='password']", adobePassword$)
+				clickhtmlelement("SPAN[OUTERTEXT='Continue']")
+				pause 3
+				if currentpage$() <> "Adobe Acrobat Home" then
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) error logging in. browser not loaded to expected page", crlf)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) expected: 'Adobe Acrobat Home' actual: " + currentpage$(), crlf)
+					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st_login_error.bmp", 1, 1)
+					closebrowser()
+					nextScript()
+					goto nextIteration
+				else
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) browser invoked and log in successfull", crlf)
+				endif
+			endif
+
+
+			if currentpage$() = "Adobe Acrobat Home" then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) browser invoked. account already logged in", crlf)
+			endif
+
+
+			'-------------------- load 1st int packet
+			res = navigate("https://acrobat.adobe.com/link/signatures?isNativeFlow=true&signUri=%2Fpublic%2Fcompose%3FagrId%3DCBJCHBCAABAAcETmAD8cNSjs_Bc4MuyyPrveEZJhfh_b%26authoringRequested%3Dtrue%26client_id%3D69U26F6M6A4Z3U%26showAuthoringOption%3Dfalse")
+			pause 6
+			'------- error handling
+			if instr(str$(res), "-") <> 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) error loading 1st int packet", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) resuming scan for next change event", crlf + crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st_load_1st_pckt.bmp", 1, 1)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": (1st) workflow failed; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - load 1st int packet", crlf + crlf)
+				closebrowser()
+				goto nextIteration
+			endif
+			'------- validation
+			ret = useocrengine(3)
+			pause 10 secs until
+				textocr("Get documents signed")
+				inwindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+				inarea(497, 178, 105, 679)
+			pausefalse
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) loading 1st int packet validation failed", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) expected text (get document signed) not found", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) resuming scan for next change event", crlf + crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st_load_1st_pckt.bmp", 1, 1)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": (1st) workflow failed; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - load 1st int packet", crlf + crlf)
+				closebrowser()
+				goto nextIteration
+			endpause
+			'------- debug logging
+			if res = 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) loaded 1st interview packet", crlf)
+			endif
+
+
+			'-------------------- enter applicant email
+			ret = useocrengine(3)
+			usewindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+			if iEnvironment = 1 then
+				clickontextocr("Enter recipient email", left, single, inarea(655, 358, 165, 21))
+			endif
+			if iEnvironment = 2 then
+				clickontextocr("Enter recipient email", left, single, inarea(532, 313, 866, 53))
+			endif
+			res = sendkeys(applicantEmail$)
+			pause 2
+			'------- error handling
+			if res <> 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) error entering applicant email", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) resuming scan for next change event", crlf + crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st_enter_applicant_email.bmp", 1, 1)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": (1st) workflow failed; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - 1st enter applicant email", crlf + crlf)
+				closebrowser()
+				goto nextIteration
+			endif
+			'------- debug logging
+			if res = 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) entered applicant email", crlf)
+			endif
+
+
+			'-------------------- add company email
+			ret = useocrengine(3)
+			usewindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat E-Sign - Google Chrome", 1)
+			if iEnvironment = 1 then
+				clickontextocr("Enter recipient email", left, single, inarea(645, 407, 166, 29))
+			endif
+			if iEnvironment = 2 then
+				clickmouse(left, double, 665, 390, absolute)
+			endif
+			res = sendkeys(corpEmail$)
+			pause 2
+			'------- error handling
+			if res <> 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) error entering corporate email", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) resuming scan for next change event", crlf + crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st_enter_corporate_email.bmp", 1, 1)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": (1st) workflow failed; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - 1st enter corporate email", crlf + crlf)
+				closebrowser()
+				goto nextIteration
+			endif
+			'------- debug logging
+			if res = 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) entered corporate email", crlf)
+			endif
+
+
+			'-------------------- add applicant name to message box
+			ret = useocrengine(3)
+			usewindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+			if iEnvironment = 1 then
+				clickontextocr("Ist Interview", left, single, inarea(537, 572, 171, 33), -85, 0) 'offset to place cursor at beginning of text.
+			endif
+			if iEnvironment = 2 then
+				clickmouse(left, down, 535, 560, absolute)
+				clickmouse(left, up, 535, 560, absolute)
+			endif
+			res = sendkeys(applicantFName$ + " " + applicantLName$ + " ")
+			pause 2
+			'------- error handling
+			if res <> 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) error adding applicant name to message box", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) resuming scan for next change event", crlf + crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st_add_applicant_name.bmp", 1, 1)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": (1st) workflow failed; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - 1st add applicant name", crlf + crlf)
+				closebrowser()
+				goto nextIteration
+			endif
+			'------- debug logging
+			if res = 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) added applicant name to message box", crlf)
+			endif
+
+
+			'-------------------- click 'next' button
+			ret = useocrengine(3)
+			usewindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat E-Sign - Google Chrome", 1)
+			if iEnvironment = 1 then
+				res = clickontextocr("ocd", left, single, inarea(496, 935, 149, 80))
+				'------- error handling
+				if res <> 0 then
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) error clicking 'next' button. error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) resuming scan for next change event", crlf + crlf)
+					write(executionLogPath$, basicLogHdr$ + currScript$ + ": (1st) workflow failed; proceeding to next change event", crlf + crlf)
+					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st_click_next.bmp", 1, 1)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - 1st click next", crlf + crlf)
+					closebrowser()
+					goto nextIteration
+				endif
+			endif
+			if iEnvironment = 2 then
+				clickmouse(left, double, 560, 940, absolute)
+			endif
+			pause 2
+			'------- validation
+			ret = useocrengine(3)
+			pause 30 secs until
+				textocr("Skills Assessment")
+				inwindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+				inarea(526, 313, 151, 685)
+			pausefalse
+				result = useocrengine(3)
+				var$ = captureocr$("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", topinstance())
+				if instr(var$, "Email provided is invalid") <> 0 then
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) email provided is invalid; resuming scan for next change event", crlf + crlf)
+					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st_invalid_email.bmp", 1, 1)
+					write(executionLogPath$, basicLogHdr$ + currScript$ + ": (1st) workflow failed; proceeding to next change event", crlf + crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: 1st invalid email", crlf + crlf)
+					closebrowser()
+					goto nextIteration
+				else
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) clicking 'next' button validation failed", crlf)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) expected text (Skills Assessment) not found", crlf)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) resuming scan for next change event", crlf + crlf)
+					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st_click_next_button.bmp", 1, 1)
+					write(executionLogPath$, basicLogHdr$ + currScript$ + ": (1st) workflow failed; proceeding to next change event", crlf + crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - 1st click next", crlf + crlf)
+					closebrowser()
+					goto nextIteration
+				endif
+			endpause
+			'------- debug logging
+			if res = 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) clicked 'next' button", crlf)
+			endif
+
+
+			'-------------------- click 'send' button
+			ret = useocrengine(3)
+			usewindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat E-Sign - Google Chrome", 1)
+			if iEnvironment = 1 then
+				res = clickontextocr("D>", left, single, inarea(1779, 933, 139, 76))
+				'------- error handling
+				if res <> 0 then
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) error clicking 'send' button", crlf)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) resuming scan for next change event", crlf + crlf)
+					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st_click_send_button.bmp", 1, 1)
+					write(executionLogPath$, basicLogHdr$ + currScript$ + ": (1st) workflow failed; proceeding to next change event", crlf + crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - 1st click send", crlf + crlf)
+					closebrowser()
+					goto nextIteration
+				endif
+			endif
+			if iEnvironment = 2 then
+				clickmouse(left, double, 1850, 970, absolute)
+			endif			
+			pause 2
+			'------- validation
+			ret = useocrengine(3)
+			pause 20 secs until
+				textocr(applicantFName$)
+				inwindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+				inarea(568, 270, 148, 832)
+			pausefalse
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) clicking 'send' button validation failed", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) expected text (send confirmation) not found", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) resuming scan for next change event", crlf + crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st_click_send_button.bmp", 1, 1)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": (1st) workflow failed; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - 1st click send", crlf + crlf)
+				closebrowser()
+				goto nextIteration
+			endpause
+			'------- debug logging
+			if res = 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": 1st interview packet sent", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": 1st Interview packet sent", crlf + crlf)
+				write(successLogPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(successLogPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(successLogPath$, basicLogHdr$ + currScript$ + ": 1st Interview packet sent", crlf + crlf)
+			endif
+
+
+			closebrowser()
+
+
+			iFirstCompl = iFirstCompl + 1	'record processed counter
+
+
+		endif	'end of 1st interview
+
+		'----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- 2nd interview
+
+		if curr_stage$ = "2nd Interview" then
+
+			iSecondCnt = iSecondCnt + 1
+
+			write(debugLogPath$, basicLogHdr$ + currScript$ + ": stage for change event is '2nd interview' triggering workflow", crlf)
+			write(executionLogPath$, basicLogHdr$ + currScript$ + ": change event for stage '2nd interview' at row: " + str$(iExcelRow) + " triggered workflow", crlf)
+			write(debugLogPath$, basicLogHdr$ + currScript$ + ": getting data from employment inquiry for current row", crlf)
+
+
+			'-------------------- get data values for current record from employment inquiry
+			applicantID$ = arrApplicantID$(i)
+			applicantFName$ = arrApplicantFName$(i)
+			applicantLName$ = arrApplicantLName$(i)
+			applicantEmail$ = arrApplicantEmail$(i)
+			adobePcktStatus$ = arrAdobePcktStatus$(i)
+			write(debugLogPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+			write(debugLogPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+			write(executionLogPath$, basicLogHdr$ + currScript$ + ": starting workflow for:" + applicantFName$ + " " + applicantLName$ + " record id: " + "[" + applicantID$ + "]", crlf)
+
+
+			'-------------------- check for already sent packets
+			write(debugLogPath$, basicLogHdr$ + currScript$ + ": checking status of packets", crlf)
+			write(debugLogPath$, basicLogHdr$ + currScript$ + ": value of adobePcktStatus: " + adobePcktStatus$, crlf)
+			if instr(adobePcktStatus$, "2nd Int Pkt") <> 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": status indicates packets have already been sent", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": skipping workflow for current record, resuming scan for next change event", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": adobe packets have been sent, proceeding to next change event", crlf + crlf)
+				goto nextIteration
+			endif
+
+
+			'-------------------- invoke browser window
+			while iRetry <= 2
+				res = startbrowser("CH", adobeURL$, 3)
+				pause 3
+				iAttempt = iRetry + 1
+
+				if res = 0 then
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": start browser was successful", crlf)
+					iRetry = 3
+				endif
+
+				if res <> 0 then
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": error starting browser on attempt #: [" + str$(iAttempt) + "]", crlf)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(res) + "), retrying", crlf)
+					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-2nd_invoke_browser-" + str$(iAttempt) + ".bmp", 1, 1)
+					closebrowser()
+					pause 1
+					iRetry = iRetry + 1
+				endif
+			wend
+			if res <> 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": browser could not be invoked after [" + str$(iAttempt) + "] attempts", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				closebrowser()
+				nextScript()
+				goto nextIteration
+			endif
+	
+			iRetry = 0
+			iAttempt = 0
+
+
+			'-------------------- check for login page
+			if existhtmlelement("INPUT EMAIL[NAME='username', ID='EmailPage-EmailField']") = 1 then	
+				usepage("Adobe ID")
+				writehtml("INPUT EMAIL[NAME='username']", adobeUsername$)
+				writehtml("INPUT TEXT[NAME='password']", adobePassword$)
+				clickhtmlelement("SPAN[OUTERTEXT='Continue']")
+				pause 3
+				if currentpage$() <> "Adobe Acrobat Home" then
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": error logging in. browser not loaded to expected page", crlf)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": expected: 'Adobe Acrobat Home' actual: " + currentpage$(), crlf)
+					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-login_error.bmp", 1, 1)
+					closebrowser()
+					nextScript()
+					goto nextIteration
+				else
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": browser invoked and log in successfull", crlf)
+				endif
+			endif
+
+
+			'-------------------------------------------------------------------------------------------------------------------------------- send 2nd interview packet
+			if currentpage$() = "Adobe Acrobat Home" then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": browser invoked. account already logged in", crlf)
+			endif
+
+
+			'-------------------- load 1st int packet
+			res = navigate("https://acrobat.adobe.com/link/signatures?isNativeFlow=true&signUri=%2Fpublic%2Fcompose%3FagrId%3DCBJCHBCAABAAnTw1PjbM4t2aF-Lj3qBgS2YM9V6sYnFy%26authoringRequested%3Dtrue%26client_id%3D69U26F6M6A4Z3U%26showAuthoringOption%3Dfalse")
+			pause 6
+			'------- error handling
+			if instr(str$(res), "-") <> 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error loading 2nd int packet", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-load_2nd_pckt.bmp", 1, 1)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - load 2nd int packet", crlf + crlf)
+				closebrowser()
+				goto nextIteration
+			endif
+			'------- validation
+			ret = useocrengine(3)
+			pause 10 secs until
+				textocr("Get documents signed")
+				inwindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+				inarea(497, 178, 105, 679)
+			pausefalse
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": loading 2nd int packet validation failed", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": expected text (get document signed) not found", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-load_2nd_pckt.bmp", 1, 1)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - load 2nd int packet", crlf + crlf)
+				closebrowser()
+				goto nextIteration
+			endpause
+			'------- debug logging
+			if res = 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": loaded 2nd interview packet", crlf)
+			endif
+
+
+			'-------------------- enter applicant email
+			ret = useocrengine(3)
+			usewindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+			if iEnvironment = 1 then
+				clickontextocr("Enter recipient email", left, single, inarea(655, 358, 165, 21))
+			endif
+			if iEnvironment = 2 then
+				clickontextocr("Enter recipient email", left, single, inarea(532, 313, 866, 53))
+			endif
+			res = sendkeys(applicantEmail$)
+			pause 2
+			'------- error handling
+			if res <> 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error entering applicant email", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-enter_applicant_email.bmp", 1, 1)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - enter applicant email", crlf + crlf)
+				closebrowser()
+				goto nextIteration
+			endif
+			'------- debug logging
+			if res = 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": entered applicant email", crlf)
+			endif
+
+
+			'-------------------- add company email
+			ret = useocrengine(3)
+			usewindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat E-Sign - Google Chrome", 1)
+			if iEnvironment = 1 then
+				clickontextocr("Enter recipient email", left, single, inarea(645, 407, 166, 29))
+			endif
+			if iEnvironment = 2 then
+				clickmouse(left, double, 665, 390, absolute)
+			endif
+			res = sendkeys(corpEmail$)
+			pause 2
+			'------- error handling
+			if res <> 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error entering corporate email", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-enter_corporate_email.bmp", 1, 1)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - enter corporate email", crlf + crlf)
+				closebrowser()
+				goto nextIteration
+			endif
+			'------- debug logging
+			if res = 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": entered corporate email", crlf)
+			endif
+
+
+			'-------------------- add applicant name to message box
+			ret = useocrengine(3)
+			usewindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+			if iEnvironment = 1 then
+				clickontextocr("2nd", left, single, inarea(529, 575, 177, 32), -85, 0) 'offset to place cursor at beginning of text.
+			endif
+			if iEnvironment = 2 then
+				clickmouse(left, down, 535, 560, absolute)
+				clickmouse(left, up, 535, 560, absolute)
+			endif
+			res = sendkeys(applicantFName$ + " " + applicantLName$ + " ")
+			pause 2
+			'------- error handling
+			if res <> 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error adding applicant name to message box", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-add_applicant_name.bmp", 1, 1)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - add applicant name", crlf + crlf)
+				closebrowser()
+				goto nextIteration
+			endif
+			'------- debug logging
+			if res = 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": added applicant name to message box", crlf)
+			endif
+
+
+			'-------------------- click 'next' button
+			ret = useocrengine(3)
+			usewindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat E-Sign - Google Chrome", 1)
+			if iEnvironment = 1 then
+				res = clickontextocr("ocd", left, single, inarea(496, 935, 149, 80))
+				'------- error handling
+				if res <> 0 then
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": error clicking 'next' button", crlf)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_next.bmp", 1, 1)
+					write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - click next", crlf + crlf)
+					closebrowser()
+					goto nextIteration
+				endif
+			endif
+			if iEnvironment = 2 then
+				clickmouse(left, double, 560, 940, absolute)
+			endif
+			pause 2
+			'------- validation
+			ret = useocrengine(3)
+			pause 30 secs until
+				textocr("Interviewee Name")
+				inwindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+				inarea(452, 359, 182, 814)
+			pausefalse
+				result = useocrengine(3)
+				var$ = captureocr$("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", topinstance())
+				if instr(var$, "Email provided is invalid") <> 0 then
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": email provided is invalid; resuming scan for next change event", crlf + crlf)
+					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-invalid_email.bmp", 1, 1)
+					write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: invalid email", crlf + crlf)
+					closebrowser()
+					goto nextIteration
+				else
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": clicking 'next' button validation failed", crlf)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": expected text (Interviewee Name) not found", crlf)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_next_button.bmp", 1, 1)
+					write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - click next", crlf + crlf)
+					closebrowser()
+					goto nextIteration
+				endif
+			endpause
+			'------- debug logging
+			if res = 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": clicked 'next' button", crlf)
+			endif
+
+
+			'-------------------- click 'send' button
+			ret = useocrengine(3)
+			usewindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat E-Sign - Google Chrome",1)
+			if iEnvironment = 1 then
+				res = clickontextocr("D>", left, single, inarea(1779, 933, 139, 76))
+				'------- error handling
+				if res <> 0 then
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": error clicking 'send' button", crlf)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_send_button.bmp", 1, 1)
+					write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - click send", crlf + crlf)
+					closebrowser()
+					goto nextIteration
+				endif
+			endif
+			if iEnvironment = 2 then
+				clickmouse(left, double, 1850, 970, absolute)
+			endif			
+			pause 2
+			'------- validation
+			ret = useocrengine(3)
+			pause 20 secs until
+				textocr(applicantFName$)
+				inwindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+				inarea(568, 270, 148, 832)
+			pausefalse
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": clicking 'send' button validation failed", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": expected text (send confirmation) not found", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_send_button.bmp", 1, 1)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - click send", crlf + crlf)
+				closebrowser()
+				goto nextIteration
+			endpause
+			'------- debug logging
+			if res = 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": 2nd interview packet sent", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": 2nd Interview packet sent", crlf + crlf)
+				write(successLogPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(successLogPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(successLogPath$, basicLogHdr$ + currScript$ + ": 2nd Interview packet sent", crlf + crlf)
+			endif
+
+
+			iSecondCompl = iSecondCompl + 1		'counter for records packets sent
+
+
+			usepage("Adobe Acrobat Home")
+			closebrowser()
+
+
+		endif	'end of 2nd interview
+
+
+		if curr_stage$ <> "1st Interview" and curr_stage$ <> "2nd Interview" then
+			write(debugLogPath$, basicLogHdr$ + currScript$ + ": status for change event at row: (" + str$(iExcelRow) + ") did not trigger workflow", crlf)
+			write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+		endif
+
+
+	endif	'end of change event if
+
+
+nextIteration:
+
+
+i = i + 1
+
+
+until i = 5000	'iterate through all rows in array
+
+
+'#############################################################################################################################
+'##   												end	script										 						##
+'#############################################################################################################################
+write(debugLogPath$, basicLogHdr$ + currScript$ + ": workflow scan completed", crlf)
+write(debugLogPath$, basicLogHdr$ + currScript$ + ": change events detected:                    " + str$(iEventCnt), crlf)
+write(debugLogPath$, basicLogHdr$ + currScript$ + ": change events with '1st interview' stage:  " + str$(iFirstCnt), crlf)
+write(debugLogPath$, basicLogHdr$ + currScript$ + ": 1st interview packets sent:                " + str$(iFirstCompl), crlf)
+write(debugLogPath$, basicLogHdr$ + currScript$ + ": change events with '2nd interview' stage:  " + str$(iSecondCnt), crlf)
+write(debugLogPath$, basicLogHdr$ + currScript$ + ": 2nd interview packets sent:                " + str$(iSecondCompl), crlf)
+write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow scan completed", crlf)
+write(executionLogPath$, basicLogHdr$ + currScript$ + ": change event rows detected:                " + str$(iEventCnt), crlf)
+write(executionLogPath$, basicLogHdr$ + currScript$ + ": events with '1st interview' stage:         " + str$(iFirstCnt), crlf)
+write(executionLogPath$, basicLogHdr$ + currScript$ + ": 1st interview packets sent:                " + str$(iFirstCompl), crlf)
+write(executionLogPath$, basicLogHdr$ + currScript$ + ": change events with '2nd interview' stage:  " + str$(iSecondCnt), crlf)
+write(executionLogPath$, basicLogHdr$ + currScript$ + ": 2nd interview packets sent:                " + str$(iSecondCompl), crlf)
+write(debugLogPath$, basicLogHdr$ + currScript$ + ": ------------------------------------------------------", crlf + crlf)
+write(executionLogPath$, basicLogHdr$ + currScript$ + ": ------------------------------------------------------", crlf + crlf)
+write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": ------------------------------------------------------", crlf + crlf)
+write(successLogPath$, basicLogHdr$ + currScript$ + ": ------------------------------------------------------", crlf + crlf)
+

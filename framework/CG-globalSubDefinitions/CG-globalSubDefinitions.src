@@ -1,0 +1,31 @@
+'##############################################################
+'##   			SUB PROCEDURES								 ##
+'##############################################################
+Sub Process_Error()
+	local buffer$
+	disable(Error)
+ 	buffer$ = "Error message : " + #errormsg$
+	
+sendemail("busch.todd@yahoo.com","busch.todd@yahoo.com","OfficeAutomationFailure","Failue has occurred in CG-initateScan.")
+
+endsub
+
+sub criticalStop()
+	write(debugLogPath$, basicLogHdr$ + currScript$ + ": critical scan error encountered; stopping interval scan", crlf + crlf)
+	write(executionLogPath$, basicLogHdr$ + currScript$ + ": critical scan error encountered; stopping interval scan", crlf + crlf)
+	write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": critical scan error encountered; scan stopped", crlf)
+	write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": all change events beyond this point will not be processed", crlf + crlf)
+	end(1)
+endsub
+
+sub nextScript()
+	write(debugLogPath$, basicLogHdr$ + currScript$ + ": critical script workflow error encountered; proceeding to next script/workflow", crlf + crlf)
+	write(executionLogPath$, basicLogHdr$ + currScript$ + ": critical script workflow error encountered; proceeding to next script/workflow", crlf + crlf)
+	write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": critical script workflow error encountered; proceeding to next script/workflow", crlf)
+	write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": all change events beyond this point will not be processed for this workflow ", crlf + crlf)
+	i = 4999
+endsub
+
+OnAction error
+dosub Process_Error
+endaction

@@ -1,0 +1,67 @@
+'#############################################################################################################################
+'## author:                 todd busch
+'##
+'## date:                   01/19/2023
+'##
+'## description:            appends the automation log files with the date and moves them to the archive folder
+'##
+'## run in:					n/a
+'##
+'## notes:                  can be set to run on a schedule to keep logs from growing too large
+'##							
+'##
+'## chg control:    ver     name        description
+'##--------------------------------------------------------------------------------------------------------------------------
+'## 01/19/2023      1.0     tbusch      initial version
+'##										
+'#############################################################################################################################
+
+'#############################################################################################################################
+'##   													script prep									 						##
+'#############################################################################################################################
+include "C:\office_automation\framework\CG-globalDimDeclarations\CG-globalDimDeclarations-v1.0.src"
+include "C:\office_automation\framework\CG-globalFunctions\CG-globalFunctions-v1.0.src"
+include "C:\office_automation\framework\CG-globalSubDefinitions\CG-globalSubDefinitions-v1.0.src"
+include "C:\office_automation\framework\CG-globalVariables\CG-globalVariables-v1.0.src"
+
+
+currScript$ = "archiveLogs"
+
+
+#IgnoreErrors = 1
+
+
+iYr$ = year$()
+iMo$ = month$()
+iDay$ = day$()
+
+
+'#############################################################################################################################
+'##   													script start								 						##
+'#############################################################################################################################
+'-------------------- rename and move debug log
+res = Name(debugLogPath$, logsArchivePath$ + "debug\debug_log-" + iYr$ + iMo$ + iDay$ + ".log")
+if res <> 0 then
+	write(debugLogPath$, basicLogHdr$ + currScript$ + ": error archiving debug log; error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+endif
+
+
+'-------------------- rename and move execution log
+res = Name(executionLogPath$, logsArchivePath$ + "execution\execution_log-" + iYr$ + iMo$ + iDay$ + ".log")
+if res <> 0 then
+	write(debugLogPath$, basicLogHdr$ + currScript$ + ": error archiving execution log; error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+endif
+
+
+'-------------------- rename and move failures log
+res = Name(scanFailuresPath$, logsArchivePath$ + "failures\scan_failures_log-" + iYr$ + iMo$ + iDay$ + ".log")
+if res <> 0 then
+	write(debugLogPath$, basicLogHdr$ + currScript$ + ": error archiving failures log; error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+endif
+
+
+'-------------------- rename and move processed log
+res = Name(successLogPath$, logsArchivePath$ + "processed\processed_log-" + iYr$ + iMo$ + iDay$ + ".log")
+if res <> 0 then
+	write(debugLogPath$, basicLogHdr$ + currScript$ + ": error archiving processed log; error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+endif
