@@ -12,15 +12,11 @@
 '## notes:                  MUST make sure default downloads location in browser is set to users 'downloads' folder
 '##							CG-globalVariables stores the path to the windows user directory
 '##
-'## chg control:    ver     name        description
-'##--------------------------------------------------------------------------------------------------------------------------
-'## 01/19/2023      1.0     tbusch      initial version
-'##
 '#############################################################################################################################
-include "C:\office_automation\framework\CG-globalDimDeclarations\CG-globalDimDeclarations-v1.0.src"
-include "C:\office_automation\framework\CG-globalFunctions\CG-globalFunctions-v1.0.src"
-include "C:\office_automation\framework\CG-globalSubDefinitions\CG-globalSubDefinitions-v1.0.src"
-include "C:\office_automation\framework\CG-globalVariables\CG-globalVariables-v1.0.src"
+include "C:\v-angels-automation\framework\CG-globalDimDeclarations\CG-globalDimDeclarations.src"
+include "C:\v-angels-automation\framework\CG-globalFunctions\CG-globalFunctions.src"
+include "C:\v-angels-automation\framework\CG-globalSubDefinitions\CG-globalSubDefinitions.src"
+include "C:\v-angels-automation\framework\CG-globalVariables\CG-globalVariables.src"
 
 
 '-------------------------------------------------------------------------------------------------------------------------------- download latest employment inquiry doc

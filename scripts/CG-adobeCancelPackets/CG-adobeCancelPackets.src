@@ -649,7 +649,7 @@ firstInterviewCancel:
 				res = existhtmlelement("DIV[OUTERTEXT='" + applicantFName$ + " " + applicantLName$ + " 1st', INDEX=8]")
 			endif
 			if iEnvironment = 2 then
-				res = existhtmlelement("DIV[OUTERTEXT='Agreement']")
+				res = existhtmlelement("DIV[OUTERTEXT='" + applicantFName$ + "',INDEX=8]")
 			endif
 			if res = 0 then
 				ret = existhtmlelement("DIV[OUTERTEXT='No', INDEX=8]")
@@ -1407,7 +1407,7 @@ firstInterviewNCNS:
 				res = existhtmlelement("DIV[OUTERTEXT='" + applicantFName$ + " " + applicantLName$ + " 1st', INDEX=8]")
 			endif
 			if iEnvironment = 2 then
-				res = existhtmlelement("DIV[OUTERTEXT='Agreement']")
+				res = existhtmlelement("DIV[OUTERTEXT='" + applicantFName$ + "',INDEX=8]")
 			endif
 			if res = 0 then
 				ret = existhtmlelement("DIV[OUTERTEXT='No', INDEX=8]")
@@ -1804,7 +1804,7 @@ firstInterviewNCNS:
 				res = existhtmlelement("DIV[OUTERTEXT='" + applicantFName$ + " " + applicantLName$ + " 1st', INDEX=8]")
 			endif
 			if iEnvironment = 2 then
-				res = existhtmlelement("DIV[OUTERTEXT='Agreement']")
+				res = existhtmlelement("DIV[OUTERTEXT='" + applicantFName$ + "',INDEX=8]")
 			endif
 			if res = 0 then
 				ret = existhtmlelement("DIV[OUTERTEXT='No', INDEX=8]")
@@ -2199,7 +2199,7 @@ firstInterviewNCNS:
 				res = existhtmlelement("DIV[OUTERTEXT='" + applicantFName$ + " " + applicantLName$ + " 1st', INDEX=8]")
 			endif
 			if iEnvironment = 2 then
-				res = existhtmlelement("DIV[OUTERTEXT='Agreement']")
+				res = existhtmlelement("DIV[OUTERTEXT='" + applicantFName$ + "',INDEX=8]")
 			endif
 			if res = 0 then
 				ret = existhtmlelement("DIV[OUTERTEXT='No', INDEX=8]")

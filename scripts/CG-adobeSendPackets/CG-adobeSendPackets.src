@@ -222,19 +222,286 @@ repeat
 			endif
 
 
-			'-------------------- load pre 1st int packet
-			res = navigate("https://acrobat.adobe.com/link/signatures?isNativeFlow=true&signUri=%2Fpublic%2Fcompose%3FagrId%3DCBJCHBCAABAA-WwTEygU2xDRx_-4VPb8ZkqYkgBKuBll%26authoringRequested%3Dtrue%26client_id%3D69U26F6M6A4Z3U%26showAuthoringOption%3Dfalse")
-			pause 6
+			'-------------------- click 'tools' link in upper-left of main frame
+			usepage("Adobe Acrobat Home")
+			res = clickhtmlelement("SPAN[OUTERTEXT='Tools']")
+			pause 3					
 			'------- error handling
-			if instr(str$(res), "-") <> 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) error loading pre 1st int packet", crlf)
+			if res <> 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) error clicking 'tools' link", crlf)
 				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
 				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre_load_pre_1st_pckt.bmp", 1, 1)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre_click_tools.bmp", 1, 1)
 				write(executionLogPath$, basicLogHdr$ + currScript$ + ": (pre) workflow failed; proceeding to next change event", crlf + crlf)
 				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
 				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - load pre 1st packet", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - pre click tools", crlf + crlf)
+				closebrowser()
+				goto nextIteration
+			endif
+			'------- validation
+			ret = useocrengine(3)
+			pause 10 secs until
+				textocr("Request e-signatures")
+				inwindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+				inarea(529, 374, 189, 281)
+			pausefalse
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) clicking 'tools' link validation failed", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) expected element text (request signatures) not found", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) resuming scan for next change event", crlf + crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre_click_tools_link.bmp", 1, 1)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": (pre) workflow failed; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - pre click tools", crlf + crlf)
+				goto nextIteration
+			endpause
+			'------- debug logging
+			if res = 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) clicked 'tools' link", crlf)
+			endif
+
+
+			'-------------------- click 'request signatures' box in tools carousel menu
+			usepage("Adobe Acrobat Home")
+			res = clickhtmlelement("DIV[OUTERTEXT='Request', INDEX=3]")
+			pause 2
+			'------- error handling
+			if res <> 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) error clicking 'request signatures'. error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) resuming scan for next change event", crlf + crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre_click_request_signatures.bmp", 1, 1)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": (pre) workflow failed; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - pre click request signatures", crlf + crlf)
+				closebrowser()
+				goto nextIteration
+			endif
+			'------- validation
+			usepage("Adobe Acrobat Home")
+			ret = existhtmlelement("DIV[OUTERTEXT='Request e-signaturesRecentDocumentsMy', INDEX=2]")
+			if ret = 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) clicking 'request signatures' link validation failed", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) expected element (file select popup) not found.", crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre_click_request_signatures.bmp", 1, 1)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) resuming scan for next change event", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": (pre) workflow failed; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - pre click request signatures", crlf + crlf)
+				closebrowser()
+				goto nextIteration
+			endif
+			'------- debug logging
+			if ret = 1 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) clicked 'request signatures' link", crlf)
+			endif
+
+
+			'-------------------- click 'documents' in top menu of request signatures popup
+			usepage("Adobe Acrobat Home")
+			res = clickhtmlelement("SPAN[OUTERTEXT='Documents', INDEX=3]")
+			pause 2
+			'------- error handling
+			if res <> 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) error clicking 'documents' link. error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) resuming scan for next change event", crlf + crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre_click_documents_link.bmp", 1, 1)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": (pre) workflow failed; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - pre click documents", crlf + crlf)
+				closebrowser()
+				goto nextIteration
+			endif
+			'------- validation
+			ret = useocrengine(3)
+			pause 10 secs until
+				textocr("Automated")
+				inwindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+				inarea(611, 437, 337, 714)
+			pausefalse
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) clicking 'documents' link validation failed", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) expected element (automated folder) not found", crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre_click_documents_link.bmp", 1, 1)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) resuming scan for next change event", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": (pre) workflow failed; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - pre click documents", crlf + crlf)
+				closebrowser()
+				goto nextIteration
+			endpause
+			'------- debug logging
+			if res = 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) clicked 'documents' link", crlf)
+			endif
+
+
+			'-------------------- click 'automated' folder
+			usepage("Adobe Acrobat Home")
+			res = clickhtmlelement("DIV[OUTERTEXT='Auto', INDEX=9]")
+			pause 2
+			'------- error handling
+			if res <> 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) error clicking 'automated' folder. error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) resuming scan for next change event", crlf + crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre_click_automated_folder.bmp", 1, 1)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": (pre) workflow failed; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - pre click automated", crlf + crlf)
+				closebrowser()
+				goto nextIteration
+			endif
+			'------- validation
+			ret = useocrengine(3)
+			if iEnvironment = 1 then
+				pause 10 secs until
+					textocr("Employee Forms")
+					inwindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+					inarea(611, 437, 337, 714)
+				pausefalse
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) clicking 'automated' folder validation failed", crlf)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) expected element (employee forms folder) not found", crlf)
+					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre_click_automated_folder.bmp", 1, 1)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) resuming scan for next change event", crlf + crlf)
+					write(executionLogPath$, basicLogHdr$ + currScript$ + ": (pre) workflow failed; proceeding to next change event", crlf + crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - pre click automated", crlf + crlf)
+					closebrowser()
+					goto nextIteration
+				endpause
+			endif
+			if iEnvironment = 2 then
+				pause 10 secs until
+					textocr("Employee Forms")
+					inwindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+					inarea(605, 583, 71, 523)
+				pausefalse
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) clicking 'automated' folder validation failed", crlf)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) expected element (employee forms folder) not found", crlf)
+					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre_click_automated_folder.bmp", 1, 1)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) resuming scan for next change event", crlf + crlf)
+					write(executionLogPath$, basicLogHdr$ + currScript$ + ": (pre) workflow failed; proceeding to next change event", crlf + crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - pre click automated", crlf + crlf)
+					closebrowser()
+					goto nextIteration
+				endpause
+			endif
+			'------- debug logging
+			if res = 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) clicked 'automated' folder", crlf)
+			endif
+
+
+			'-------------------- click 'employee forms' folder
+			usepage("Adobe Acrobat Home")
+			res = clickhtmlelement("DIV[CONTENT='EmployeEmployee']")
+			pause 2
+			'------- error handling
+			if res <> 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) error clicking 'employee forms' folder. error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) resuming scan for next change event", crlf + crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre_click_employee_forms_folder.bmp", 1, 1)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": (pre) workflow failed; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - pre click employee forms", crlf + crlf)
+				closebrowser()
+				goto nextIteration
+			endif
+			'------- validation
+			ret = useocrengine(3)
+			pause 10 secs until
+				textocr("Applicant to New Hire")
+				inwindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+				inarea(611, 437, 337, 714)
+			pausefalse
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) clicking 'employee forms' folder validation failed", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) expected element (applicant to new hire folder) not found", crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre_click_employee_forms_folder.bmp", 1, 1)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) resuming scan for next change event", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": (pre) workflow failed; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - pre click employee forms", crlf + crlf)
+				closebrowser()
+				goto nextIteration
+			endpause
+			'------- debug logging
+			if res = 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) clicked 'employee forms' folder", crlf)
+			endif
+
+
+			'-------------------- click 'applicant to new hire forms' folder
+			ret = useocrengine(3)
+			usewindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+			if iEnvironment = 1 then
+				res = clickontextocr("Applicant to New Hire", left, single, inarea(641, 581, 628, 73))
+			endif
+			if iEnvironment = 2 then
+				clickmouse(left, double, 780, 630, absolute)
+			endif
+			pause 5
+			'------- error handling
+			if res <> 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) error clicking 'applicant to new hire' folder. error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) resuming scan for next change event", crlf + crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre_applicant_to_new_hire_forms_folder.bmp", 1, 1)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": (pre) workflow failed; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - pre click applicant to new hire forms", crlf + crlf)
+				closebrowser()
+				goto nextIteration
+			endif
+			'------- debug logging
+			if res = 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) clicked 'applicant to new hire' folder", crlf)
+			endif
+
+
+			'-------------------- click 'pre 1st interview packet.pdf'
+			usepage("Adobe Acrobat Home")
+			res = clickhtmlelement("DIV[CONTENT='PRE 1st IntervPRE']")
+			pause 2
+			'------- error handling
+			if res <> 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) error clicking 'pre 1st interview packet'. error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) resuming scan for next change event", crlf + crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre_click_pre_1st_interview_packet.bmp", 1, 1)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": (pre) workflow failed; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - click pre 1st packet", crlf + crlf)
+				closebrowser()
+				goto nextIteration
+			endif
+			'------- debug logging
+			if res = 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) selected 'pre 1st interview packet", crlf)
+			endif
+
+
+			'-------------------- click 'continue' button
+			usepage("Adobe Acrobat Home")
+			res = clickhtmlelement("BUTTON[INNERTEXT='Continue']")
+			pause 2
+			'------- error handling
+			if res <> 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) error clicking 'continue' button. error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) resuming scan for next change event", crlf + crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre_click_continue_button.bmp", 1, 1)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": (pre) workflow failed; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - pre click continue", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			endif
@@ -245,14 +512,14 @@ repeat
 				inwindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
 				inarea(497, 178, 105, 679)
 			pausefalse
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) loading pre 1st int packet validation failed", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) click 'continue' button validation failed", crlf)
 				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) expected text (get document signed) not found", crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre_click_continue_button.bmp", 1, 1)
 				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (pre) resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre_load_pre_1st_pckt.bmp", 1, 1)
 				write(executionLogPath$, basicLogHdr$ + currScript$ + ": (pre) workflow failed; proceeding to next change event", crlf + crlf)
 				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
 				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - load pre 1st packet", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - pre click continue", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			endpause
@@ -540,19 +807,299 @@ firstInterviewSend:
 			endif
 
 
-			'-------------------- load 1st int packet
-			res = navigate("https://acrobat.adobe.com/link/signatures?isNativeFlow=true&signUri=%2Fpublic%2Fcompose%3FagrId%3DCBJCHBCAABAAcETmAD8cNSjs_Bc4MuyyPrveEZJhfh_b%26authoringRequested%3Dtrue%26client_id%3D69U26F6M6A4Z3U%26showAuthoringOption%3Dfalse")
-			pause 6
+			'-------------------- click 'tools' link in upper-left of main frame
+			usepage("Adobe Acrobat Home")
+			res = clickhtmlelement("SPAN[OUTERTEXT='Tools']")
+			pause 3					
 			'------- error handling
-			if instr(str$(res), "-") <> 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) error loading 1st int packet", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+			if res <> 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) error clicking 'tools' link. error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
 				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st_load_1st_pckt.bmp", 1, 1)
 				write(executionLogPath$, basicLogHdr$ + currScript$ + ": (1st) workflow failed; proceeding to next change event", crlf + crlf)
 				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
 				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - load 1st int packet", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - 1st click tools", crlf + crlf)
+				closebrowser()
+				goto nextIteration
+			endif
+			'------- validation
+			ret = useocrengine(3)
+			pause 10 secs until
+				textocr("Request e-signatures")
+				inwindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+				inarea(529, 374, 189, 281)
+			pausefalse
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) clicking 'tools' link validation failed", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) expected element text (request signatures) not found", crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st_click_tools_link.bmp", 1, 1)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) resuming scan for next change event", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": (1st) workflow failed; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - 1st click tools", crlf + crlf)
+				goto nextIteration
+			endpause
+			'------- debug logging
+			if res = 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) clicked 'tools' link", crlf)
+			endif
+
+
+			'-------------------- click 'request signatures' box in tools carousel menu
+			usepage("Adobe Acrobat Home")
+			res = clickhtmlelement("DIV[OUTERTEXT='Request', INDEX=3]")
+			pause 2
+			'------- error handling
+			if res <> 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) error clicking 'request signatures'. error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) resuming scan for next change event", crlf + crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st_click_request_signatures.bmp", 1, 1)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": (1st) workflow failed; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - 1st click request signatures", crlf + crlf)
+				closebrowser()
+				goto nextIteration
+			endif
+			'------- validation
+			usepage("Adobe Acrobat Home")
+			ret = existhtmlelement("DIV[OUTERTEXT='Request e-signaturesRecentDocumentsMy', INDEX=2]")
+			if ret = 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) clicking 'request signatures' link validation failed", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) expected element (file select popup) not found.", crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st_click_request_signatures.bmp", 1, 1)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) resuming scan for next change event", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": (1st) workflow failed; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - 1st click request signatures", crlf + crlf)
+				closebrowser()
+				goto nextIteration
+			endif
+			'------- debug logging
+			if ret = 1 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) clicked 'request signatures' link", crlf)
+			endif
+
+
+			'-------------------- click 'documents' in top menu of request signatures popup
+			usepage("Adobe Acrobat Home")
+			res = clickhtmlelement("SPAN[OUTERTEXT='Documents', INDEX=3]")
+			pause 2
+			'------- error handling
+			if res <> 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) error clicking 'documents' link. error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) resuming scan for next change event", crlf + crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st_click_documents_link.bmp", 1, 1)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": (1st) workflow failed; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - 1st click documents", crlf + crlf)
+				closebrowser()
+				goto nextIteration
+			endif
+			'------- validation
+			ret = useocrengine(3)
+			pause 10 secs until
+				textocr("Automated")
+				inwindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+				inarea(611, 437, 337, 714)
+			pausefalse
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) clicking 'documents' link validation failed", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) expected element (automated folder) not found", crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st_click_documents_link.bmp", 1, 1)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) resuming scan for next change event", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": (1st) workflow failed; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - 1st click documents", crlf + crlf)
+				closebrowser()
+				goto nextIteration
+			endpause
+			'------- debug logging
+			if res = 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) clicked 'documents' link", crlf)
+			endif
+
+
+			'-------------------- click 'automated' folder
+			usepage("Adobe Acrobat Home")
+			res = clickhtmlelement("DIV[OUTERTEXT='Auto', INDEX=9]")
+			pause 2
+			'------- error handling
+			if res <> 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) error clicking 'automated' folder. error_code: (" + str$(res) + ") Msg: " + #ErrorMsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) resuming scan for next change event", crlf + crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st_click_automated_folder.bmp", 1, 1)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": (1st) workflow failed; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - 1st click automated", crlf + crlf)
+				closebrowser()
+				goto nextIteration
+			endif
+			'------- validation
+			ret = useocrengine(3)
+			if iEnvironment = 1 then
+				pause 10 secs until
+					textocr("Employee Forms")
+					inwindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+					inarea(611, 437, 337, 714)
+				pausefalse
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) clicking 'automated' folder validation failed", crlf)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) expected element (employee forms folder) not found", crlf)
+					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st_click_automated_folder.bmp", 1, 1)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) resuming scan for next change event", crlf + crlf)
+					write(executionLogPath$, basicLogHdr$ + currScript$ + ": (1st) workflow failed; proceeding to next change event", crlf + crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - 1st click automated", crlf + crlf)
+					closebrowser()
+					goto nextIteration
+				endpause
+			endif
+			if iEnvironment = 2 then
+				pause 10 secs until
+					textocr("Employee Forms")
+					inwindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+					inarea(605, 583, 71, 523)
+				pausefalse
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) clicking 'automated' folder validation failed", crlf)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) expected element (employee forms folder) not found", crlf)
+					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st_click_automated_folder.bmp", 1, 1)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) resuming scan for next change event", crlf + crlf)
+					write(executionLogPath$, basicLogHdr$ + currScript$ + ": (1st) workflow failed; proceeding to next change event", crlf + crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - 1st click automated", crlf + crlf)
+					closebrowser()
+					goto nextIteration
+				endpause
+			endif
+			'------- debug logging
+			if res = 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) clicked 'automated' folder", crlf)
+			endif
+
+
+			'-------------------- click 'employee forms' folder
+			usepage("Adobe Acrobat Home")
+			res = clickhtmlelement("DIV[CONTENT='EmployeEmployee']")
+			pause 2
+			'------- error handling
+			if res <> 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) error clicking 'employee forms' folder. error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) resuming scan for next change event", crlf + crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st_click_employee_forms_folder.bmp", 1, 1)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": (1st) workflow failed; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - 1st click employee forms", crlf + crlf)
+				closebrowser()
+				goto nextIteration
+			endif
+			'------- validation
+			ret = useocrengine(3)
+			pause 10 secs until
+				textocr("Applicant to New Hire")
+				inwindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+				inarea(611, 437, 337, 714)
+			pausefalse
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) clicking 'employee forms' folder validation failed", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) expected element (applicant to new hire folder) not found", crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st_click_employee_forms_folder.bmp", 1, 1)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) resuming scan for next change event", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": (1st) workflow failed; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - 1st click employee forms", crlf + crlf)
+				closebrowser()
+				goto nextIteration
+			endpause
+			'------- debug logging
+			if res = 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) clicked 'employee forms' folder", crlf)
+			endif
+
+
+			'-------------------- click 'applicant to new hire forms' folder
+			ret = useocrengine(3)
+			usewindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+			if iEnvironment = 1 then
+				res = clickontextocr("Applicant to New Hire", left, single, inarea(641, 581, 628, 73))
+			endif
+			if iEnvironment = 2 then
+				clickmouse(left, double, 780, 630, absolute)
+			endif
+			pause 5
+			'------- error handling
+			if res <> 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) error clicking 'applicant to new hire' folder. error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) resuming scan for next change event", crlf + crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st_applicant_to_new_hire_forms_folder.bmp", 1, 1)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": (1st) workflow failed; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - 1st click applicant to new hire forms", crlf + crlf)
+				closebrowser()
+				goto nextIteration
+			endif
+			'------- debug logging
+			if res = 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) clicked 'applicant to new hire' folder", crlf)
+			endif
+
+
+			'-------------------- click '1st interview packet.pdf'
+			res = clickhtmlelement("DIV[OUTERTEXT='1st', INDEX=8]")
+			'------- error handling
+			if res <> 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) error clicking '1st interview packet' using web function. error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_1st_packet_web.bmp", 1, 1)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) attempting click using ocr engine", crlf)
+			endif
+			pause 1
+			'------- debug logging
+			if res = 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) selected '1st interview packet", crlf)
+			endif
+
+			if res <> 0 then
+				ret = useocrengine(3)
+				usewindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+				result = clickontextocr("1st Interview Packet pdf", left, single, inarea(716, 448, 217, 26))
+				'------- error handling
+				if result <> 0 then
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) error clicking '1st interview packet' using ocr engine. error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) resuming scan for next change event", crlf + crlf)
+					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_1st_packet_ocr.bmp", 1, 1)
+					write(executionLogPath$, basicLogHdr$ + currScript$ + ": (1st) workflow failed; proceeding to next change event", crlf + crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - select 1st int packet", crlf + crlf)
+					closebrowser()
+					goto nextIteration
+				endif
+				'------- debug logging
+				if ret = 0 then
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) selected '1st interview packet", crlf)
+				endif
+			endif
+
+
+			'-------------------- click 'continue' button
+			usepage("Adobe Acrobat Home")
+			res = clickhtmlelement("BUTTON[INNERTEXT='Continue']")
+			pause 2
+			'------- error handling
+			if res <> 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) error clicking 'continue' button. error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) resuming scan for next change event", crlf + crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st_click_continue_button.bmp", 1, 1)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": (1st) workflow failed; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - 1st click continue", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			endif
@@ -563,20 +1110,20 @@ firstInterviewSend:
 				inwindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
 				inarea(497, 178, 105, 679)
 			pausefalse
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) loading 1st int packet validation failed", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) click 'continue' button validation failed", crlf)
 				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) expected text (get document signed) not found", crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st_click_continue_button.bmp", 1, 1)
 				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st_load_1st_pckt.bmp", 1, 1)
 				write(executionLogPath$, basicLogHdr$ + currScript$ + ": (1st) workflow failed; proceeding to next change event", crlf + crlf)
 				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
 				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - load 1st int packet", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - 1st click continue", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			endpause
 			'------- debug logging
 			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) loaded 1st interview packet", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (1st) clicked 'continue' button", crlf)
 			endif
 
 
@@ -880,19 +1427,285 @@ firstInterviewSend:
 			endif
 
 
-			'-------------------- load 1st int packet
-			res = navigate("https://acrobat.adobe.com/link/signatures?isNativeFlow=true&signUri=%2Fpublic%2Fcompose%3FagrId%3DCBJCHBCAABAAnTw1PjbM4t2aF-Lj3qBgS2YM9V6sYnFy%26authoringRequested%3Dtrue%26client_id%3D69U26F6M6A4Z3U%26showAuthoringOption%3Dfalse")
-			pause 6
+			'-------------------- click 'tools' link in upper-left of main frame
+			usepage("Adobe Acrobat Home")
+			res = clickhtmlelement("SPAN[OUTERTEXT='Tools']")
+			pause 3					
 			'------- error handling
-			if instr(str$(res), "-") <> 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error loading 2nd int packet", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+			if res <> 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error clicking 'tools' link. error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
 				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-load_2nd_pckt.bmp", 1, 1)
 				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
 				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
 				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - load 2nd int packet", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - click tools", crlf + crlf)
+				closebrowser()
+				goto nextIteration
+			endif
+			'------- validation
+			ret = useocrengine(3)
+			pause 10 secs until
+				textocr("Request e-signatures")
+				inwindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+				inarea(529, 374, 189, 281)
+			pausefalse
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": clicking 'tools' link validation failed", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": expected element text (request signatures) not found", crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_tools_link.bmp", 1, 1)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - click tools", crlf + crlf)
+				goto nextIteration
+			endpause
+			'------- debug logging
+			if res = 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": clicked 'tools' link", crlf)
+			endif
+
+
+			'-------------------- click 'request signatures' box in tools carousel menu
+			usepage("Adobe Acrobat Home")
+			res = clickhtmlelement("DIV[OUTERTEXT='Request', INDEX=3]")
+			pause 2
+			'------- error handling
+			if res <> 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error clicking 'request signatures'. error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_request_signatures.bmp", 1, 1)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - click request signatures", crlf + crlf)
+				closebrowser()
+				goto nextIteration
+			endif
+			'------- validation
+			usepage("Adobe Acrobat Home")
+			ret = existhtmlelement("DIV[OUTERTEXT='Request e-signaturesRecentDocumentsMy', INDEX=2]")
+			if ret = 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": clicking 'request signatures' link validation failed", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": expected element (file select popup) not found.", crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_request_signatures.bmp", 1, 1)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - click request signatures", crlf + crlf)
+				closebrowser()
+				goto nextIteration
+			endif
+			'------- debug logging
+			if ret = 1 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": clicked 'request signatures' link", crlf)
+			endif
+
+
+			'-------------------- click 'documents' in top menu of request signatures popup
+			usepage("Adobe Acrobat Home")
+			res = clickhtmlelement("SPAN[OUTERTEXT='Documents', INDEX=3]")
+			pause 2
+			'------- error handling
+			if res <> 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error clicking 'documents' link. error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_documents_link.bmp", 1, 1)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - click documents", crlf + crlf)
+				closebrowser()
+				goto nextIteration
+			endif
+			'------- validation
+			ret = useocrengine(3)
+			pause 10 secs until
+				textocr("Automated")
+				inwindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+				inarea(611, 437, 337, 714)
+			pausefalse
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": clicking 'documents' link validation failed", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": expected element (automated folder) not found", crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_documents_link.bmp", 1, 1)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - click documents", crlf + crlf)
+				closebrowser()
+				goto nextIteration
+			endpause
+			'------- debug logging
+			if res = 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": clicked 'documents' link", crlf)
+			endif
+
+
+			'-------------------- click 'automated' folder
+			usepage("Adobe Acrobat Home")
+			res = clickhtmlelement("DIV[OUTERTEXT='Auto', INDEX=9]")
+			pause 2
+			'------- error handling
+			if res <> 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error clicking 'automated' folder. error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_automated_folder.bmp", 1, 1)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - click automated", crlf + crlf)
+				closebrowser()
+				goto nextIteration
+			endif
+			'------- validation
+			ret = useocrengine(3)
+			if iEnvironment = 1 then
+				pause 10 secs until
+					textocr("Employee Forms")
+					inwindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+					inarea(611, 437, 337, 714)
+				pausefalse
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": clicking 'automated' folder validation failed", crlf)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": expected element (employee forms folder) not found", crlf)
+					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_automated_folder.bmp", 1, 1)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+					write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - click automated", crlf + crlf)
+					closebrowser()
+					goto nextIteration
+				endpause
+			endif
+			if iEnvironment = 2 then
+				pause 10 secs until
+					textocr("Employee Forms")
+					inwindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+					inarea(605, 583, 71, 523)
+				pausefalse
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": clicking 'automated' folder validation failed", crlf)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": expected element (employee forms folder) not found", crlf)
+					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_automated_folder.bmp", 1, 1)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+					write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - click automated", crlf + crlf)
+					closebrowser()
+					goto nextIteration
+				endpause
+			endif
+			'------- debug logging
+			if res = 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": clicked 'automated' folder", crlf)
+			endif
+
+
+			'-------------------- click 'employee forms' folder
+			usepage("Adobe Acrobat Home")
+			res = clickhtmlelement("DIV[CONTENT='EmployeEmployee']")
+			pause 2
+			'------- error handling
+			if res <> 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error clicking 'employee forms' folder. error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_employee_forms_folder.bmp", 1, 1)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - click employee forms", crlf + crlf)
+				closebrowser()
+				goto nextIteration
+			endif
+			'------- validation
+			ret = useocrengine(3)
+			pause 10 secs until
+				textocr("Applicant to New Hire")
+				inwindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+				inarea(611, 437, 337, 714)
+			pausefalse
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": clicking 'employee forms' folder validation failed", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": expected element (applicant to new hire folder) not found", crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_employee_forms_folder.bmp", 1, 1)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - click employee forms", crlf + crlf)
+				closebrowser()
+				goto nextIteration
+			endpause
+			'------- debug logging
+			if res = 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": clicked 'employee forms' folder", crlf)
+			endif
+
+
+			'-------------------- click 'applicant to new hire forms' folder
+			ret = useocrengine(3)
+			usewindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+			if iEnvironment = 1 then
+				res = clickontextocr("Applicant to New Hire", left, single, inarea(641, 581, 628, 73))
+			endif
+			if iEnvironment = 2 then
+				clickmouse(left, double, 780, 630, absolute)
+			endif
+			pause 5
+			'------- error handling
+			if res <> 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error clicking 'applicant to new hire' folder. error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-applicant_to_new_hire_forms_folder.bmp", 1, 1)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - click applicant to new hire forms", crlf + crlf)
+				closebrowser()
+				goto nextIteration
+			endif
+			'------- debug logging
+			if res = 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": clicked 'applicant to new hire' folder", crlf)
+			endif
+
+
+			'-------------------- click '2nd interview packet.pdf'
+			ret = useocrengine(3)
+			UseWindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+			res = clickOnTextOCR("2nd Interview Packet", left, single, inarea(600, 455, 712, 214))
+			'------- error handling
+			if res <> 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error clicking '2nd interview' packet. error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-sel_2nd_interview_packet.bmp", 1, 1)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - select 2nd interview packet", crlf + crlf)
+				closebrowser()
+				goto nextIteration
+			endif
+			pause 2
+			'------- debug logging
+			if res = 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": clicked '2nd interview' packet", crlf)
+			endif
+
+
+			'-------------------- click 'continue' button
+			usepage("Adobe Acrobat Home")
+			res = clickhtmlelement("BUTTON[INNERTEXT='Continue']")
+			pause 2
+			'------- error handling
+			if res <> 0 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error clicking 'continue' button. error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_continue_button.bmp", 1, 1)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - 1st click continue", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			endif
@@ -903,20 +1716,20 @@ firstInterviewSend:
 				inwindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
 				inarea(497, 178, 105, 679)
 			pausefalse
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": loading 2nd int packet validation failed", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": click 'continue' button validation failed", crlf)
 				write(debugLogPath$, basicLogHdr$ + currScript$ + ": expected text (get document signed) not found", crlf)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_continue_button.bmp", 1, 1)
 				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-load_2nd_pckt.bmp", 1, 1)
 				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
 				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
 				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - load 2nd int packet", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - click continue", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			endpause
 			'------- debug logging
 			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": loaded 2nd interview packet", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": clicked 'continue' button", crlf)
 			endif
 
 

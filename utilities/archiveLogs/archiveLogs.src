@@ -8,21 +8,16 @@
 '## run in:					n/a
 '##
 '## notes:                  can be set to run on a schedule to keep logs from growing too large
-'##							
-'##
-'## chg control:    ver     name        description
-'##--------------------------------------------------------------------------------------------------------------------------
-'## 01/19/2023      1.0     tbusch      initial version
 '##										
 '#############################################################################################################################
 
 '#############################################################################################################################
 '##   													script prep									 						##
 '#############################################################################################################################
-include "C:\office_automation\framework\CG-globalDimDeclarations\CG-globalDimDeclarations-v1.0.src"
-include "C:\office_automation\framework\CG-globalFunctions\CG-globalFunctions-v1.0.src"
-include "C:\office_automation\framework\CG-globalSubDefinitions\CG-globalSubDefinitions-v1.0.src"
-include "C:\office_automation\framework\CG-globalVariables\CG-globalVariables-v1.0.src"
+include "C:\v-angels-automation\framework\CG-globalDimDeclarations\CG-globalDimDeclarations.src"
+include "C:\v-angels-automation\framework\CG-globalFunctions\CG-globalFunctions.src"
+include "C:\v-angels-automation\framework\CG-globalSubDefinitions\CG-globalSubDefinitions.src"
+include "C:\v-angels-automation\framework\CG-globalVariables\CG-globalVariables.src"
 
 
 currScript$ = "archiveLogs"
