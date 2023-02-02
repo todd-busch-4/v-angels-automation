@@ -1783,7 +1783,7 @@ firstInterviewNCNS:
 
 			'-------------------- enter search criteria
 			usewindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
-			res = sendkeys("<Doublequote>" + applicantFName$ + " " + applicantLName$ + " 1st<Doublequote><enter>")
+			res = sendkeys("<Doublequote>" + applicantFName$ + " " + applicantLName$ + " 2nd<Doublequote><enter>")
 			pause 6
 			'------- error handling
 			if res <> 0 then
@@ -1801,7 +1801,7 @@ firstInterviewNCNS:
 			'------- validation
 			usepage("Adobe Acrobat Home")
 			if iEnvironment = 1 then
-				res = existhtmlelement("DIV[OUTERTEXT='" + applicantFName$ + " " + applicantLName$ + " 1st', INDEX=8]")
+				res = existhtmlelement("DIV[OUTERTEXT='" + applicantFName$ + " " + applicantLName$ + " 2nd', INDEX=8]")
 			endif
 			if iEnvironment = 2 then
 				res = existhtmlelement("DIV[OUTERTEXT='" + applicantFName$ + "',INDEX=8]")
@@ -1840,7 +1840,7 @@ firstInterviewNCNS:
 
 			'-------------------- select packet
 			usepage("Adobe Acrobat Home")
-			res = clickhtmlelement("DIV[OUTERTEXT='" + applicantFName$ + " " + applicantLName$ + "' 1st', INDEX=8]", left)
+			res = clickhtmlelement("DIV[OUTERTEXT='" + applicantFName$ + " " + applicantLName$ + "' 2nd', INDEX=8]", left)
 			pause 2
 			'------- error handling
 			if res <> 0 then
@@ -1857,7 +1857,7 @@ firstInterviewNCNS:
 			endif
 			'------- validation
 			usepage("Adobe Acrobat Home")
-			ret = existhtmlelement("DIV[OUTERTEXT='" + applicantFName$ + " " + applicantLName$ + " 1st', INDEX=6]")
+			ret = existhtmlelement("DIV[OUTERTEXT='" + applicantFName$ + " " + applicantLName$ + " 2nd', INDEX=6]")
 			if ret <> 1 then
 				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (2nd-cancel) selecting packet validation failed", crlf)
 				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (2nd-cancel) expected html element (packet title) not found in right panel", crlf)
@@ -1948,7 +1948,7 @@ firstInterviewNCNS:
 
 			'-------------------- enter cancel text
 			usepage("Adobe Acrobat Home")
-			res = writehtml("TEXTAREA[CLASS='spectrum-Textfield s']", "NCNS.")
+			res = writehtml("TEXTAREA[CLASS='spectrum-Textfield s']", "Cancelled.")
 			pause 2
 			'------- error handling
 			if res <> 0 then
@@ -2178,7 +2178,7 @@ firstInterviewNCNS:
 
 			'-------------------- enter search criteria
 			usewindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
-			res = sendkeys("<Doublequote>" + applicantFName$ + " " + applicantLName$ + " 1st<Doublequote><enter>")
+			res = sendkeys("<Doublequote>" + applicantFName$ + " " + applicantLName$ + " 2nd<Doublequote><enter>")
 			pause 6
 			'------- error handling
 			if res <> 0 then
@@ -2196,7 +2196,7 @@ firstInterviewNCNS:
 			'------- validation
 			usepage("Adobe Acrobat Home")
 			if iEnvironment = 1 then
-				res = existhtmlelement("DIV[OUTERTEXT='" + applicantFName$ + " " + applicantLName$ + " 1st', INDEX=8]")
+				res = existhtmlelement("DIV[OUTERTEXT='" + applicantFName$ + " " + applicantLName$ + " 2nd', INDEX=8]")
 			endif
 			if iEnvironment = 2 then
 				res = existhtmlelement("DIV[OUTERTEXT='" + applicantFName$ + "',INDEX=8]")
@@ -2235,7 +2235,7 @@ firstInterviewNCNS:
 
 			'-------------------- select packet
 			usepage("Adobe Acrobat Home")
-			res = clickhtmlelement("DIV[OUTERTEXT='" + applicantFName$ + " " + applicantLName$ + "' 1st', INDEX=8]", left)
+			res = clickhtmlelement("DIV[OUTERTEXT='" + applicantFName$ + " " + applicantLName$ + "' 2nd', INDEX=8]", left)
 			pause 2
 			'------- error handling
 			if res <> 0 then
@@ -2252,7 +2252,7 @@ firstInterviewNCNS:
 			endif
 			'------- validation
 			usepage("Adobe Acrobat Home")
-			ret = existhtmlelement("DIV[OUTERTEXT='" + applicantFName$ + " " + applicantLName$ + " 1st', INDEX=6]")
+			ret = existhtmlelement("DIV[OUTERTEXT='" + applicantFName$ + " " + applicantLName$ + " 2nd', INDEX=6]")
 			if ret <> 1 then
 				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (2nd-ncns) selecting packet validation failed", crlf)
 				write(debugLogPath$, basicLogHdr$ + currScript$ + ": (2nd-ncns) expected html element (packet title) not found in right panel", crlf)
