@@ -144,9 +144,9 @@ repeat
 		iOnboardCnt = iOnboardCnt + 1		'stage counter
 
 
-		if curr_stage$ = "On-board" then
+		if curr_stage$ = "On-board" or curr_stage$ = "Termed Rehire" then
 
-			write(debugLogPath$, basicLogHdr$ + currScript$ + ": stage: 'On-board' for change event triggers workflow", crlf)
+			write(debugLogPath$, basicLogHdr$ + currScript$ + ": stage: [" + curr_stage$ + "] for change event triggers workflow", crlf)
 			write(executionLogPath$, basicLogHdr$ + currScript$ + ": change event for stage: 'On-board' at row: [" + str$(iExcelRow) + "] triggered workflow", crlf)
 			write(debugLogPath$, basicLogHdr$ + currScript$ + ": getting data from employment inquiry for current row", crlf)
 
@@ -180,7 +180,7 @@ repeat
 
 			'-------------------- check gms status
 			write(debugLogPath$, basicLogHdr$ + currScript$ + ": checking gms status", crlf)
-			if instr(gmsStatus$, "New Hire Invited") = 0 then
+			if instr(gmsStatus$, "New Hire Invited") = 0  and instr(gmsStatus$, "Termed Rehire") = 0 then
 				write(debugLogPath$, basicLogHdr$ + currScript$ + ": status not set for gms entry", crlf)
 				write(debugLogPath$, basicLogHdr$ + currScript$ + ": status of column: (" + gmsStatus$ + ")", crlf)
 				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
@@ -190,6 +190,8 @@ repeat
 				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": SSN: " + applicantSSN$, crlf)
 				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: status not set for gms entry", crlf + crlf)
 				goto nextIteration
+			else
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": applicant set for gms entry", crlf)
 			endif
 
 
@@ -1297,26 +1299,11 @@ repeat
 				closebrowser()
 				goto nextIteration
 			endif
-			errorCheck$ = gmsErrorCheck$()
-			if errorCheck$ <> "no error found" then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error clicking save", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": " + errorCheck$, crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_save.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": SSN: " + applicantSSN$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - clicking save", crlf + crlf)
-				closebrowser()
-				goto nextIteration
-			endif
 			'------- validation
-			ret = useocrengine(3)
-			var$ = captureareaocr$("FIREFOX.EXE|MozillaWindowClass|Group Management Services - New Hire — Mozilla Firefox", topinstance(), 392, 997, 33, 1198)
-			if instr(var$, "Successfully created") = 0 then
+			ret = existhtmlelement ("BUTTON[INNERTEXT='Done']")
+			if ret <> 1 then
 				write(debugLogPath$, basicLogHdr$ + currScript$ + ": clicking 'save' validation failed;", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": expected object (success msg) not found on page", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": expected object (done button) not found on page", crlf)
 				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ +  "_" + currScript$ + "_click_save.bmp", 1, 1)
 				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
@@ -1328,7 +1315,7 @@ repeat
 				goto nextIteration
 			endif
 			'------- debug logging
-			if instr(var$, "Successfully created") <> 0 then
+			if ret = 1 then
 				write(debugLogPath$, basicLogHdr$ + currScript$ + ": form successfully submitted", crlf + crlf)
 				write(executionLogPath$, basicLogHdr$ + currScript$ + ": form successfully submitted", crlf + crlf)
 				write(successLogPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
@@ -1724,44 +1711,29 @@ rehireFlow:
 				closebrowser()
 				goto nextIteration
 			endif
-			errorCheck$ = gmsErrorCheck$()
-			if errorCheck$ <> "no error found" then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error clicking rehire save", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": " + errorCheck$, crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_rehire_save.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": SSN: " + applicantSSN$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - clicking rehire save", crlf + crlf)
-				closebrowser()
-				goto nextIteration
-			endif
 			'------- validation
-			ret = useocrengine(3)
-			var$ = captureareaocr$("FIREFOX.EXE|MozillaWindowClass|Group Management Services - Rehire — Mozilla Firefox", topinstance(), 392, 997, 33, 1198)
-			if instr(var$, "Successfully created") = 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": clicking rehire 'save' validation failed;", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": expected object (success msg) not found on page", crlf)
+			ret = existhtmlelement ("BUTTON[INNERTEXT='Done']")
+			if ret <> 1 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": clicking 'save' validation failed;", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": expected object (done button) not found on page", crlf)
 				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ +  "_" + currScript$ + "_click_rehire_save.bmp", 1, 1)
+				hardcopy(screenshotsPath$ +  "_" + currScript$ + "_click_save.bmp", 1, 1)
 				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
 				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
 				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
 				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": SSN: " + applicantSSN$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - clicking rehire 'save'", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - clicking 'save'", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			endif
 			'------- debug logging
-			if instr(var$, "Successfully created") <> 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": rehire form successfully submitted", crlf + crlf)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": rehire form successfully submitted", crlf + crlf)
+			if ret = 1 then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": form successfully submitted", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": form successfully submitted", crlf + crlf)
 				write(successLogPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
 				write(successLogPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
 				write(successLogPath$, basicLogHdr$ + currScript$ + ": SSN: " + applicantSSN$, crlf)
-				write(successLogPath$, basicLogHdr$ + currScript$ + ": rehire form successfully submitted", crlf + crlf)
+				write(successLogPath$, basicLogHdr$ + currScript$ + ": form successfully submitted", crlf + crlf)
 			endif
 
 
@@ -1774,7 +1746,7 @@ rehireFlow:
 		endif		'end of on-board stage
 
 
-		if curr_stage$ <> "On-board" then
+		if curr_stage$ <> "On-board" and curr_stage$ <> "Termed Rehire" then
 			write(debuglogpath$, currdate$ + "-" + currtime$ + ": " + currscript$ + ": stage did not trigger workflow", crlf)
 		endif
 

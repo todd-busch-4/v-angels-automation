@@ -1,6 +1,13 @@
 
 
 
+'---------------------------------------------------------------------------------------------------- gms success results
+"BUTTON[INNERTEXT='Done']"												'done button
+
+"TABLE[CONTENT='Update']"												'1st line of success msg "Update Progress"
+"TABLE[CONTENT='Successfully']"											'2nd line of success msg "Successfully created onboarding prehire record 1UJ7EDFG6DBKRKRFFSIHXN5BSODECCJ969682863"
+
+"SPAN[OUTERTEXT='T81441']"												'employee id
 
 
 
@@ -8,10 +15,21 @@
 
 
 
+UsePage("Group Management Services - New Hire")
+	ClickHTMLElement("BUTTON[INNERTEXT='Done']")
+	ClickHTMLElement("INPUT BUTTON[VALUE='Hidden Clear']")
 
-UsePage("Zipwhip | Daniel Nelson")
-	ClickHTMLElement("BUTTON[CLASS='zk-button zk-button-transparent z']")
-	WriteHTML("INPUT TEXT[NAME='contactSearch']", "Seth Adkins")
+
+ret = UseOCREngine(3)
+
+	Pause 10 secs until
+		TextOCR("Emergency")
+		InWindow("FIREFOX.EXE|MozillaWindowClass|Group Management Services - New Hire — Mozilla Firefox",1)
+		InArea(996,480,90,157)
+	PauseFalse
+		MsgBox("'Wait for' at line " + #ErrorLine$ + " has failed !")
+		End
+	EndPause
 
 
 
