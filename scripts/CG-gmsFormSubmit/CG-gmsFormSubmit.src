@@ -98,10 +98,6 @@ if instr(str$(res), "-") <> 0 then
 endif
 
 
-'add leading zeros to mm/dd parts of company start date so it matches the gms autoconverted date on validation
-startDateCompany$ = zeroPadDate$(startDateCompany$)
-
-
 '#############################################################################################################################
 '##   													script start								 						##
 '#############################################################################################################################
@@ -144,7 +140,7 @@ repeat
 		iOnboardCnt = iOnboardCnt + 1		'stage counter
 
 
-		if curr_stage$ = "On-board" or curr_stage$ = "Termed Rehire" then
+		if curr_stage$ = "On-board" or curr_stage$ = "Termed ReHire" then
 
 			write(debugLogPath$, basicLogHdr$ + currScript$ + ": stage: [" + curr_stage$ + "] for change event triggers workflow", crlf)
 			write(executionLogPath$, basicLogHdr$ + currScript$ + ": change event for stage: 'On-board' at row: [" + str$(iExcelRow) + "] triggered workflow", crlf)
@@ -163,6 +159,22 @@ repeat
 			write(debugLogPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
 			write(debugLogPath$, basicLogHdr$ + currScript$ + ": SSN: " + applicantSSN$, crlf)
 			write(executionLogPath$, basicLogHdr$ + currScript$ + ": starting workflow for:" + applicantFName$ + " " + applicantLName$ + " record id: " + "(" + applicantID$ + ")", crlf)
+
+
+			'-------------------- format raw values to match app formatted values for validation(s)
+			'------- add leading zeroes to single char day/month in company start date
+			startDateCompany$ = zeroPadDate$(startDateCompany$)
+			'------- add dashes to ssn
+			if instr(applicantSSN$, "-") = 0 then
+				'divide # into parts
+				pre$ = left$(applicantSSN$, 3)
+				middle$ = mid$(applicantSSN$, 4, 2)
+				post$ = right$(applicantSSN$, 4)
+
+				'assemble string
+				applicantSSN$ = pre$ + "-" + middle$ + "-" + post$
+			endif
+
 
 
 			'-------------------- verify ssn has been added to spreadsheet
@@ -1160,10 +1172,11 @@ repeat
 
 			'-------------------- enter pay rate
 			clickhtmlelement("INPUT TEXT[NAME='EmployeeActionFormsPayR']")
-			'res = writehtml("INPUT TEXT[NAME='EmployeeActionFormsPayR']", payRate$)
-			usewindow("FIREFOX.EXE|MozillaWindowClass|Group Management Services - New Hire — Mozilla Firefox", 1)
-			sendkeys(payRate$, noactivate)
-			sendkeys("<tab>", noactivate)
+			pause 1
+			res = writehtml("INPUT TEXT[NAME='EmployeeActionFormsPayR']", payRate$)
+			'usewindow("FIREFOX.EXE|MozillaWindowClass|Group Management Services - New Hire — Mozilla Firefox", 1)
+			'sendkeys(payRate$, noactivate)
+			'sendkeys("<tab>", noactivate)
 			pause 2
 			'------- error handling
 			if res <> 0 then
@@ -1580,6 +1593,7 @@ rehireFlow:
 
 
 			'-------------------- enter rehire date
+			currDate$ = zeroPadDate$(currDate$)
 			res = writehtml("INPUT TEXT[NAME='EmployeeActionFormsR']", currDate$)
 			clickhtmlelement("SPAN[ID='label36v1']")
 			'------- error handling
@@ -1696,7 +1710,7 @@ rehireFlow:
 
 			'-------------------- click save
 			res = clickhtmlelement("BUTTON[INNERTEXT='Save']", left)
-			pause 8
+			pause 10
 			'------- error handling
 			if res <> 0 then
 				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error clicking rehire 'save'", crlf)
@@ -1712,22 +1726,23 @@ rehireFlow:
 				goto nextIteration
 			endif
 			'------- validation
-			ret = existhtmlelement ("BUTTON[INNERTEXT='Done']")
-			if ret <> 1 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": clicking 'save' validation failed;", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": expected object (done button) not found on page", crlf)
+			ret = gethtmledittext("INPUT TEXT[NAME='EmployeeActionFormsR']", val$)
+			if val$ <> "" then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": enter rehire date validation failed", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": actual extracted value did not match expected", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": expected: (" + currDate$ + ")   actual: (" + val$ + ")", crlf)
 				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ +  "_" + currScript$ + "_click_save.bmp", 1, 1)
+				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-enter_rehire_date.bmp", 1, 1)
 				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
 				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
 				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
 				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": SSN: " + applicantSSN$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - clicking 'save'", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - entering rehire date", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			endif
 			'------- debug logging
-			if ret = 1 then
+			if val$ = "" then
 				write(debugLogPath$, basicLogHdr$ + currScript$ + ": form successfully submitted", crlf + crlf)
 				write(executionLogPath$, basicLogHdr$ + currScript$ + ": form successfully submitted", crlf + crlf)
 				write(successLogPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
@@ -1746,7 +1761,7 @@ rehireFlow:
 		endif		'end of on-board stage
 
 
-		if curr_stage$ <> "On-board" and curr_stage$ <> "Termed Rehire" then
+		if curr_stage$ <> "On-board" and curr_stage$ <> "Termed ReHire" then
 			write(debuglogpath$, currdate$ + "-" + currtime$ + ": " + currscript$ + ": stage did not trigger workflow", crlf)
 		endif
 
