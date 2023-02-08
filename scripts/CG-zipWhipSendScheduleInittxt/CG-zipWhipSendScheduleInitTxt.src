@@ -19,7 +19,6 @@
 '##   													script prep									 						##
 '#############################################################################################################################
 include "C:\v-angels-automation\framework\CG-globalDimDeclarations\CG-globalDimDeclarations.src"
-include "C:\v-angels-automation\framework\VA-globalWebFunctions\VA-globalWebFunctions.src"
 include "C:\v-angels-automation\framework\CG-globalFunctions\CG-globalFunctions.src"
 include "C:\v-angels-automation\framework\CG-globalSubDefinitions\CG-globalSubDefinitions.src"
 include "C:\v-angels-automation\framework\CG-globalVariables\CG-globalVariables.src"
@@ -29,15 +28,6 @@ currScript$ = "CG-zipWhipSendScheduleinitTxt"
 
 
 #ignoreerrors = 1					'turn off errors
-
-
-OnAction error
-dosub Process_Error
-endaction
-
-
-iRetry = 0
-iAttempt = 0
 
 
 '-------------------------------------------------------------------------------------------------------------------------------- read in columns from employment inquiry doc

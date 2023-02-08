@@ -33,13 +33,6 @@ iMo$ = Month$()
 iDay$ = Day$()
 iHr$ = Hour$()
 iMin$ = Min$()
-iRetry = 0
-iAttempt = 0
-
-
-OnAction error
-dosub Process_Error
-endaction
 
 
 write(debugLogPath$, basicLogHdr$ + currScript$ + ": STARTING INTERVAL SCAN", crlf)

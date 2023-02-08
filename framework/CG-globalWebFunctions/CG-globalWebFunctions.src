@@ -4,64 +4,9 @@
 '##  purpose:						comprises a library of web-based functions to be used in caregiver workflow script development with the intent and goal 
 '##									to minimize code duplication and increase script cleanliness and readability as well as reduce maintenance efforts
 '##																																							
-'##  contents:						invokeBrowser$, webEnterText, webClickElement, webSelectItem
+'##  contents:						webEnterText, webClickElement, webSelectItem
 '##																																							 
 '##############################################################################################################################################################
-
-'=============================================================================================================================================================
-'== function name:           invokeBrowser$
-'==
-'== developer:               todd busch
-'==
-'== purpose:                 attempts to start the specified browser and load the specified url. if an error is encountered it will retry the number of
-'==                          of times defined in iRetry var (default: 3). if number of retry attempts defined is exceeded it will log messages, close the
-'==                          the browser, and return the error code as a string value
-'==
-'== input parms:             str_app$:   browser code to invoke ("CH" - Chrome  "FF" - FireFox)
-'==                          str_url$:   url to navigate to on browser invoke
-'==
-'== returns:                 string: "0" for success or error code encountered
-'==
-'== notes:                   n/a
-'==
-'=============================================================================================================================================================
-
-function invokeBrowser$(str_app$, str_url$)
-	local iRetry, r, iAttempt
-
-	while iRetry <= 2
-		r = startbrowser(str_app$, str_url$, 3)
-		pause 3
-		iAttempt = iRetry + 1
-
-		if r = 0 then
-			iRetry = 3
-		endif
-
-		if r <> 0 then
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error starting browser on attempt #: [" + str$(iAttempt) + "]", crlf)
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(r) + "), retrying", crlf)
-			hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-invoke_browser-" + str$(iAttempt) + ".bmp", 1, 1)
-			closebrowser()
-			pause 1
-			iRetry = iRetry + 1
-		endif
-	wend
-
-	if r = 0 then
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": start browser was successful", crlf)
-		invokeBrowser$ = "0"
-	endif
-
-	if r <> 0 then
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": browser could not be invoked after [" + str$(iAttempt) + "] attempts", crlf)
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(r) + ") msg: " + #errormsg$, crlf)
-		closebrowser()
-		invokeBrowser$ = str$(r) 
-	endif
-
-EndFunction
-
 
 '=============================================================================================================================================================
 '== function name:           webEnterText

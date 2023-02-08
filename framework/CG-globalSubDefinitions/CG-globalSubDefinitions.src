@@ -1,17 +1,6 @@
 '##############################################################
-'##   			SUB PROCEDURES								 ##
+'##   			sub procedures
 '##############################################################
-Sub Process_Error()
-	local buffer$
-	disable(Error)
- 	buffer$ = "Error message : " + #errormsg$
-	
-sendemail("busch.todd@yahoo.com","busch.todd@yahoo.com","OfficeAutomationFailure","Failue has occurred in CG-initateScan.")
-
-'UseWindow("EXPLORER.EXE|SysListView32|FolderView", 1)
-'sendkeys("<Ctrl <Shift <Alt a>>>")
-
-endsub
 
 sub criticalStop()
 	write(debugLogPath$, basicLogHdr$ + currScript$ + ": critical scan error encountered; stopping interval scan", crlf + crlf)
@@ -28,69 +17,3 @@ sub nextScript()
 	write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": all change events beyond this point will not be processed for this workflow ", crlf + crlf)
 	i = 4999
 endsub
-
-sub loadEmploymentInquiryRows()
-	'-------------------- record id
-	cnt = readexcel (employmentInquiryPath$, employmentInquiryIdCol$, arrApplicantID$())
-	if instr(str$(cnt), "-") <> 0 then				'look for dash which would indicate an error code
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading ID column.  error_code: " +   str$(cnt), crlf)
-		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (id column)", crlf)
-		criticalStop()
-	else
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (" + str$(cnt) + ") rows read into array.", crlf)
-	endif
-	'-------------------- applicant first name
-	res = readexcel (employmentInquiryPath$, employmentInquiryFNameCol$, arrApplicantFName$())	
-	if instr(str$(res), "-") <> 0 then
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading first name column.  error_code: " +   str$(res), crlf)
-		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (applicant first name)", crlf)
-		criticalStop()
-	endif
-	'-------------------- applicant last name
-	res = readexcel (employmentInquiryPath$, employmentInquiryLNameCol$, arrApplicantLName$())	
-	if instr(str$(res), "-") <> 0 then
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading last name column.  error_code: " +   str$(res), crlf)
-		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (applicant last name)", crlf)
-		criticalStop()
-	endif
-	'-------------------- applicant email
-	res = readexcel (employmentInquiryPath$, employmentInquiryEmailCol$, arrApplicantEmail$())
-	if instr(str$(res), "-") <> 0 then
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading email column.  error_code: " +   str$(res), crlf)
-		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (applicant email)", crlf)
-		criticalStop()
-	endif
-	'-------------------- stage
-	res = readexcel (employmentInquiryPath$, employmentInquiryStageCol$, arrCurrentStage$())
-	if instr(str$(res), "-") <> 0 then
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading stage column.  error_code: " +   str$(res), crlf)
-		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (stage)", crlf)
-		criticalStop()
-	endif
-	'-------------------- change events
-	res = readexcel (employmentInquiryPath$, employmentInquiryChangeEventCol$, arrChangeEvents$())
-	if instr(str$(res), "-") <> 0 then
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading change events column.  error_code: " +   str$(res), crlf)
-		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (change events)", crlf)
-		criticalStop()
-	endif
-	'-------------------- gms status
-	res = readexcel (employmentInquiryPath$, employmentInquiryGMSCol$, arrGMSStatus$())
-	if instr(str$(res), "-") <> 0 then
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading gms status column.  error_code: " +   str$(res), crlf)
-		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (gms status)", crlf)
-		criticalStop()
-	endif
-	'-------------------- ssn
-	res = readexcel (employmentInquiryPath$, employmentInquirySSNCol$, arrApplicantSSN$())
-	if instr(str$(res), "-") <> 0 then
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading ssn column.  error_code: (" + str$(cnt) + ")", crlf)
-		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (ssn)", crlf)
-		criticalStop()
-	endif
-endsub
-
-
-OnAction error
-dosub Process_Error
-endaction

@@ -1,5 +1,5 @@
 '##############################################################
-'##   			dim declarations							 ##
+'##   			dim declarations							 
 '##############################################################
 Dim arrApplicantEmail$(5000)
 Dim arrApplicantFName$(5000)

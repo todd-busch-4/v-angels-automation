@@ -33,11 +33,6 @@ currScript$ = "CG-gmsFormSubmit"
 #ignoreerrors = 1
 
 
-OnAction error
-dosub Process_Error
-endaction
-
-
 '-------------------- read in columns from employment inquiry doc
 loadEmploymentInquiryRows()
 

@@ -4,9 +4,64 @@
 '##  purpose:						comprises a library of functions to be used in caregiver workflow script development with the intent and goal to
 '##									minimize code duplication, increase script cleanliness and readability, as well as reduce maintenance efforts
 '##																																							 
-'##  contents:						zeroPadDate$, formatSSN$, gmsErrorCheck$, gmsNoRehireCheck, checkForNullSSN
+'##  contents:						invokeBrowser$, zeroPadDate$, formatSSN$, gmsErrorCheck$, gmsNoRehireCheck, checkForNullSSN
 '##																																							 
 '##############################################################################################################################################################
+
+'=============================================================================================================================================================
+'== function name:           invokeBrowser$
+'==
+'== developer:               todd busch
+'==
+'== purpose:                 attempts to start the specified browser and load the specified url. if an error is encountered it will retry the number of
+'==                          of times defined in iRetry var (default: 3). if number of retry attempts defined is exceeded it will log messages, close the
+'==                          the browser, and return the error code as a string value
+'==
+'== input parms:             str_app$:   browser code to invoke ("CH" - Chrome  "FF" - FireFox)
+'==                          str_url$:   url to navigate to on browser invoke
+'==
+'== returns:                 string: "0" for success or error code encountered
+'==
+'== notes:                   n/a
+'==
+'=============================================================================================================================================================
+
+function invokeBrowser$(str_app$, str_url$)
+	local iRetry, r, iAttempt
+
+	while iRetry <= 2
+		r = startbrowser(str_app$, str_url$, 3)
+		pause 3
+		iAttempt = iRetry + 1
+
+		if r = 0 then
+			iRetry = 3
+		endif
+
+		if r <> 0 then
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error starting browser on attempt #: [" + str$(iAttempt) + "]", crlf)
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(r) + "), retrying", crlf)
+			hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-invoke_browser-" + str$(iAttempt) + ".bmp", 1, 1)
+			closebrowser()
+			pause 1
+			iRetry = iRetry + 1
+		endif
+	wend
+
+	if r = 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": start browser was successful", crlf)
+		invokeBrowser$ = "0"
+	endif
+
+	if r <> 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": browser could not be invoked after [" + str$(iAttempt) + "] attempts", crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(r) + ") msg: " + #errormsg$, crlf)
+		closebrowser()
+		invokeBrowser$ = str$(r) 
+	endif
+
+EndFunction
+
 
 /*=============================================================================================================================================================
 == function name:           zeroPadDate$
@@ -256,6 +311,78 @@ function gmsNoRehireCheck$()
 endfunction
 
 
+function loadEmploymentInquiryRows()
+	local r
+
+	'-------------------- record id
+	cnt = readexcel (employmentInquiryPath$, employmentInquiryIdCol$, arrApplicantID$())
+	if instr(str$(cnt), "-") <> 0 then				'look for dash which would indicate an error code
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading ID column.  error_code: " +   str$(cnt), crlf)
+		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (id column)", crlf)
+		loadEmploymentInquiryRows = 1
+		exitfunction
+	else
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (" + str$(cnt) + ") rows read into array.", crlf)
+	endif
+	'-------------------- applicant first name
+	r = readexcel (employmentInquiryPath$, employmentInquiryFNameCol$, arrApplicantFName$())	
+	if instr(str$(r), "-") <> 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading first name column.  error_code: " +   str$(r), crlf)
+		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (applicant first name)", crlf)
+		loadEmploymentInquiryRows = 1
+		exitfunction
+	endif
+	'-------------------- applicant last name
+	r = readexcel (employmentInquiryPath$, employmentInquiryLNameCol$, arrApplicantLName$())	
+	if instr(str$(r), "-") <> 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading last name column.  error_code: " +   str$(r), crlf)
+		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (applicant last name)", crlf)
+		loadEmploymentInquiryRows = 1
+		exitfunction
+	endif
+	'-------------------- applicant email
+	r = readexcel (employmentInquiryPath$, employmentInquiryEmailCol$, arrApplicantEmail$())
+	if instr(str$(r), "-") <> 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading email column.  error_code: " +   str$(r), crlf)
+		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (applicant email)", crlf)
+		loadEmploymentInquiryRows = 1
+		exitfunction
+	endif
+	'-------------------- stage
+	r = readexcel (employmentInquiryPath$, employmentInquiryStageCol$, arrCurrentStage$())
+	if instr(str$(r), "-") <> 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading stage column.  error_code: " +   str$(r), crlf)
+		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (stage)", crlf)
+		loadEmploymentInquiryRows = 1
+		exitfunction
+	endif
+	'-------------------- change events
+	r = readexcel (employmentInquiryPath$, employmentInquiryChangeEventCol$, arrChangeEvents$())
+	if instr(str$(r), "-") <> 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading change events column.  error_code: " +   str$(r), crlf)
+		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (change events)", crlf)
+		loadEmploymentInquiryRows = 1
+		exitfunction
+	endif
+	'-------------------- gms status
+	r = readexcel (employmentInquiryPath$, employmentInquiryGMSCol$, arrGMSStatus$())
+	if instr(str$(r), "-") <> 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading gms status column.  error_code: " +   str$(r), crlf)
+		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (gms status)", crlf)
+		loadEmploymentInquiryRows = 1
+		exitfunction
+	endif
+	'-------------------- ssn
+	r = readexcel (employmentInquiryPath$, employmentInquirySSNCol$, arrApplicantSSN$())
+	if instr(str$(r), "-") <> 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading ssn column.  error_code: (" + str$(cnt) + ")", crlf)
+		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (ssn)", crlf)
+		loadEmploymentInquiryRows = 1
+		exitfunction
+	endif
+
+endfunction
+
 
 function checkForNullSSN()
 
@@ -272,7 +399,6 @@ function checkForNullSSN()
 	endif
 
 endfunction
-
 
 function checkGMSStatus()
 
