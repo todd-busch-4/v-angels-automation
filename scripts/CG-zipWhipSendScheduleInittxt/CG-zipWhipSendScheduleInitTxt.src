@@ -19,6 +19,7 @@
 '##   													script prep									 						##
 '#############################################################################################################################
 include "C:\v-angels-automation\framework\CG-globalDimDeclarations\CG-globalDimDeclarations.src"
+include "C:\v-angels-automation\framework\VA-globalWebFunctions\VA-globalWebFunctions.src"
 include "C:\v-angels-automation\framework\CG-globalFunctions\CG-globalFunctions.src"
 include "C:\v-angels-automation\framework\CG-globalSubDefinitions\CG-globalSubDefinitions.src"
 include "C:\v-angels-automation\framework\CG-globalVariables\CG-globalVariables.src"
@@ -43,66 +44,66 @@ iAttempt = 0
 '-------------------- record id
 cnt = readexcel (employmentInquiryPath$, employmentInquiryIdCol$, arrApplicantID$())
 if instr(str$(cnt), "-") <> 0 then				'look for dash which would indicate an error code
-	write(debugLogPath$, basicLogHdr$ + currScript$ + ": error reading ID column.  error_code: (" + str$(cnt) + ")", crlf)
-	write(executionLogPath$, basicLogHdr$ + currScript$ + ": scan failed reading in data (id column)", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading ID column.  error_code: (" + str$(cnt) + ")", crlf)
+	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (id column)", crlf)
 	criticalStop()
 else
-	write(debugLogPath$, basicLogHdr$ + currScript$ + ": (" + str$(cnt) + ") rows read into array.", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (" + str$(cnt) + ") rows read into array.", crlf)
 endif
 '-------------------- applicant first name
 res = readexcel (employmentInquiryPath$, employmentInquiryFNameCol$, arrApplicantFName$())	
 if instr(str$(res), "-") <> 0 then
-	write(debugLogPath$, basicLogHdr$ + currScript$ + ": error reading first name column.  error_code: (" + str$(cnt) + ")", crlf)
-	write(executionLogPath$, basicLogHdr$ + currScript$ + ": scan failed reading in data (applicant first name)", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading first name column.  error_code: (" + str$(cnt) + ")", crlf)
+	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (applicant first name)", crlf)
 	criticalStop()
 endif
 '-------------------- applicant last name
 res = readexcel (employmentInquiryPath$, employmentInquiryLNameCol$, arrApplicantLName$())	
 if instr(str$(res), "-") <> 0 then
-	write(debugLogPath$, basicLogHdr$ + currScript$ + ": error reading last name column.  error_code: (" + str$(cnt) + ")", crlf)
-	write(executionLogPath$, basicLogHdr$ + currScript$ + ": scan failed reading in data (applicant last name)", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading last name column.  error_code: (" + str$(cnt) + ")", crlf)
+	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (applicant last name)", crlf)
 	criticalStop()
 endif
 '-------------------- email
 res = readexcel (employmentInquiryPath$, employmentInquiryEmailCol$, arrApplicantEmail$())	
 if instr(str$(res), "-") <> 0 then
-	write(debugLogPath$, basicLogHdr$ + currScript$ + ": error reading email column.  error_code: (" + str$(cnt) + ")", crlf)
-	write(executionLogPath$, basicLogHdr$ + currScript$ + ": scan failed reading in data (applicant email)", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading email column.  error_code: (" + str$(cnt) + ")", crlf)
+	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (applicant email)", crlf)
 	criticalStop()
 endif
 '-------------------- stage
 res = readexcel (employmentInquiryPath$, employmentInquiryStageCol$, arrCurrentStage$())
 if instr(str$(res), "-") <> 0 then
-	write(debugLogPath$, basicLogHdr$ + currScript$ + ": error reading stage column.  error_code: (" + str$(cnt) + ")", crlf)
-	write(executionLogPath$, basicLogHdr$ + currScript$ + ": scan failed reading in data (stage)", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading stage column.  error_code: (" + str$(cnt) + ")", crlf)
+	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (stage)", crlf)
 	criticalStop()
 endif
 '-------------------- change events
 res = readexcel (employmentInquiryPath$, employmentInquiryChangeEventCol$, arrChangeEvents$())
 if instr(str$(res), "-") <> 0 then
-	write(debugLogPath$, basicLogHdr$ + currScript$ + ": error reading change events column.  error_code: (" + str$(cnt) + ")", crlf)
-	write(executionLogPath$, basicLogHdr$ + currScript$ + ": scan failed reading in data (change events)", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading change events column.  error_code: (" + str$(cnt) + ")", crlf)
+	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (change events)", crlf)
 	criticalStop()
 endif
 '-------------------- phone
 res = readexcel (employmentInquiryPath$, employmentInquiryPhoneCol$, arrApplicantPhone$())
 if instr(str$(res), "-") <> 0 then
-	write(debugLogPath$, basicLogHdr$ + currScript$ + ": error reading phone column.  error_code: (" + str$(cnt) + ")", crlf)
-	write(executionLogPath$, basicLogHdr$ + currScript$ + ": scan failed reading in data (phone)", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading phone column.  error_code: (" + str$(cnt) + ")", crlf)
+	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (phone)", crlf)
 	criticalStop()
 endif
 '-------------------- 1st interview appointment
 res = readexcel (employmentInquiryPath$, employmentInquiry1stAppCol$, arrApplicant1stApp$())
 if instr(str$(res), "-") <> 0 then
-	write(debugLogPath$, basicLogHdr$ + currScript$ + ": error reading 1st interview appointment column.  error_code: (" + str$(cnt) + ")", crlf)
-	write(executionLogPath$, basicLogHdr$ + currScript$ + ": scan failed reading in data (1st interview appointment)", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading 1st interview appointment column.  error_code: (" + str$(cnt) + ")", crlf)
+	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (1st interview appointment)", crlf)
 	criticalStop()
 endif
 '-------------------- text messages
 res = readexcel (employmentInquiryPath$, employmentInquiryTextmsgCol$, arrTextmsgStatus$())
 if instr(str$(res), "-") <> 0 then
-	write(debugLogPath$, basicLogHdr$ + currScript$ + ": error reading text messages column.  error_code: (" + str$(cnt) + ")", crlf)
-	write(executionLogPath$, basicLogHdr$ + currScript$ + ": scan failed reading in data (text messages)", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading text messages column.  error_code: (" + str$(cnt) + ")", crlf)
+	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (text messages)", crlf)
 	criticalStop()
 endif
 
@@ -111,17 +112,17 @@ endif
 '##   													script start								 						##
 '#############################################################################################################################
 
-write(debugLogPath$, basicLogHdr$ + currScript$ + ": starting scan for zipwhip change events", crlf)
-write(executionLogPath$, basicLogHdr$ + currScript$ + ": starting scan of (" + str$(cnt) + ") rows for zipwhip change events", crlf)
-write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": starting scan of (" + str$(cnt) + ") rows for zipwhip change events", crlf)
-write(successLogPath$, basicLogHdr$ + currScript$ + ": starting scan of (" + str$(cnt) + ") rows for zipwhip change events", crlf)
+write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": starting scan for zipwhip change events", crlf)
+write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": starting scan of (" + str$(cnt) + ") rows for zipwhip change events", crlf)
+write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": starting scan of (" + str$(cnt) + ") rows for zipwhip change events", crlf)
+write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": starting scan of (" + str$(cnt) + ") rows for zipwhip change events", crlf)
 if iEnvironment = 1 then
-	write(debugLogPath$, basicLogHdr$ + currScript$ + ": using settings for environment 1", crlf)
-	write(debugLogPath$, basicLogHdr$ + currScript$ + ": --------------------------------------------------------", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": using settings for environment 1", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": --------------------------------------------------------", crlf)
 endif
 if iEnvironment = 2 then
-	write(debugLogPath$, basicLogHdr$ + currScript$ + ": using settings for environment 2", crlf)
-	write(debugLogPath$, basicLogHdr$ + currScript$ + ": --------------------------------------------------------", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": using settings for environment 2", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": --------------------------------------------------------", crlf)
 endif
 
 
@@ -141,7 +142,7 @@ repeat
 
 		iChangeCnt = iChangeCnt + 1				'change event counter
 		iExcelRow = i + 2						'row in employment inquiry doc (add 1 for header and 1 for zero indexed arrays)
-		write(debugLogPath$, basicLogHdr$ + currScript$ + ": change event found at row: [" + str$(iExcelRow) + "]", crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change event found at row: [" + str$(iExcelRow) + "]", crlf)
 
 
 		'-------------------- get stage of current change event
@@ -151,9 +152,9 @@ repeat
 		'------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ 1st interview 
 		if curr_stage$ = "1st Interview" then
 			iStageCnt = iStageCnt + 1			'stage counter
-			write(debugLogPath$, basicLogHdr$ + currScript$ + ": stage for change event is '1st Interview' triggering workflow", crlf)
-			write(executionLogPath$, basicLogHdr$ + currScript$ + ": change event for stage '1st Interview' at row: " + str$(iExcelRow) + " triggered workflow", crlf)
-			write(debugLogPath$, basicLogHdr$ + currScript$ + ": getting data from employment inquiry for current row", crlf)
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage for change event is '1st Interview' triggering workflow", crlf)
+			write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change event for stage '1st Interview' at row: " + str$(iExcelRow) + " triggered workflow", crlf)
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": getting data from employment inquiry for current row", crlf)
 
 
 			'-------------------- get data values for current record from employment inquiry
@@ -166,40 +167,40 @@ repeat
 			textmsgStatus$ = arrTextmsgStatus$(i)
 			currentStage$ = arrCurrentStage$ (i)
 			applicantFullName$ = applicantFName$ + " " + applicantLName$
-			write(debugLogPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-			write(debugLogPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-			write(executionLogPath$, basicLogHdr$ + currScript$ + ": starting workflow for record id: " + "(" + applicantID$ + ") " + applicantFName$ + " " + applicantLName$, crlf)
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+			write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": starting workflow for record id: " + "(" + applicantID$ + ") " + applicantFName$ + " " + applicantLName$, crlf)
 
 
 			'-------------------- check for non-standard formatted phone number
 			l = instr(applicantPhone$, "[tel:")
 			if l <> 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": applicant phone is in non-standard format: '" + applicantPhone$ + "'", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant phone is in non-standard format: '" + applicantPhone$ + "'", crlf)
 				applicantPhone$ = Left$(applicantPhone$, l - 1)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": reformatted applicant phone: " + applicantPhone$, crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": reformatted applicant phone: " + applicantPhone$, crlf)
 			endif
 
 
 			'-------------------- check for no phone number
 			if applicantPhone$ = "" then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": phone field is blank", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": phone field was blank; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: no phone number", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": phone field is blank", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": phone field was blank; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: no phone number", crlf + crlf)
 				goto nextIteration
 			endif
 
 
 			'-------------------- check for scheduled appointment
 			if applicant1stApp$ = "" then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": applicant does not have a scheduled 1st interview", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": no 1st interview scheduled; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: no 1st interview scheduled", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant does not have a scheduled 1st interview", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": no 1st interview scheduled; proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: no 1st interview scheduled", crlf + crlf)
 				goto nextIteration
 			endif
 
@@ -274,11 +275,11 @@ repeat
 
 
 			'-------------------- check for already sent messages
-			write(debugLogPath$, basicLogHdr$ + currScript$ + ": checking status of text msg column", crlf)
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": checking status of text msg column", crlf)
 			if textmsgStatus$ <> "" then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": text messages were previously sent", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": messages already sent, proceeding to next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": text messages were previously sent", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": messages already sent, proceeding to next change event", crlf + crlf)
 				goto nextIteration
 			endif
 
@@ -287,23 +288,23 @@ repeat
 			ret = startbrowser("FF", zipWhipURL$, 3)
 			maximizewindow("FIREFOX.EXE|MozillaWindowClass|", 1)
 			if ret <> 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error invoking browser", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(ret) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error invoking browser", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(ret) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-invoke_browser.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - browser invoke", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - browser invoke", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			endif
 
 
 			'-------------------- check for and handle login page
-			ret = existw("FIREFOX.EXE|MozillaWindowClass|Zipwhip - Login — Mozilla Firefox", 1)
+			ret = existw("FIREFOX.EXE|MozillaWindowClass|Zipwhip - Login ï¿½ Mozilla Firefox", 1)
 			if ret = 1 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": account was not logged in", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": account was not logged in", crlf)
 				'check for object indicating a 'remembered user' has been pre-filled
 				usepage("Zipwhip - Login")
 				res = existhtmlelement("DIV[DATA-TESTID='EXISTING_IDENTITY']")
@@ -325,19 +326,19 @@ repeat
 				'------- validation
 				res$ = currentpage$()
 				if res$ <> "Zipwhip | Daniel Nelson" then
-					write(debugLogPath$, basicLogHdr$ + currScript$ + ": issue logging in. current page = (" + res$ + ").", crlf)
+					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": issue logging in. current page = (" + res$ + ").", crlf)
 					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-login_error.bmp", 1, 1)
-					write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
-					write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - log in", crlf + crlf)
+					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+					write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - log in", crlf + crlf)
 					closebrowser()
 					goto nextIteration
 				endif
 				'------- debug logging
 				if res$ = "Zipwhip | Daniel Nelson" then
-					write(debugLogPath$, basicLogHdr$ + currScript$ + ": browser invoked. log in was successful", crlf)
+					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": browser invoked. log in was successful", crlf)
 				endif
 			endif
 
@@ -346,7 +347,7 @@ repeat
 			'-------------------- invoke browser
 			res$ = currentpage$()
 			if res$ = "Zipwhip | Daniel Nelson" then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": browser invoked. account already logged in", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": browser invoked. account already logged in", crlf)
 			endif
 
 
@@ -356,14 +357,14 @@ repeat
 			pause 2
 			'-------error handling
 			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error clicking 'contact' icon", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error clicking 'contact' icon", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_contacts_icon.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - click contacts", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - click contacts", crlf + crlf)
 			closebrowser()
 				goto nextIteration
 			endif
@@ -372,17 +373,17 @@ repeat
 				ret = useocrengine(3)
 				pause 10 secs until
 					textocr("Contacts")
-					inwindow("FIREFOX.EXE|MozillaWindowClass|Zipwhip | Daniel Nelson — Mozilla Firefox", 1)
+					inwindow("FIREFOX.EXE|MozillaWindowClass|Zipwhip | Daniel Nelson ï¿½ Mozilla Firefox", 1)
 					inarea(574, 136, 51, 155)
 				pausefalse
-					write(debugLogPath$, basicLogHdr$ + currScript$ + ": clicking 'contact' icon validation failed", crlf)
-					write(debugLogPath$, basicLogHdr$ + currScript$ + ": expected element (header text) not found.", crlf)
-					write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicking 'contact' icon validation failed", crlf)
+					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": expected element (header text) not found.", crlf)
+					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_contacts_icon.bmp", 1, 1)
-					write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - click contacts", crlf + crlf)
+					write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - click contacts", crlf + crlf)
 					closebrowser()
 					goto nextIteration
 				endpause
@@ -391,24 +392,24 @@ repeat
 				ret = useocrengine(3)
 				pause 10 secs until
 					textocr("Contacts")
-					inwindow("FIREFOX.EXE|MozillaWindowClass|Zipwhip | Daniel Nelson — Mozilla Firefox", 1)
+					inwindow("FIREFOX.EXE|MozillaWindowClass|Zipwhip | Daniel Nelson ï¿½ Mozilla Firefox", 1)
 					inarea(438, 143, 71, 321)
 				pausefalse
-					write(debugLogPath$, basicLogHdr$ + currScript$ + ": clicking 'contact' icon validation failed", crlf)
-					write(debugLogPath$, basicLogHdr$ + currScript$ + ": expected element (header text) not found.", crlf)
-					write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicking 'contact' icon validation failed", crlf)
+					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": expected element (header text) not found.", crlf)
+					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_contacts_icon.bmp", 1, 1)
-					write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - click contacts", crlf + crlf)
+					write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - click contacts", crlf + crlf)
 					closebrowser()
 					goto nextIteration
 				endpause
 			endif
 			'------- debug logging
 			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": clicked 'contact' icon", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicked 'contact' icon", crlf)
 			endif
 				
 
@@ -417,14 +418,14 @@ repeat
 			pause 2
 			'------- error handling
 			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error clicking 'add' icon", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error clicking 'add' icon", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_add_contact_button.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - click add contact", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - click add contact", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			endif
@@ -433,17 +434,17 @@ repeat
 				ret = useocrengine(3)
 				pause 10 secs until
 					textocr("Add Contact")
-					inwindow("FIREFOX.EXE|MozillaWindowClass|Zipwhip | Daniel Nelson — Mozilla Firefox", 1)
+					inwindow("FIREFOX.EXE|MozillaWindowClass|Zipwhip | Daniel Nelson ï¿½ Mozilla Firefox", 1)
 					inarea(770, 187, 42, 223)
 				pausefalse
-					write(debugLogPath$, basicLogHdr$ + currScript$ + ": clicking 'add contact' icon validation failed", crlf)
-					write(debugLogPath$, basicLogHdr$ + currScript$ + ": expected element (header text) not found.", crlf)
-					write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicking 'add contact' icon validation failed", crlf)
+					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": expected element (header text) not found.", crlf)
+					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_add_contact.bmp", 1, 1)
-					write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - click add contact", crlf + crlf)
+					write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - click add contact", crlf + crlf)
 					closebrowser()
 					goto nextIteration
 				endpause
@@ -452,24 +453,24 @@ repeat
 				ret = useocrengine(3)
 				pause 10 secs until
 					textocr("Add Contact")
-					inwindow("FIREFOX.EXE|MozillaWindowClass|Zipwhip | Daniel Nelson — Mozilla Firefox", 1)
+					inwindow("FIREFOX.EXE|MozillaWindowClass|Zipwhip | Daniel Nelson ï¿½ Mozilla Firefox", 1)
 					inarea(717, 220, 53, 343)
 				pausefalse
-					write(debugLogPath$, basicLogHdr$ + currScript$ + ": clicking 'add contact' icon validation failed", crlf)
-					write(debugLogPath$, basicLogHdr$ + currScript$ + ": expected element (header text) not found.", crlf)
-					write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicking 'add contact' icon validation failed", crlf)
+					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": expected element (header text) not found.", crlf)
+					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_add_contact.bmp", 1, 1)
-					write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - click add contact", crlf + crlf)
+					write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - click add contact", crlf + crlf)
 					closebrowser()
 					goto nextIteration
 				endpause
 			endif
 			'------- debug logging
 			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": clicked 'add contact' icon", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicked 'add contact' icon", crlf)
 			endif
 				
 
@@ -477,48 +478,48 @@ repeat
 			res = writehtml("INPUT TEXT[NAME='firstName']", applicantFName$)
 			'------- error handling
 			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error entering 'first name'", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error entering 'first name'", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-enter_first_name.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - enter first name", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - enter first name", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			endif
 			'------- validation
 			ret = gethtmledittext("INPUT TEXT[NAME='firstName',LABEL='First Name']", var$)
 			if ret <> 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error getting text to validate first name entry", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error getting text to validate first name entry", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-enter_first_name.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - enter first name", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - enter first name", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			endif
 			if ret = 0 then
 				if var$ <> applicantFName$ then
-					write(debugLogPath$, basicLogHdr$ + currScript$ + ": validation failed; expected did not match actual", crlf)
-					write(debugLogPath$, basicLogHdr$ + currScript$ + ": actual: (" + var$ + ")   expected: (" + applicantFName$ + ")", crlf)
-					write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": validation failed; expected did not match actual", crlf)
+					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": actual: (" + var$ + ")   expected: (" + applicantFName$ + ")", crlf)
+					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-enter_first_name.bmp", 1, 1)
-					write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - enter first name", crlf + crlf)
+					write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - enter first name", crlf + crlf)
 					closebrowser()
 					goto nextIteration
 				endif
 			endif
 			'------- debug logging
 			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": entered applicant first name: " + applicantFName$, crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": entered applicant first name: " + applicantFName$, crlf)
 			endif
 
 
@@ -526,48 +527,48 @@ repeat
 			res = writehtml("INPUT TEXT[NAME='lastName']", applicantLName$)
 			'------- error handling
 			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error entering 'last name'", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error entering 'last name'", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-enter_last_name.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - enter last name", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - enter last name", crlf + crlf)
 			closebrowser()
 				goto nextIteration
 			endif
 			'------- validation
 			ret = gethtmledittext("INPUT TEXT[NAME='lastName']", var$)
 			if ret <> 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error getting text to validate last name entry", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error getting text to validate last name entry", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-enter_last_name.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - enter last name", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - enter last name", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			endif
 			if ret = 0 then
 				if var$ <> applicantLName$ then
-					write(debugLogPath$, basicLogHdr$ + currScript$ + ": validation failed; expected did not match actual", crlf)
-					write(debugLogPath$, basicLogHdr$ + currScript$ + ": actual: (" + var$ + ")   expected: (" + applicantLName$ + ")", crlf)
-					write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": validation failed; expected did not match actual", crlf)
+					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": actual: (" + var$ + ")   expected: (" + applicantLName$ + ")", crlf)
+					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-enter_last_name.bmp", 1, 1)
-					write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - enter last name", crlf + crlf)
+					write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - enter last name", crlf + crlf)
 					closebrowser()
 					goto nextIteration
 				endif
 			endif
 			'------- debug logging
 			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": entered applicant last name: " + applicantLName$, crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": entered applicant last name: " + applicantLName$, crlf)
 			endif
 
 
@@ -575,20 +576,20 @@ repeat
 			res = writehtml("INPUT TEXT[NAME='phoneNumber']", applicantPhone$)
 			'------- error handling
 			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error entering 'phone'", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error entering 'phone'", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-enter_phone_number.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - enter phone", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - enter phone", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			endif
 			'------- debug logging
 			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": entered applicant phone number: " + applicantPhone$, crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": entered applicant phone number: " + applicantPhone$, crlf)
 			endif
 
 
@@ -596,14 +597,14 @@ repeat
 			res = writehtml("TEXTAREA[NAME='notes']", "Created by WinTask.")
 			'------- error handling
 			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error entering 'notes'", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error entering 'notes'", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-enter_notes.bmp", 1, 1)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": notes not critical; continuing script execution", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": notes not critical; continuing script execution", crlf)
 			endif
 			'------- debug logging
 			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": entered notes", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": entered notes", crlf)
 			endif
 
 
@@ -612,14 +613,14 @@ repeat
 			pause 2
 			'------- error handling
 			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error clicking 'more' to expand fields", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error clicking 'more' to expand fields", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_expand_link.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - expand form", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - expand form", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			endif
@@ -627,20 +628,20 @@ repeat
 			usepage("Zipwhip | Daniel Nelson")
 			ret = existhtmlelement("INPUT TEXT[NAME='email']")
 			if ret <> 1 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": clicking 'more' link validation failed", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": expected html element (email inputbox) not found.", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicking 'more' link validation failed", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": expected html element (email inputbox) not found.", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_more_hyperlink.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - expand form", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - expand form", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			endif
 			'------- debug logging
 			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": clicked 'more' link to expand fields", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicked 'more' link to expand fields", crlf)
 			endif
 
 
@@ -648,48 +649,48 @@ repeat
 			res = writehtml("INPUT TEXT[NAME='email']", applicantEmail$)
 			'------- error handling
 			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error entering 'email'", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error entering 'email'", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-enter_email.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - enter email", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - enter email", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			Endif
 			'------- validation
 			ret = gethtmledittext("INPUT TEXT[NAME='email']", var$)
 			if ret <> 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error getting text to validate email entry", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error getting text to validate email entry", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-enter_email.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - enter email", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - enter email", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			endif
 			if ret = 0 then
 				if var$ <> applicantEmail$ then
-					write(debugLogPath$, basicLogHdr$ + currScript$ + ": enter email validation failed; actual did not match expected", crlf)
-					write(debugLogPath$, basicLogHdr$ + currScript$ + ": actual: " + var$ + "expected: " + applicantEmail$, crlf)
-					write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": enter email validation failed; actual did not match expected", crlf)
+					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": actual: " + var$ + "expected: " + applicantEmail$, crlf)
+					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-enter_email.bmp", 1, 1)
-					write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - enter email", crlf + crlf)
+					write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - enter email", crlf + crlf)
 					closebrowser()
 					goto nextIteration
 				endif
 			endif
 			'------- debug logging
 			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": entered applicant email: " + applicantEmail$, crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": entered applicant email: " + applicantEmail$, crlf)
 			endif
 
 
@@ -698,61 +699,61 @@ repeat
 			pause 2
 			'------- error handling
 			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error clicking 'save'", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error clicking 'save'", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_save_contact.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - save contact", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - save contact", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			Endif
 			'------- validation
 			res = existhtmlelement("DIV[OUTERTEXT='" + applicantFName$ + " " + applicantLName$ + "',INDEX=7]")
 			if res <> 1 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": save contact failed. expected element (contact card) not found.", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": save contact failed. expected element (contact card) not found.", crlf)
 				ret = capturehtml("DIV[OUTERTEXT='Add ContactFirst',INDEX=7]", captured_string$)
 				if ret = 0 then
 					result_string$ = extractbetween$(captured_string$, "Number", excluded, "Company", excluded)
 						if result_string$ = "Invalid Phone Number" then
-							write(debugLogPath$, basicLogHdr$ + currScript$ + ": phone number is invalid", crlf)
-							write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
-							write(executionLogPath$, basicLogHdr$ + currScript$ + ": phone number is invalid; proceeding to next change event", crlf + crlf)
-							write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-							write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-							write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: invalid phone number", crlf + crlf)
+							write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": phone number is invalid", crlf)
+							write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+							write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": phone number is invalid; proceeding to next change event", crlf + crlf)
+							write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+							write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+							write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: invalid phone number", crlf + crlf)
 							closebrowser()
 							goto nextIteration
 						endif
 						if result_string$ = "Contact already exists" then
-							write(debugLogPath$, basicLogHdr$ + currScript$ + ": contact already exists", crlf)
-							write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
-							write(executionLogPath$, basicLogHdr$ + currScript$ + ": contact already exists; proceeding to next change event", crlf + crlf)
-							write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-							write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-							write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: duplicate contact", crlf + crlf)
+							write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": contact already exists", crlf)
+							write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+							write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": contact already exists; proceeding to next change event", crlf + crlf)
+							write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+							write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+							write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: duplicate contact", crlf + crlf)
 							closebrowser()
 							goto nextIteration
 						endif
 				endif
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_save_contact.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - save contact", crlf + crlf)	
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - save contact", crlf + crlf)	
 			endif
 			'------- debug logging
 			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": contact saved successfully", crlf)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": contact saved successfully", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": contact saved successfully", crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": contact saved successfully", crlf)
 			endif
 
 
 			'-------------------- close contact card
-			usewindow("FIREFOX.EXE|MozillaWindowClass|Zipwhip | Daniel Nelson — Mozilla Firefox", 1)
+			usewindow("FIREFOX.EXE|MozillaWindowClass|Zipwhip | Daniel Nelson ï¿½ Mozilla Firefox", 1)
 			clickmouse(Left, Double, 515, 515, absolute)
 
 
@@ -763,36 +764,36 @@ repeat
 			pause 2
 			'------- error handling
 			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error clicking 'conversations' icon", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error clicking 'conversations' icon", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click-conversations_icon.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - click conversations", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - click conversations", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			Endif
 			'------- validation
 			pause 10 secs until
 				bitmap(imagePath$ + "zipwhip-conversationsPageIcon.bmp")
-				inwindow("FIREFOX.EXE|MozillaWindowClass|Zipwhip | Daniel Nelson — Mozilla Firefox", 1)
+				inwindow("FIREFOX.EXE|MozillaWindowClass|Zipwhip | Daniel Nelson ï¿½ Mozilla Firefox", 1)
 			pausefalse
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": clicking 'conversations' validation failed", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": clicking 'expected element (bitmap) not found.", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicking 'conversations' validation failed", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicking 'expected element (bitmap) not found.", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_conversations_icon.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - click conversations", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - click conversations", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			endpause
 			'------- debug logging
 			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": clicked 'conversations' icon", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicked 'conversations' icon", crlf)
 			endif
 
 
@@ -802,34 +803,34 @@ repeat
 			pause 2
 			'------- error handling
 			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error entering 'search criteria'", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error entering 'search criteria'", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-enter_search_criteria.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - enter search criteria", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - enter search criteria", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			Endif
 			'------- validation
 			ret = existhtmlelement("DIV[OUTERTEXT='" + applicantFName$ + "', INDEX=2]")
 			if ret <> 1 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": contact search validation failed", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": expected html element (contact card) not found.", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": contact search validation failed", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": expected html element (contact card) not found.", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-contact_search.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - enter search criteria", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - enter search criteria", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			endif
 			'------- debug logging
 			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": searched for contact", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": searched for contact", crlf)
 			endif
 
 
@@ -838,34 +839,34 @@ repeat
 			pause 2
 			'------- error handling
 			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error selecting contact from search result", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error selecting contact from search result", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-select_returned_contact.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - select contact", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - select contact", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			Endif
 			'------- validation
 			ret = existhtmlelement("DIV[OUTERTEXT='0/600',CLASS='zw-default-div-style compose-box_t']")
 			if ret <> 1 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": select contact validation failed", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": expected element (text message inputbox) not found", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": select contact validation failed", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": expected element (text message inputbox) not found", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-select_returned_contact.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - select contact", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - select contact", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			Endif
 			'------- debug logging
 			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": selected contact from search result", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": selected contact from search result", crlf)
 			endif
 
 
@@ -874,25 +875,25 @@ repeat
 			pause 2
 			'------- error handling
 			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error entering message text", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error entering message text", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-enter_message_text.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - enter msg text", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - enter msg text", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			Endif
 			'------- debug logging
 			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": entered initial text message", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": entered initial text message", crlf)
 			endif
 
 
 			'-------------------- click send button
-			usewindow("FIREFOX.EXE|MozillaWindowClass|Zipwhip | Daniel Nelson — Mozilla Firefox", 1)
+			usewindow("FIREFOX.EXE|MozillaWindowClass|Zipwhip | Daniel Nelson ï¿½ Mozilla Firefox", 1)
 			if iEnvironment = 1 then
 				movemouse(1300, 1010, absolute)
 				pause 1
@@ -904,18 +905,18 @@ repeat
 				clickmouse(left, double, 1380, 1015, absolute)
 			endif
 			pause 1
-			write(debugLogPath$, basicLogHdr$ + currScript$ + ": initial text message sent", crlf)
-			write(executionLogPath$, basicLogHdr$ + currScript$ + ": initial text message sent", crlf)
-			write(successLogPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-			write(successLogPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-			write(successLogPath$, basicLogHdr$ + currScript$ + ": result: initial text msg sent", crlf + crlf)
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": initial text message sent", crlf)
+			write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": initial text message sent", crlf)
+			write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+			write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+			write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: initial text msg sent", crlf + crlf)
 
 
 			'-------------------------------------------------------------------------------------------------------------------------------- schedule day before confirmation msg
 			'-------------------- check if day before appt is today
 			if sCurrDay$ >= firstAppPriorDay$ then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": day before appt is today or before; skipping schedule prior day confirm text", crlf)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": day before appt is today or before; skipping schedule prior day confirm text", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": day before appt is today or before; skipping schedule prior day confirm text", crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": day before appt is today or before; skipping schedule prior day confirm text", crlf)
 				goto dayOfConfirm
 			endif
 
@@ -930,36 +931,36 @@ repeat
 			pause 2
 			'------- error handling
 			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error clicking 'conversations' icon", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error clicking 'conversations' icon", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click-conversations_icon.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - click conversations", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - click conversations", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			Endif
 			'------- validation
 			pause 10 secs until
 				bitmap(imagePath$ + "zipwhip-conversationsPageIcon.bmp")
-				inwindow("FIREFOX.EXE|MozillaWindowClass|Zipwhip | Daniel Nelson — Mozilla Firefox", 1)
+				inwindow("FIREFOX.EXE|MozillaWindowClass|Zipwhip | Daniel Nelson ï¿½ Mozilla Firefox", 1)
 			pausefalse
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": clicking 'conversations' validation failed", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": clicking 'expected element (bitmap) not found.", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicking 'conversations' validation failed", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicking 'expected element (bitmap) not found.", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_conversations_icon.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - click conversations", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - click conversations", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			endpause
 			'------- debug logging
 			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": clicked 'conversations' icon", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicked 'conversations' icon", crlf)
 			endif
 
 
@@ -968,34 +969,34 @@ repeat
 			pause 2
 			'------- error handling
 			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error entering 'search criteria'", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error entering 'search criteria'", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-enter_search_criteria.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - enter search criteria", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - enter search criteria", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			Endif
 			'------- validation
 			ret = existhtmlelement("DIV[OUTERTEXT='" + applicantFName$ + "', INDEX=2]")
 			if ret <> 1 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": contact search validation failed", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": expected html element (contact card) not found.", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": contact search validation failed", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": expected html element (contact card) not found.", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-contact_search.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - enter search criteria", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - enter search criteria", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			endif
 			'------- debug logging
 			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": searched for contact", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": searched for contact", crlf)
 			endif
 
 
@@ -1004,34 +1005,34 @@ repeat
 			pause 2
 			'------- error handling
 			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error selecting contact from search result", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error selecting contact from search result", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-select_returned_contact.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - select contact", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - select contact", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			Endif
 			'------- validation
 			ret = existhtmlelement("DIV[OUTERTEXT='0/600',CLASS='zw-default-div-style compose-box_t']")
 			if ret <> 1 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": select contact validation failed", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": expected element (text message inputbox) not found", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": select contact validation failed", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": expected element (text message inputbox) not found", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-select_returned_contact.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - select contact", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - select contact", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			Endif
 			'------- debug logging
 			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": selected contact from search result", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": selected contact from search result", crlf)
 			endif
 
 
@@ -1041,34 +1042,34 @@ repeat
 			pause 2
 			'------- error handling
 			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error clicking 'clock' icon", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error clicking 'clock' icon", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_clock_icon.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - click clock", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - click clock", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			Endif
 			'------- validation
 			ret = existhtmlelement("BUTTON[CLASS='SingleDatePickerInpu']")
 			if ret <> 1 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": clicking 'clock' validation failed", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": expected element (date picker) not found.", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicking 'clock' validation failed", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": expected element (date picker) not found.", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_clock_icon.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - click clock", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - click clock", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			Endif
 			'------- debug logging
 			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": clicked 'clock' icon (schedule)", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicked 'clock' icon (schedule)", crlf)
 			endif
 
 
@@ -1077,34 +1078,34 @@ repeat
 			pause 2
 			'------- error handling
 			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error clicking date control", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error clicking date control", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_date_picker_control.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - click date picker control", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - click date picker control", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			Endif
 			'------- validation
 			ret = existhtmlelement("DIV[CLASS='DayPicker_transition']")
 			if ret <> 1 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": clicking date picker validation failed", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": expected element (calendar) not found.", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicking date picker validation failed", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": expected element (calendar) not found.", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_date_picker_control.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - click date picker control", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - click date picker control", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			Endif
 			'------- debug logging
 			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": clicked date picker control", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicked date picker control", crlf)
 			endif
 
 
@@ -1115,26 +1116,26 @@ repeat
 			pause 2
 			'------- error handling
 			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error entering date", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error entering date", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-enter_prior_date.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - enter day before appt", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - enter day before appt", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			Endif
 			'------- debug logging
 			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": entered day before appt date", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": entered day before appt date", crlf)
 			endif
 
 
 			'-------------------- select time picker control
 			ret = useocrengine(3)
-			usewindow("FIREFOX.EXE|MozillaWindowClass|Zipwhip | Daniel Nelson — Mozilla Firefox", 1)
+			usewindow("FIREFOX.EXE|MozillaWindowClass|Zipwhip | Daniel Nelson ï¿½ Mozilla Firefox", 1)
 			if iEnvironment = 1 then
 				res = clickontextocr("ET", left, single, inarea(1116, 992, 105, 38), -40, 0)
 			endif
@@ -1144,48 +1145,48 @@ repeat
 			pause 2
 			'------- error handling
 			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error clicking time picker control", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error clicking time picker control", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_time-picker_control.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - click time picker control", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - click time picker control", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			Endif
 			'------- debug logging
 			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": clicked time picker control", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicked time picker control", crlf)
 			endif
 
 
 			'-------------------- enter scheduled message time
 			sendkeys(dayPriorAppHour$)
 			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error entering scheduled hour", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error entering scheduled hour", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-enter_scheduled_hour.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - enter hour", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - enter hour", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			Endif
 			pause 2
 			sendkeys(dayPriorAppMinutes$)
 			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error entering scheduled minute", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error entering scheduled minute", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-enter_scheduled_minute.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - enter minutes", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - enter minutes", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			Endif
@@ -1193,21 +1194,21 @@ repeat
 
 			sendkeys(dayPriorDayNight$)
 			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error entering time of day", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error entering time of day", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-enter_scheduled_time_of_day.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - enter am/pm", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - enter am/pm", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			Endif
 			pause 2
 			'------- debug logging
 			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": entered scheduled time", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": entered scheduled time", crlf)
 			endif
 
 
@@ -1217,25 +1218,25 @@ repeat
 			pause 2
 			'------- error handling
 			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error composing msg", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error composing msg", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-enter_message_text_2.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - enter msg text", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - enter msg text", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			Endif
 			'------- debug logging
 			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": entered day before confirm msg text", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": entered day before confirm msg text", crlf)
 			endif
 
 
 			'-------------------- click 'schedule' button
-			usewindow("FIREFOX.EXE|MozillaWindowClass|Zipwhip | Daniel Nelson — Mozilla Firefox", 1)
+			usewindow("FIREFOX.EXE|MozillaWindowClass|Zipwhip | Daniel Nelson ï¿½ Mozilla Firefox", 1)
 			if iEnvironment = 1 then
 				clickmouse(left, double, 1300, 1010, absolute)
 			endif
@@ -1243,11 +1244,11 @@ repeat
 				clickmouse(left, double, 1380, 1015, absolute)
 			endif
 			pause 1
-			write(debugLogPath$, basicLogHdr$ + currScript$ + ": day before confirm msg scheduled", crlf)
-			write(executionLogPath$, basicLogHdr$ + currScript$ + ": day before confirm msg scheduled", crlf)
-			write(successLogPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-			write(successLogPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-			write(successLogPath$, basicLogHdr$ + currScript$ + ": result: day before confirm msg scheduled", crlf + crlf)
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": day before confirm msg scheduled", crlf)
+			write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": day before confirm msg scheduled", crlf)
+			write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+			write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+			write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: day before confirm msg scheduled", crlf + crlf)
 
 
 			'-------------------------------------------------------------------------------------------------------------------------------- schedule day of confirm text
@@ -1261,34 +1262,34 @@ dayOfConfirm:
 			pause 2
 			'------- error handling
 			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error entering 'search criteria'", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error entering 'search criteria'", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-enter_search_criteria.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - enter search criteria", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - enter search criteria", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			Endif
 			'------- validation
 			ret = existhtmlelement("DIV[OUTERTEXT='" + applicantFName$ + "', INDEX=2]")
 			if ret <> 1 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": contact search validation failed", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": expected html element (contact card) not found.", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": contact search validation failed", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": expected html element (contact card) not found.", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-contact_search.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - enter search criteria", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - enter search criteria", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			endif
 			'------- debug logging
 			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": searched for contact", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": searched for contact", crlf)
 			endif
 
 
@@ -1297,34 +1298,34 @@ dayOfConfirm:
 			pause 2
 			'------- error handling
 			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error selecting contact from search result", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error selecting contact from search result", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-select_returned_contact.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - select contact", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - select contact", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			Endif
 			'------- validation
 			ret = existhtmlelement("DIV[OUTERTEXT='0/600',CLASS='zw-default-div-style compose-box_t']")
 			if ret <> 1 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": select contact validation failed", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": expected element (text message inputbox) not found", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": select contact validation failed", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": expected element (text message inputbox) not found", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-select_returned_contact.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - select contact", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - select contact", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			Endif
 			'------- debug logging
 			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": selected contact from search result", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": selected contact from search result", crlf)
 			endif
 
 
@@ -1333,20 +1334,20 @@ dayOfConfirm:
 			pause 2
 			'------- error handling
 			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error entering message text (3)", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error entering message text (3)", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-enter_message_text_3.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - enter msg text", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - enter msg text", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			Endif
 			'------- debug logging
 			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": entered same day confirm msg text", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": entered same day confirm msg text", crlf)
 			endif
 
 
@@ -1356,34 +1357,34 @@ dayOfConfirm:
 			pause 2
 			'------- error handling
 			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error clicking 'clock' icon", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error clicking 'clock' icon", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_clock_icon.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - click clock", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - click clock", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			Endif
 			'------- validation
 			ret = existhtmlelement("BUTTON[CLASS='SingleDatePickerInpu']")
 			if ret <> 1 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": clicking 'clock' validation failed", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": expected element (date picker) not found.", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicking 'clock' validation failed", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": expected element (date picker) not found.", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_clock_icon.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - click clock", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - click clock", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			Endif
 			'------- debug logging
 			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": clicked 'clock' icon (schedule)", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicked 'clock' icon (schedule)", crlf)
 			endif
 
 
@@ -1392,34 +1393,34 @@ dayOfConfirm:
 			pause 2
 			'------- error handling
 			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error clicking date control", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error clicking date control", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_date_picker_control.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - click date picker control", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - click date picker control", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			Endif
 			'------- validation
 			ret = existhtmlelement("DIV[CLASS='DayPicker_transition']")
 			if ret <> 1 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": clicking date picker validation failed", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": expected element (calendar) not found.", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicking date picker validation failed", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": expected element (calendar) not found.", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_date_picker_control.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - click date picker control", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - click date picker control", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			Endif
 			'------- debug logging
 			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": clicked date picker control", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicked date picker control", crlf)
 			endif
 
 
@@ -1430,26 +1431,26 @@ dayOfConfirm:
 			pause 2
 			'------- error handling
 			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error entering date", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error entering date", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-enter_date.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - enter day before appt", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - enter day before appt", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			Endif
 			'------- debug logging
 			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": entered day before appt date", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": entered day before appt date", crlf)
 			endif
 
 
 			'-------------------- select time picker control
 			ret = useocrengine(3)
-			usewindow("FIREFOX.EXE|MozillaWindowClass|Zipwhip | Daniel Nelson — Mozilla Firefox", 1)
+			usewindow("FIREFOX.EXE|MozillaWindowClass|Zipwhip | Daniel Nelson ï¿½ Mozilla Firefox", 1)
 			if iEnvironment = 1 then
 				res = clickontextocr("ET", left, single, inarea(1116, 992, 105, 38), -40, 0)
 			endif
@@ -1459,48 +1460,48 @@ dayOfConfirm:
 			pause 2
 			'------- error handling
 			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error clicking time picker control", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error clicking time picker control", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_time-picker_control.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - click time picker control", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - click time picker control", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			Endif
 			'------- debug logging
 			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": clicked time picker control", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicked time picker control", crlf)
 			endif
 
 
 			'-------------------- enter scheduled message time
 			sendkeys(dayOfAppHour$)
 			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error entering scheduled hour", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error entering scheduled hour", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-enter_scheduled_hour.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - enter hour", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - enter hour", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			Endif
 			pause 2
 			sendkeys(dayOfAppMinutes$)
 			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error entering scheduled minute", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error entering scheduled minute", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-enter_scheduled_minute.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - enter minutes", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - enter minutes", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			Endif
@@ -1508,26 +1509,26 @@ dayOfConfirm:
 
 			sendkeys(dayOfDayNight$)
 			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error entering time of day", crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": resuming scan for next change event", crlf + crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error entering time of day", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-enter_scheduled_time_of_day.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - enter am/pm", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - enter am/pm", crlf + crlf)
 				closebrowser()
 				goto nextIteration
 			Endif
 			pause 2
 			'------- debug logging
 			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + currScript$ + ": entered scheduled time", crlf)
+				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": entered scheduled time", crlf)
 			endif
 
 
 			'-------------------- click 'schedule' button
-			usewindow("FIREFOX.EXE|MozillaWindowClass|Zipwhip | Daniel Nelson — Mozilla Firefox", 1)
+			usewindow("FIREFOX.EXE|MozillaWindowClass|Zipwhip | Daniel Nelson ï¿½ Mozilla Firefox", 1)
 			if iEnvironment = 1 then
 				clickmouse(left, double, 1300, 1010, absolute)
 			endif
@@ -1535,11 +1536,11 @@ dayOfConfirm:
 				clickmouse(left, double, 1380, 1015, absolute)
 			endif
 			pause 1
-			write(debugLogPath$, basicLogHdr$ + currScript$ + ": day of confirm msg scheduled", crlf + crlf)
-			write(executionLogPath$, basicLogHdr$ + currScript$ + ": day of confirm msg scheduled", crlf + crlf)
-			write(successLogPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
-			write(successLogPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-			write(successLogPath$, basicLogHdr$ + currScript$ + ": result: day of confirm msg scheduled", crlf + crlf)
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": day of confirm msg scheduled", crlf + crlf)
+			write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": day of confirm msg scheduled", crlf + crlf)
+			write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+			write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+			write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: day of confirm msg scheduled", crlf + crlf)
 
 
 			closebrowser()
@@ -1552,7 +1553,7 @@ dayOfConfirm:
 
 
 		if curr_stage$ <> "1st Interview" then
-			Write(debugLogPath$, basicLogHdr$ + currScript$ + ": stage value did not trigger workflow, resuming scan for next change event", crlf + crlf)
+			Write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage value did not trigger workflow, resuming scan for next change event", crlf + crlf)
 		endif
 
 
@@ -1571,19 +1572,19 @@ until i = 5000
 '##############################################################
 '##   			script end									 ##
 '##############################################################
-write(debugLogPath$, basicLogHdr$ + currScript$ + ": ", crlf) 
-write(debugLogPath$, basicLogHdr$ + currScript$ + ": workflow scan completed", crlf) 
-write(debugLogPath$, basicLogHdr$ + currScript$ + ": change events detected:            " + str$(iChangeCnt), crlf)
-write(debugLogPath$, basicLogHdr$ + currScript$ + ": events with '1st interview' stage: " + str$(iStageCnt), crlf)
-write(debugLogPath$, basicLogHdr$ + currScript$ + ": records msgs sent for:             " + str$(iSentCnt), crlf)
-write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow scan completed", crlf)
-write(executionLogPath$, basicLogHdr$ + currScript$ + ": change event rows detected: " + str$(iChangeCnt), crlf)
-write(executionLogPath$, basicLogHdr$ + currScript$ + ": 1st Interview events:       " + str$(iStageCnt), crlf)
-write(executionLogPath$, basicLogHdr$ + currScript$ + ": records msgs sent for:      " + str$(iSentCnt), crlf)
-write(debugLogPath$, basicLogHdr$ + currScript$ + ": ------------------------------------------------------", crlf + crlf)
-write(executionLogPath$, basicLogHdr$ + currScript$ + ": ------------------------------------------------------", crlf + crlf)
-write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": ------------------------------------------------------", crlf + crlf)
-write(successLogPath$, basicLogHdr$ + currScript$ + ": ------------------------------------------------------", crlf + crlf)
+write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ", crlf) 
+write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf) 
+write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events detected:            " + str$(iChangeCnt), crlf)
+write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": events with '1st interview' stage: " + str$(iStageCnt), crlf)
+write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": records msgs sent for:             " + str$(iSentCnt), crlf)
+write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf)
+write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change event rows detected: " + str$(iChangeCnt), crlf)
+write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 1st Interview events:       " + str$(iStageCnt), crlf)
+write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": records msgs sent for:      " + str$(iSentCnt), crlf)
+write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
+write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
+write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
+write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
 
 
 

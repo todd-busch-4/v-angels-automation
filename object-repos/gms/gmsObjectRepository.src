@@ -1,0 +1,65 @@
+'##############################################################################################################################################################
+'##  filename:						gms object repo																										 
+'##																																							 
+'##  contents:						contains window and object definitions for the gms web application												 
+'##																																							 
+'##  purpose:						abstract these definitions from individual scripts and create a single cetralized location for editing																 
+'##																																							 
+'##############################################################################################################################################################
+
+'======================================================================= window definitions =====================================================================
+wndEnhancedDashboard$ = "FIREFOX.EXE|MozillaWindowClass|Group Management Services - Enhanced Dashboard — Mozilla Firefox"
+wndNewHireForm$ = "FIREFOX.EXE|MozillaWindowClass|Group Management Services - New Hire — Mozilla Firefox"
+wndRehireForm$ = "FIREFOX.EXE|MozillaWindowClass|Group Management Services - Rehire — Mozilla Firefox"
+
+
+'======================================================================= page definitions =====================================================================
+pgGMSLogin$ = "Group Management Services - Login"
+pgCompanySrc$ = "Group Management Services - Search All Companies"
+pgEnhancedDashboard$ = "Group Management Services - Enhanced Dashboard"
+pgNewHireForm$ = "Group Management Services - New Hire"
+pgRehireForm$ = "Group Management Services - Rehire"
+
+
+'======================================================================= object definitions =====================================================================
+'-------------------- log in page
+txtUsername$ = "INPUT TEXT[NAME='HrpyWorkWUser']"
+txtPassword$ = "INPUT PASSWORD[NAME='HrpyWorkWPassword']"
+btnLogin$ = "BUTTON[INNERTEXT='Sign in']"
+bmpLogo$ = "IMG[SRC='https://gms.prismhr.']"
+
+
+'-------------------- enhanced dashboard
+lnkNewHire$ = "TD[OUTERTEXT='New']"
+lnkRehire$ = "TD[OUTERTEXT='Rehire']"
+
+
+'-------------------- new hire form
+txtWorkLoc$ = "INPUT TEXT[NAME='EmployeeActionFormsL']"
+txtSocial$ = "INPUT TEXT[NAME='EmployeeActionFormsW']"
+txtFirstName$ = "INPUT TEXT[NAME='EmployeeActionFormsF']"
+txtLastName$ = "INPUT TEXT[NAME='EmployeeActionFormsLa']"
+txtEmail$ = "INPUT TEXT[NAME='EmployeeActionFormsE']"
+dtCompanyStartDt$ = "INPUT TEXT[NAME='EmployeeActionFormsH']"
+txtPosition$ = "INPUT TEXT[NAME='EmployeeActionFormsJ']"
+txtEmployStatus$ = "INPUT TEXT[NAME='EmployeeActionFormsStatu']"
+txtEmployType$ = "INPUT TEXT[NAME='EmployeeActionFormsTy']"
+txtBenefitGrp$ = "INPUT TEXT[NAME='EmployeeActionFormsBen']"
+txtPayGrp$ = "INPUT TEXT[NAME='EmployeeActionFormsPay']"
+selPayMethod$ = "SELECT[NAME='EmployeeActionFormsPay']"
+txtPayRate$ = "INPUT TEXT[NAME='EmployeeActionFormsPayR']"
+txtStdHours$ = "INPUT TEXT[NAME='EmployeeActionFormsStdP']"
+btnSave$ = "BUTTON[INNERTEXT='Save']"
+btnDone$ = "BUTTON[INNERTEXT='Done']"
+
+
+'-------------------- rehire form
+txtRHSocial$ = "INPUT TEXT[NAME='HrpyWorkWGlobalSearch1']"
+selRehireStatus$ = "SELECT[NAME='EmployeeActionFormsR']"
+selRehireType$ = "SELECT[NAME='EmployeeActionFormsRehireT']"
+dtRehireDate$ = "INPUT TEXT[NAME='EmployeeActionFormsR']"
+txtEmployeeID$ = "SPAN[ID='label36v1']"
+selRehireCode$ = "SELECT[NAME='EmployeeActionFormsRea']"
+txtRHPayRate$ = "INPUT TEXT[NAME='EmployeeActionFormsRhPayR']"
+
+'save button has same descriptor as on new hire page

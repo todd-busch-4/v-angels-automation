@@ -1,0 +1,34 @@
+'##############################################################################################################################################################
+'##  filename:						cg-globalWinfunctions																										 
+'##																																							 
+'##  purpose:						comprises a library of windows-based functions to be used in caregiver workflow script development with the intent and goal 
+'##									to minimize code duplication and increase script cleanliness and readability as well as reduce maintenance efforts
+'##																																							
+'##  contents:						winSendKeys
+'##																																							 
+'##############################################################################################################################################################
+
+function winSendKeys(key_list$, step$)
+	local r
+
+	r = sendkeys(key_list$, noactivate)
+
+	if r <> 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error " + step$, crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(r) + ") msg: " + #errormsg$, crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+		hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-" + step$ + ".bmp", 1, 1)
+		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": SSN: " + applicantSSN$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - " + step$, crlf + crlf)
+		closebrowser()
+		winSendKeys = r
+	endif
+
+	if r = 0 then
+		winSendKeys = 0
+	endif
+
+endfunction

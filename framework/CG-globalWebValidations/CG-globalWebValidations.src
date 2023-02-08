@@ -1,0 +1,94 @@
+'##############################################################################################################################################################
+'##  filename:						cg-globalWebValidations																										 
+'##																																							 
+'##  purpose:						comprises a library of web-based validations to be used in caregiver workflow script development with the intent and goal
+'##									to minimize code duplication, increase script cleanliness and readability, as well as reduce maintenance efforts	
+'##																																							
+'##  contents:						webValidateText, webValidateElement, webValidateCurrPage
+'##																																							 
+'##############################################################################################################################################################
+
+function webValidateText(object$, text$, step$)
+    local r, var$
+
+    r = gethtmledittext(object$, var$)
+
+    if r <> 0 then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": failed to get text from object", crlf)
+        hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-" + step$ + ".bmp", 1, 1)
+        exitfunction
+    endif
+
+    if r = 0 then
+        if var$ <> text$ then
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + step$ + " validation failed", crlf)
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": actual value did not match expected", crlf)
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": expected: (" + text$ + ")  actual: (" + var$ + ")", crlf)
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+            hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-" + step$ + ".bmp", 1, 1)
+            write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+            write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+            write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+            write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": SSN: " + applicantSSN$, crlf)
+            write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - " + step$, crlf + crlf)
+            closebrowser()
+            webValidateText = 1
+        endif
+
+        if var$ = text$ then
+        	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + step$ + " was successful", crlf)
+            webValidateText = 0
+        endif
+
+    endif
+
+endfunction
+
+
+function webValidateElement(objectDesc$, objectName$, step$)
+    local r
+
+    r = existhtmlelement(objectDesc$)
+
+    if r <> 1 then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + step$ + " validation failed;", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": expected object (" + objectName$ + ") was not found on page;", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+        hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-" + step$ + ".bmp", 1, 1)
+        write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+        write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+        write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+        write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": SSN: " + applicantSSN$, crlf)
+        write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - " + step$, crlf + crlf)
+        closebrowser()
+        webValidateElement = r
+    endif
+
+    if r = 1 then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + step$ + " was successful", crlf)
+        webValidateElement = 1
+    endif
+
+endfunction
+
+function webValidateCurrPage(pageName$, step$)
+
+	if currentpage$() <> pageName$ then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + step$ + " validation failed", crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": actual page did not match expected", crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": expected: (" + pageName$ + ")   actual: (" + currentpage$() + ")", crlf)
+		hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-" + step$ + ".bmp", 1, 1)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": SSN: " + applicantSSN$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - " + step$, crlf + crlf)
+		closebrowser()
+		webValidateCurrPage = 1
+	else
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + step$ + " was successful", crlf)
+		webValidateCurrPage = 0
+	endif
+
+endfunction

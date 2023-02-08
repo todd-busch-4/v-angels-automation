@@ -1,0 +1,75 @@
+'##############################################################################################################################################################
+'##  filename:						cg-globalLogging																										 
+'##																																							 
+'##  purpose:						comprises a library of logging functions to be used in caregiver workflow script development with the purpose
+'##									and intent to abstract these functions from the main script for readability, promote consistency across scripts, 
+'##									as well as provide a single centralized editing point to reduce maintenance efforts
+'##																																							 
+'##  contents:						logWorkflowSuccess, logStartScript
+'##																																							 
+'##############################################################################################################################################################
+
+
+/*=============================================================================================================================================================
+== function name:           logWorkflowSuccess
+==
+== developer:               todd busch
+==
+== purpose:                 writes lines to various log files that workflow was successful using specified text
+==
+== input parms:            	text$:	text to use as part of the log
+==
+== returns:                 int:	0 for success
+==
+== notes:                   n/a
+==
+=============================================================================================================================================================*/
+function logWorkflowSuccess(text$)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + text$, crlf + crlf)
+	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ":  " + text$, crlf + crlf)
+	write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+	write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+	write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + text$, crlf + crlf)
+	logWorkflowSuccess = 0
+endfunction
+
+
+
+function logStartScript(workflow$)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": starting scan for " + workflow$ + " change events", crlf)
+	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": starting scan of (" + str$(cnt) + ") rows for " + workflow$ + " change events", crlf)
+	write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": starting scan of (" + str$(cnt) + ") rows for " + workflow$ + " change events", crlf)
+	write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": starting scan of (" + str$(cnt) + ") rows for " + workflow$ + " change events", crlf + crlf)
+	if iEnvironment = 1 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": using settings for environment 1", crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": --------------------------------------------------------", crlf)
+	endif
+	if iEnvironment = 2 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": using settings for environment 2", crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": --------------------------------------------------------", crlf)
+	endif
+	logStartScript = 0
+endfunction
+
+
+
+function logStageMatch()
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage: [" + curr_stage$ + "] for change event triggers workflow", crlf)
+	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change event for stage: [" + curr_stage$ + "] at row: [" + str$(iExcelRow) + "] triggered workflow", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": getting data for current row", crlf)
+endfunction
+
+
+
+function logEventFound()
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change event found at row: [" + str$(iExcelRow) + "]", crlf)
+endfunction
+
+
+
+function logDataValues()
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": SSN: " + applicantSSN$, crlf)
+	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": starting workflow for:" + applicantFName$ + " " + applicantLName$ + " record id: " + "(" + applicantID$ + ")", crlf)
+endfunction

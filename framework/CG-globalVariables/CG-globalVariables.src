@@ -1,6 +1,10 @@
-'##############################################################
-'##   			GLOBAL PARAMETERS							 ##
-'##############################################################
+'##############################################################################################################################################################
+'##  filename:						cg-globalVariables																										 
+'##																																							 
+'##  purpose:						library of variables and parameters referenced throughout caregive workflow scripts and other resource files
+'##									the purpose it to abstract data elements from the scripts themselves as well as provide a single point of 
+'##																																							 
+'##############################################################################################################################################################
 
 '-------------------- automation config paths
 iEnvironment = 1																		'used to determine environment runnng in (1): for todd's thinkpad or (2): for angelhypdsktp
@@ -76,7 +80,6 @@ employmentInquiryBackGroundChkCol$ = "M2:M5001"											'mapping for backgroun
 employmentInquirySSNCol$ = "AD2:AD5001"													'mapping for social security column
 
 
-
 '-------------------- workflow data
 '------- gms data
 position$ = "OH8835"
@@ -94,6 +97,6 @@ gmsPayRate$ = "10.10"
 startDateCompany$ = datetodate$("d", 7, date$())											'7 days from current date
 
 '-------------------- misc.
-basicLogHdr$ = currDate$ + "-" + currTime$ + ": "
+basicLogHdr$ = currDate$ + "-"
 employmentInquirySharePointPath$ = "https://visitingangels4889.sharepoint.com/:f:/s/CareGiverPortal/EirZqWiZdCNEmCzhQz3bjZkBtL7kN_SdhmS7iyidNTNO2A?e=ZYz6vT"
 
