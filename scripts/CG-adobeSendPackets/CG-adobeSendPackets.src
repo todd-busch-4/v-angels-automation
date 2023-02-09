@@ -20,6 +20,7 @@
 '###############################################################################################################################################
 include "C:\v-angels-automation\framework\CG-globalDimDeclarations\CG-globalDimDeclarations.src"
 include "C:\v-angels-automation\framework\CG-globalFunctions\CG-globalFunctions.src"
+include "C:\v-angels-automation\framework\CG-globalLogging\CG-globalLogging.src"
 include "C:\v-angels-automation\framework\CG-globalSubDefinitions\CG-globalSubDefinitions.src"
 include "C:\v-angels-automation\framework\CG-globalVariables\CG-globalVariables.src"
 
@@ -30,7 +31,7 @@ currScript$ = "CG-adobeSendPackets"
 #IgnoreErrors = 1
 
 
-'-------------------------------------------------------------------------------------------------------------------------------- read in columns from employment inquiry doc
+'-------------------- read in columns from employment inquiry doc
 if loadEmploymentInquiryRows() = 1 then
 	criticalStop()
 endif
@@ -39,21 +40,10 @@ endif
 '#############################################################################################################################
 '##   													script start								 						##
 '#############################################################################################################################
-write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": starting scan for adobe packet send change events", crlf)
-write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": starting scan of (" + str$(cnt) + ") rows for adobe packet send change events", crlf + crlf)
-write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": starting scan of (" + str$(cnt) + ") rows for adobe packet send change events", crlf + crlf)
-write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": starting scan of (" + str$(cnt) + ") rows for adobe packet send change events", crlf + crlf)
-if iEnvironment = 1 then
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": using settings for environment 1", crlf)
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": --------------------------------------------------------", crlf)
-endif
-if iEnvironment = 2 then
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": using settings for environment 2", crlf)
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": --------------------------------------------------------", crlf)
-endif
+logStartScript("adobe send")
 
 
-'--------------------------------------------------------------------------------------------------------------------------------------------------------------- begin iterating through change event column
+'------------------------------------------------------------------------------------------------------------------------------ begin iterating through change event column
 i = 0
 
 
@@ -67,19 +57,17 @@ repeat
 	if curr_status$ = "Yes" then
 		iEventCnt = iEventCnt + 1	'change event counter
 		iExcelRow = i + 2			'add 1 for header row and 1 for zero indexed arrays
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change event found at row: [" + str$(iExcelRow) + "]", crlf)
+		logEventFound()
 
 
 		'-------------------- get the stage for the current change event
 		curr_stage$ = arrCurrentStage$(i)
 
 
-'------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- 1st interview stage
+'-------------------------------------------------------------------------------------------------------------------------------- 1st interview stage
 		if curr_stage$ = "1st Interview" then
 			iFirstCnt = iFirstCnt + 1		'stage counter
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage: '1st interview' for change event triggers workflow", crlf)
-			write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change event for stage '1st interview' at row: [" + str$(iExcelRow) + "] triggered workflow", crlf)
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": getting data from employment inquiry for current row", crlf)
+			logStageMatch()
 
 
 			'-------------------- get data values for current record from employment inquiry
@@ -88,9 +76,7 @@ repeat
 			applicantLName$ = arrApplicantLName$(i)
 			applicantEmail$ = arrApplicantEmail$(i)
 			adobePcktStatus$ = arrAdobePcktStatus$(i)
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-			write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": starting workflow for:" + applicantFName$ + " " + applicantLName$ + " record id: " + "[" + applicantID$ + "]", crlf)
+			logDataValues()
 
 
 			'-------------------- check for already sent packets
