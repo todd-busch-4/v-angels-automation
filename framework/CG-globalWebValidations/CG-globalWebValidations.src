@@ -1,12 +1,30 @@
-'##############################################################################################################################################################
-'##  filename:						cg-globalWebValidations																										 
-'##																																							 
-'##  purpose:						comprises a library of web-based validations to be used in caregiver workflow script development with the intent and goal
-'##									to minimize code duplication, increase script cleanliness and readability, as well as reduce maintenance efforts	
-'##																																							
-'##  contents:						webValidateText, webValidateElement, webValidateCurrPage
-'##																																							 
-'##############################################################################################################################################################
+/*#############################################################################################################################################################
+##  filename:						cg-globalWebValidations
+##
+##  purpose:						library of web-based validations for use in caregiver workflow script development in order to minimize code
+##									duplication, increase script cleanliness/readability, and reduce maintenance efforts by providing a single
+##									centralized location for changes
+##
+##  contents:						webValidateText, webValidateElement, webValidateCurrPage
+##
+#############################################################################################################################################################*/
+
+/*=============================================================================================================================================================
+== function name:           webValidateText
+==
+== developer:               todd busch
+==
+== purpose:                 gets the text property value from the specified html object and validates it matches expected w/error-handling & logging
+==
+== input parms:             object$:	descriptor of the html object validate
+==                          text$:      the expected text value
+==                          step$:		terse description of the action/step in the script (e.g. "clicking login")
+==
+== returns:                 int:    0 - on success   1 - on failure
+==
+== notes:                   none
+==
+=============================================================================================================================================================*/
 
 function webValidateText(object$, text$, step$)
     local r, var$
@@ -16,6 +34,7 @@ function webValidateText(object$, text$, step$)
     if r <> 0 then
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": failed to get text from object", crlf)
         hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-" + step$ + ".bmp", 1, 1)
+        webValidateText = 1
         exitfunction
     endif
 
@@ -45,6 +64,23 @@ function webValidateText(object$, text$, step$)
 endfunction
 
 
+/*=============================================================================================================================================================
+== function name:           webValidateElement
+==
+== developer:               todd busch
+==
+== purpose:                 validates the existence of the specified html object on the current page w/error-handling & logging
+==
+== input parms:             objectDesc$:	descriptor of the html object to verify
+==                          objectName$:    name /title of the object
+==                          step$:		    terse description of the action/step in the script (e.g. "clicking login")
+==
+== returns:                 int:    1 - if object found   error_code - on failure or object not found
+==
+== notes:                   none
+==
+=============================================================================================================================================================*/
+
 function webValidateElement(objectDesc$, objectName$, step$)
     local r
 
@@ -70,6 +106,23 @@ function webValidateElement(objectDesc$, objectName$, step$)
     endif
 
 endfunction
+
+
+/*=============================================================================================================================================================
+== function name:           webValidateCurrPage
+==
+== developer:               todd busch
+==
+== purpose:                 validates that the current page matches the expected page w/error-handling & logging
+==
+== input parms:             pageName$:  name of the expected page
+==                          step$:		terse description of the action/step in the script (e.g. "clicking login")
+==
+== returns:                 int:    0 - on match/success    1 - on failure/no match
+==
+== notes:                   none
+==
+=============================================================================================================================================================*/
 
 function webValidateCurrPage(pageName$, step$)
 

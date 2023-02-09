@@ -1,0 +1,40 @@
+/*#############################################################################################################################################################
+##  filename:						zipwhipObjectRepository
+##
+##  contents:						contains window and object definitions for the zipwhip web application
+##
+#############################################################################################################################################################*/
+
+'======================================================================= window definitions =====================================================================
+wndBrowser$ = "FIREFOX.EXE|MozillaWindowClass|"
+wndLogin$ = "FIREFOX.EXE|MozillaWindowClass|Zipwhip - Login — Mozilla Firefox"
+wndMainDan$ = "FIREFOX.EXE|MozillaWindowClass|Zipwhip | Daniel Nelson — Mozilla Firefox"
+
+
+
+
+'======================================================================= page definitions =====================================================================
+pgLogin$ = "Zipwhip - Login"
+pgMainDan$ = "Zipwhip | Daniel Nelson"
+
+
+
+
+'======================================================================= object definitions =====================================================================
+'-------------------- login page
+selSavedIdentity$ = "DIV[DATA-TESTID='EXISTING_IDENTITY']"
+lnkLoginNext$ = "DIV[OUTERTEXT='Next']"
+txtUsername$ = "INPUT TEXT[NAME='identity']"
+txtPassword$ = "INPUT PASSWORD[NAME='password']"
+btnLogin$ = "BUTTON[INNERTEXT='Log In']"
+lnkLoginLink$ = "DIV[OUTERTEXT='Log', INDEX=7]"
+
+
+'-------------------- main page
+btnContacts$ = "BUTTON[CLASS='zk-button zk-button-transparent z', INDEX=3]"
+
+
+
+'-------------------- contacts page
+btnAddContact$ = "BUTTON[INNERTEXT='Add Contact']"
+titleContacts$ = "DIV[OUTERTEXT='Contacts',INDEX=8]"

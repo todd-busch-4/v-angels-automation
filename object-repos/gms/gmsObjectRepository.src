@@ -1,11 +1,9 @@
-'##############################################################################################################################################################
-'##  filename:						gms object repo																										 
-'##																																							 
-'##  contents:						contains window and object definitions for the gms web application												 
-'##																																							 
-'##  purpose:						abstract these definitions from individual scripts and create a single cetralized location for editing																 
-'##																																							 
-'##############################################################################################################################################################
+/*#############################################################################################################################################################
+##  filename:						gmsObjectRepository
+##
+##  contents:						contains window and object definitions for the gms web application
+##
+#############################################################################################################################################################*/
 
 '======================================================================= window definitions =====================================================================
 wndEnhancedDashboard$ = "FIREFOX.EXE|MozillaWindowClass|Group Management Services - Enhanced Dashboard — Mozilla Firefox"

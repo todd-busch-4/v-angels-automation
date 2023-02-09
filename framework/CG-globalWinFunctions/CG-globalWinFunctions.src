@@ -1,13 +1,29 @@
-'##############################################################################################################################################################
-'##  filename:						cg-globalWinfunctions																										 
-'##																																							 
-'##  purpose:						comprises a library of windows-based functions to be used in caregiver workflow script development with the intent and goal 
-'##									to minimize code duplication and increase script cleanliness and readability as well as reduce maintenance efforts
-'##																																							
-'##  contents:						winSendKeys
-'##																																							 
-'##############################################################################################################################################################
+/*#############################################################################################################################################################
+##  filename:						cg-globalWinfunctions
+##
+##  purpose:						library of windows-based functions for use in caregiver workflow script development in order to minimize code
+##									duplication, increase script cleanliness/readability, and reduce maintenance efforts by providing a single
+##									centralized location for changes
+##
+##  contents:						winSendKeys
+##
+#############################################################################################################################################################*/
 
+/*=============================================================================================================================================================
+== function name:           winSendKeys
+==
+== developer:               todd busch
+==
+== purpose:                 emulates using the keyboard to type the keys in the specified key list
+==
+== input parms:            	key_list$:	the keys to be typed
+==                          step$:		terse description of the action/step in the script (e.g. "closing popup")
+==
+== returns:                 int:	0 - on success		error_code - on failure
+==
+== notes:                   be sure the last context set was to a window to receive the typed keys
+==
+=============================================================================================================================================================*/
 function winSendKeys(key_list$, step$)
 	local r
 

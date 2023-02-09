@@ -1,0 +1,215 @@
+/*#############################################################################################################################################################
+##  filename:						cg-gmsFunctions
+##
+##  purpose:						library of functions for use in GMS workflow script development in order to minimize code duplication,
+##									increase script cleanliness/readability, and reduce maintenance efforts by providing a single centralized
+##									location for changes
+##
+##  contents:						gmsErrorCheck$, gmsNoRehireCheck, checkGMSStatus
+##
+#############################################################################################################################################################*/
+
+/*=============================================================================================================================================================
+== function name:           gmsErrorCheck$
+==
+== developer:               todd busch
+==
+== purpose:                 handle gms errors displayed in popup dialogbox when entering form data on new hire page
+==
+== input parms:            	none
+==
+== returns:                 string - "0": for ocrengine failure; "rehire": for previous employee; "1": for all other errors
+==
+== notes:                   dialogbox cannot be seen by wintask at all. capturing ocr in area where it pops up and analyzes text found if any to determine
+==							what/if any error occurred
+==
+=============================================================================================================================================================*/
+function gmsErrorCheck$()
+	local r
+
+	'get focus off textfield to prompt popup if error
+	usewindow(wndNewHireForm$, 1)
+	clickmouse(left, down, 950, 250, absolute)
+	clickmouse(left, up, 950, 250, absolute)
+	pause 2
+
+	r = useocrengine(3)
+
+	'return error if ocrengine fails
+	if r <> 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ocrengine failed trying to capture error popup", crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(r) + ") msg: " + #errormsg$, crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": continuing though app is in unverified state", crlf)
+		gmsErrorCheck$ = "0"
+		exitfunction
+	endif
+
+	'capture area error popup is typically displayed in
+	err$ = captureareaocr$(wndNewHireForm$, topinstance(), 739, 467, 191, 442)
+
+	'check for captured error msg
+	if instr(err$, "gmsprismhicom") <> 0 then
+		
+		'handle dup ssn error for previous employee
+		if instr(err$, "belongs to") <> 0 then
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ssn belongs to a previous employee; proceeding to rehire form", crlf)
+			gmsErrorCheck$ = "rehire"
+			exitfunction
+		endif
+
+		'look for & return dup ssn error - onboarding
+		if instr(err$, "onboarding") <> 0 then
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ssn belongs to applicant in onboarding", crlf)
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+			write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ssn belongs to applicant in onboarding; proceeding to next change event", crlf + crlf)
+			write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+			write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+			write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: gmsErrorCheck - applicant in onboarding", crlf + crlf)
+			gmsErrorCheck$ = "1"
+			closebrowser()
+			exitfunction
+		endif
+
+		'look for & return invalid char error
+		if instr(err$, "Invalid characters found") <> 0 then
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": invalid character error", crlf)
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+			write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+			write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+			write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+			write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: gmsErrorCheck - invalid character", crlf + crlf)
+			gmsErrorCheck$ = "1"
+			closebrowser()
+			exitfunction
+		endif
+
+		'catch all for unknown errors
+		err$ = mid$(err$, 18, 200)		'trim var to just msg text
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": an unknown error occurred", crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + err$, crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: gmsErrorCheck - " + err$, crlf + crlf)
+		closebrowser()
+		gmsErrorCheck$ = "1"
+		exitfunction
+
+	endif
+
+
+endfunction
+
+
+/*=============================================================================================================================================================
+== function name:           gmsNoRehireCheck
+==
+== developer:               todd busch
+==
+== purpose:                 checks for popup indicating an applicant had previsouly been set to "no-rehire"
+==
+== input parms:            	none
+==
+== returns:                 int - (0) if warning found or ocrengine failure to continue; (1) if any other error/warning was found
+==
+== notes:                   none
+==
+=============================================================================================================================================================*/
+function gmsNoRehireCheck()
+
+	ret = useocrengine(3)
+
+	'return 0 to continue if ocrengine fails
+	if r <> 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ocrengine failed trying to capture error popup", crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(r) + ") msg: " + #errormsg$, crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": continuing though app is in unverified state", crlf)
+		gmsNoRehireCheck = 0
+		exitfunction
+	endif
+
+	'capture ocr in area where popup is typically displayed
+	err$ = captureareaocr$(wndRehireForm$, topinstance(), 731, 459, 244, 502)
+
+	'exit function if no error popup found
+	if instr(err$, "gmsprismhicom") = 0 then
+		gmsNoRehireCheck = 0
+		exitfunction
+	endif
+
+	'if popup error is found...
+	if instr(err$, "gmsprismhicom") <> 0 then
+
+		'return msg for no-rehire designation
+		if instr(err$, "No-Rehire") <> 0 then
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant was set to 'no-rehire'", crlf)
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": dismissing warning and continuing to submit rehire", crlf)
+			usewindow(wndRehireForm$, 1)
+			sendkeys("<enter>", noactivate)
+			gmsNoRehireCheck = 0
+			exitfunction
+		endif
+
+		'return msg for employed status 'a'
+		if instr(err$, "You may not perform a Rehire on an employee with a status of") <> 0 then
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ssn belongs to current employee with status 'A'", crlf)
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+			write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+			write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+			write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+			write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - status 'a' employee", crlf + crlf)
+			closebrowser()
+			gmsNoRehireCheck = 1
+			exitfunction
+		endif
+
+		'catch all for unknown errors
+		err$ = mid$(err$, 18, 200)		'trim var to just msg text
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": an unknown error occurred", crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + err$, crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: gmsNoRehireCheck - " + err$, crlf + crlf)
+		closebrowser()
+		gmsErrorCheck = 1
+		exitfunction
+
+	endif
+
+endfunction
+
+/*=============================================================================================================================================================
+== function name:           checkGMSStatus
+==
+== developer:               todd busch
+==
+== purpose:                 checks value of gms status column for value to trigger form submission
+==
+== returns:                 int:	0 - status matched trigger	  1 - value did not match trigger
+==
+== notes:                   pertinentinfo
+==
+=============================================================================================================================================================*/
+
+function checkGMSStatus()
+
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": checking gms status", crlf)
+	if instr(gmsStatus$, "New Hire Invited") = 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status not set for gms entry", crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status of column: (" + gmsStatus$ + ")", crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status not set for gms entry; proceeding to next change event", crlf + crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": SSN: " + applicantSSN$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: status not set for gms entry", crlf + crlf)
+		checkGMSStatus = 1
+	else
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant set for gms entry", crlf)
+		checkGMSStatus = 0
+	endif
+
+endfunction

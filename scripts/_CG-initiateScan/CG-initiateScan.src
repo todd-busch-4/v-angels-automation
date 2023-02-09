@@ -35,27 +35,27 @@ iHr$ = Hour$()
 iMin$ = Min$()
 
 
-write(debugLogPath$, basicLogHdr$ + currScript$ + ": STARTING INTERVAL SCAN", crlf)
-write(executionLogPath$, basicLogHdr$ + currScript$ + ": STARTING INTERVAL SCAN", crlf)
+write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": STARTING INTERVAL SCAN", crlf)
+write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": STARTING INTERVAL SCAN", crlf)
 
 
 '-------------------------------------------------------------------------------------------------------------------------------- download latest employment inquiry doc
-write(debugLogPath$, basicLogHdr$ + currScript$ + ": downloading latest version of employment inquiry list.xlsx", crlf)
+write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": downloading latest version of employment inquiry list.xlsx", crlf)
 
 
 '-------------------- invoke sharepoint page
 res = startbrowser("CH", employmentInquirySharePointPath$, 3)
 '------- error handling
 if res <> 0 then
-	write(debugLogPath$, basicLogHdr$ + currScript$ + ": unable to load employment inquiry sharepoint page", crlf)
-	write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": unable to load employment inquiry sharepoint page", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
 	hardcopy(screenshotsPath$ + currScript$ + "-invoke_browser.bmp", 1, 1)
 	closebrowser()
 	criticalStop()
 endif
 '------- debug logging
 if res = 0 then
-	write(debugLogPath$, basicLogHdr$ + currScript$ + ": browser invoked and loaded sharepoint page", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": browser invoked and loaded sharepoint page", crlf)
 endif
 
 
@@ -65,8 +65,8 @@ if iEnvironment = 1 then
 	res = clickonbitmap(imagePath$ + "sharepoint-excelIcon.bmp", left, single)	'easiest way to set focus to row given issues wintask has seeing/clicking certain containing elements
 	'------- error handling
 	if res <> 0 then
-		write(debugLogPath$, basicLogHdr$ + currScript$ + ": could not set focus to document row", crlf)
-		write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": could not set focus to document row", crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
 		hardcopy(screenshotsPath$ + currScript$ + "-sel_doc_row_.bmp", 1, 1)
 		closebrowser()
 		criticalStop()
@@ -77,7 +77,7 @@ if iEnvironment = 2 then
 	clickmouse(left, up, 330, 421, absolute)
 endif
 '------- debug logging
-write(debugLogPath$, basicLogHdr$ + currScript$ + ": selected employment inquiry doc row", crlf)
+write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": selected employment inquiry doc row", crlf)
 
 
 '-------------------- click download link
@@ -85,15 +85,15 @@ usepage("CareGiver Portal - WinTask Data - All Documents")
 res = clickhtmlelement("SPAN[OUTERTEXT='Download', INDEX=2]")
 '------- error handling
 if res <> 0 then
-	write(debugLogPath$, basicLogHdr$ + currScript$ + ": error clicking download link", crlf)
-	write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error clicking download link", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
 	hardcopy(screenshotsPath$ + currScript$ + "-click_download_.bmp", 1, 1)
 	closebrowser()
 	criticalStop()
 endif
 '------- debug logging
 if res = 0 then
-	write(debugLogPath$, basicLogHdr$ + currScript$ + ": clicked download link", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicked download link", crlf)
 endif
 
 
@@ -102,15 +102,15 @@ usewindow("CHROME.EXE|#32770|Save As", 4)
 res = click(button, "&Save")
 '------- error handling
 if res <> 0 then
-	write(debugLogPath$, basicLogHdr$ + currScript$ + ": error clicking save button", crlf)
-	write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error clicking save button", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
 	hardcopy(screenshotsPath$ + currScript$ + "-click_save_.bmp", 1, 1)
 	closebrowser()
 	criticalStop()
 endif
 '------- debug logging
 if res = 0 then
-	write(debugLogPath$, basicLogHdr$ + currScript$ + ": clicked save", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicked save", crlf)
 endif
 
 
@@ -121,15 +121,15 @@ pause 3
 '-------------------- copy to package directory
 res = filecopy(localWinUser$ + "Downloads\Employment Inquiry List.xlsx", employmentInquiryPath$, forced)
 if res <> 0 then
-	write(debugLogPath$, basicLogHdr$ + currScript$ + ": error copying doc to package folder", crlf)
-	write(debugLogPath$, basicLogHdr$ + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error copying doc to package folder", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
 	hardcopy(screenshotsPath$ + currScript$ + "-file_copy_.bmp", 1, 1)
 	closebrowser()
 	criticalStop()
 endif
 '------- debug logging
 if res = 0 then
-	write(debugLogPath$, basicLogHdr$ + currScript$ + ": copied worksheet into automation package directory", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": copied worksheet into automation package directory", crlf)
 endif
 
 
@@ -139,7 +139,7 @@ closebrowser()
 res = kill(localWinUser$ + "Downloads\Employment Inquiry List.xlsx")
 
 
-write(debugLogPath$, basicLogHdr$ + currScript$ + ": latest version download complete", crlf)
+write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": latest version download complete", crlf)
 
 
 '#############################################################################################################################
@@ -148,7 +148,7 @@ write(debugLogPath$, basicLogHdr$ + currScript$ + ": latest version download com
 run(scriptsPath$ + "CG-adobeSendPackets\CG-adobeSendPackets.rob")
 run(scriptsPath$ + "CG-adobeCancelPackets\CG-adobeCancelPackets.rob")
 run(scriptsPath$ + "CG-zipWhipSendScheduleInittxt\CG-zipWhipSendScheduleInittxt.rob")
-'run(scriptsPath$ + "CG-gmsFormSubmit\CG-gmsFormSubmit.rob")
+run(scriptsPath$ + "CG-gmsFormSubmit\CG-gmsFormSubmit.rob")
 
 
 '#############################################################################################################################
@@ -158,13 +158,13 @@ res = name(employmentInquiryPath$, emplInquiryArchivePath$ + "Employment Inquiry
 
 
 if res = 0 then
-	write(debugLogPath$, basicLogHdr$ + currScript$ + ": Employment Inquiry doc archived", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Employment Inquiry doc archived", crlf)
 else
-	write(debugLogPath$, basicLogHdr$ + currScript$ + ": Error archiving Employment Inquiry doc; error_code: (" + str$(res) + ")", crlf)	
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Error archiving Employment Inquiry doc; error_code: (" + str$(res) + ")", crlf)	
 endif
 
 
-write(debugLogPath$, basicLogHdr$ + currScript$ + ": -------------------------------------- END OF SCAN ------------------------------------------------------------------------------", crlf + crlf)
+write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": -------------------------------------- END OF SCAN ------------------------------------------------------------------------------", crlf + crlf)
 write(executionLogPath$, basicLogHdr$ + "-------------------------------------- END OF SCAN ------------------------------------------------------------------------------", crlf + crlf)
 write(scanFailuresPath$, basicLogHdr$ + "-------------------------------------- END OF SCAN ------------------------------------------------------------------------------", crlf + crlf)
 write(successLogPath$, basicLogHdr$ + "-------------------------------------- END OF SCAN ------------------------------------------------------------------------------", crlf + crlf)

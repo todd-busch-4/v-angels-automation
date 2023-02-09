@@ -1,32 +1,33 @@
-'##############################################################################################################################################################
-'##  filename:						global functions																										 
-'##																																							 
-'##  purpose:						comprises a library of functions to be used in caregiver workflow script development with the intent and goal to
-'##									minimize code duplication, increase script cleanliness and readability, as well as reduce maintenance efforts
-'##																																							 
-'##  contents:						invokeBrowser$, zeroPadDate$, formatSSN$, gmsErrorCheck$, gmsNoRehireCheck, checkForNullSSN
-'##																																							 
-'##############################################################################################################################################################
+/*#############################################################################################################################################################
+##  filename:						cg-globalFunctions
+##
+##  purpose:						library of general functions for use in caregiver workflow script development in order to minimize code
+##									duplication, increase script cleanliness/readability, and reduce maintenance efforts by providing a single
+##									centralized location for changes
+##
+##  contents:						invokeBrowser$, zeroPadDate$, formatSSN$, checkForNullSSN, loadEmploymentInquiryRows
+##
+#############################################################################################################################################################*/
 
 '=============================================================================================================================================================
-'== function name:           invokeBrowser$
+'== function name:           invokeBrowser
 '==
 '== developer:               todd busch
 '==
 '== purpose:                 attempts to start the specified browser and load the specified url. if an error is encountered it will retry the number of
-'==                          of times defined in iRetry var (default: 3). if number of retry attempts defined is exceeded it will log messages, close the
-'==                          the browser, and return the error code as a string value
+'==                          of times defined in iRetry (default: 3). if number of retry attempts defined is exceeded it will log messages, close the
+'==                          the browser, and return the error code
 '==
-'== input parms:             str_app$:   browser code to invoke ("CH" - Chrome  "FF" - FireFox)
+'== input parms:             str_app$:   browser code to invoke ("CH" = Chrome  "FF" = FireFox)
 '==                          str_url$:   url to navigate to on browser invoke
 '==
-'== returns:                 string: "0" for success or error code encountered
+'== returns:                 int:	0 - success		error_code - on failure
 '==
 '== notes:                   n/a
 '==
 '=============================================================================================================================================================
 
-function invokeBrowser$(str_app$, str_url$)
+function invokeBrowser(str_app$, str_url$)
 	local iRetry, r, iAttempt
 
 	while iRetry <= 2
@@ -36,6 +37,8 @@ function invokeBrowser$(str_app$, str_url$)
 
 		if r = 0 then
 			iRetry = 3
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": start browser was successful", crlf)
+			invokeBrowser = 0
 		endif
 
 		if r <> 0 then
@@ -48,16 +51,11 @@ function invokeBrowser$(str_app$, str_url$)
 		endif
 	wend
 
-	if r = 0 then
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": start browser was successful", crlf)
-		invokeBrowser$ = "0"
-	endif
-
 	if r <> 0 then
 		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": browser could not be invoked after [" + str$(iAttempt) + "] attempts", crlf)
 		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(r) + ") msg: " + #errormsg$, crlf)
 		closebrowser()
-		invokeBrowser$ = str$(r) 
+		invokeBrowser = r
 	endif
 
 EndFunction
@@ -69,6 +67,8 @@ EndFunction
 == developer:               todd busch
 ==
 == purpose:                 adds a leading zero to single digit day and month parts of a short formatted date (m/d/yyyy)
+==
+== input parms:             dt_date$:	date to be formatted
 ==
 == returns:                 string:		the converted date with leading zeros
 ==
@@ -114,7 +114,7 @@ endfunction
 ==
 == input parms:            	str_ssn$:	the ssn to be formatted
 ==
-== returns:                 string:		the converted ssn with leading dashes
+== returns:                 string:		the formatted ssn with dashes
 ==
 == notes:                   n/a
 ==
@@ -139,177 +139,46 @@ endfunction
 
 
 /*=============================================================================================================================================================
-== function name:           gmsErrorCheck$
+== function name:           checkForNullSSN
 ==
 == developer:               todd busch
 ==
-== purpose:                 handle gms errors displayed in popup dialogbox when entering form data on new hire page
+== purpose:                 checks value from employment inquiry sn column for blank value
 ==
-== input parms:            	none
+== returns:                 int:	0 - contained ssn	  1 - ssn was null
 ==
-== returns:                 string - one of canned msgs for known errors or the parsed error text for unknown errors or no error "found"
-==
-== notes:                   dialogbox cannot be seen by wintask at all. capturing ocr in area where it pops up and analyzes text found if any to determine
-==							what/if any error occurred
+== notes:                   none
 ==
 =============================================================================================================================================================*/
-function gmsErrorCheck$()
-	local r
+function checkForNullSSN()
 
-	'get focus off textfield to prompt popup if error
-	usewindow("FIREFOX.EXE|MozillaWindowClass|Group Management Services - New Hire — Mozilla Firefox", 1)
-	clickmouse(left, down, 950, 250, absolute)
-	clickmouse(left, up, 950, 250, absolute)
-	pause 2
-
-	r = useocrengine(3)
-
-	'return error if ocrengine fails
-	if r <> 0 then
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ocrengine failed trying to capture error popup", crlf)
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(r) + ") msg: " + #errormsg$, crlf)
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": continuing though app is in unverified state", crlf)
-		gmsErrorCheck$ = "0"
-		exitfunction
-	endif
-
-	'capture area error popup is typically displayed in
-	err$ = captureareaocr$("FIREFOX.EXE|MozillaWindowClass|Group Management Services - New Hire — Mozilla Firefox", topinstance(), 739, 467, 191, 442)
-
-	'check for captured error msg
-	if instr(err$, "gmsprismhicom") <> 0 then
-		
-		'handle dup ssn error for previous employee
-		if instr(err$, "belongs to") <> 0 then
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ssn belongs to a previous employee; proceeding to rehire form", crlf)
-			gmsErrorCheck$ = "rehire"
-			exitfunction
-		endif
-
-		'look for & return dup ssn error - onboarding
-		if instr(err$, "onboarding") <> 0 then
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ssn belongs to applicant in onboarding", crlf)
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
-			write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ssn belongs to applicant in onboarding; proceeding to next change event", crlf + crlf)
-			write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-			write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-			write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: gmsErrorCheck - applicant in onboarding", crlf + crlf)
-			gmsErrorCheck$ = "1"
-			closebrowser()
-			exitfunction
-		endif
-
-		'look for & return invalid char error
-		if instr(err$, "Invalid characters found") <> 0 then
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": invalid character error", crlf)
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
-			write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
-			write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-			write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-			write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: gmsErrorCheck - invalid character", crlf + crlf)
-			gmsErrorCheck$ = "1"
-			closebrowser()
-			exitfunction
-		endif
-
-		'catch all for unknown errors
-		err$ = mid$(err$, 18, 200)		'trim var to just msg text
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": an unknown error occurred", crlf)
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + err$, crlf)
+	if applicantSSN$ = "" then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ssn col did not contain a social for the current applicant", crlf)
 		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
 		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
 		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: gmsErrorCheck - " + err$, crlf + crlf)
-		closebrowser()
-		gmsErrorCheck$ = "1"
-		exitfunction
-
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - no ssn", crlf + crlf)
+		checkForNullSSN = 1
+	else
+		checkForNullSSN = 0
 	endif
-
 
 endfunction
 
 
 /*=============================================================================================================================================================
-== function name:           gmsNoRehireCheck
+== function name:           loadEmploymentInquiryRows
 ==
 == developer:               todd busch
 ==
-== purpose:                 checks for popup indicating an applicant had previsouly been set to "no-rehire"
+== purpose:                 loads data needed from employment inquiry spreadsheet into arrays
 ==
-== input parms:            	none
-==
-== returns:                 int - (0) if warning not found; (1) if warning was found
+== returns:                 int:	0 - if all items read successfully	  1 - if any item fails
 ==
 == notes:                   pertinentinfo
 ==
 =============================================================================================================================================================*/
-function gmsNoRehireCheck$()
-
-	ret = useocrengine(3)
-
-	'return error if ocrengine fails
-	if r <> 0 then
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ocrengine failed trying to capture error popup", crlf)
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(r) + ") msg: " + #errormsg$, crlf)
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": continuing though app is in unverified state", crlf)
-		gmsNoRehireCheck$ = "0"
-		exitfunction
-	endif
-
-	'capture ocr in area where popup is typically displayed
-	err$ = captureareaocr$("FIREFOX.EXE|MozillaWindowClass|Group Management Services - Rehire — Mozilla Firefox", topinstance(), 731, 459, 244, 502)
-
-	'exit function if no error popup found
-	if instr(err$, "gmsprismhicom") = 0 then
-		gmsNoRehireCheck$ = "0"
-		exitfunction
-	endif
-
-	'if popup error is found...
-	if instr(err$, "gmsprismhicom") <> 0 then
-
-		'return msg for no-rehire designation
-		if instr(err$, "No-Rehire") <> 0 then
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant was set to 'no-rehire'", crlf)
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": dismissing warning and continuing to submit rehire", crlf)
-			usewindow(wndRehireForm$, 1)
-			sendkeys("<enter>", noactivate)
-			gmsNoRehireCheck$ = "0"
-			exitfunction
-		endif
-
-		'return msg for employed status 'a'
-		if instr(err$, "You may not perform a Rehire on an employee with a status of") <> 0 then
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ssn belongs to current employee with status 'A'", crlf)
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
-			write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
-			write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-			write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-			write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - status 'a' employee", crlf + crlf)
-			closebrowser()
-			gmsNoRehireCheck$ = "1"
-			exitfunction
-		endif
-
-		'catch all for unknown errors
-		err$ = mid$(err$, 18, 200)		'trim var to just msg text
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": an unknown error occurred", crlf)
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + err$, crlf)
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
-		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: gmsNoRehireCheck - " + err$, crlf + crlf)
-		closebrowser()
-		gmsErrorCheck$ = "1"
-		exitfunction
-
-	endif
-
-endfunction
-
 
 function loadEmploymentInquiryRows()
 	local r
@@ -364,6 +233,14 @@ function loadEmploymentInquiryRows()
 		loadEmploymentInquiryRows = 1
 		exitfunction
 	endif
+	'-------------------- adobe packet status
+	r = readexcel (employmentInquiryPath$, employmentInquiryAdobeCol$, arrAdobePcktStatus$())
+	if instr(str$(r), "-") <> 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading adobe packet status column.  error_code: (" + str$(r) + ")", crlf)
+		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (adobe packet status)", crlf)
+		loadEmploymentInquiryRows = 1
+		exitfunction
+	endif
 	'-------------------- gms status
 	r = readexcel (employmentInquiryPath$, employmentInquiryGMSCol$, arrGMSStatus$())
 	if instr(str$(r), "-") <> 0 then
@@ -380,42 +257,31 @@ function loadEmploymentInquiryRows()
 		loadEmploymentInquiryRows = 1
 		exitfunction
 	endif
-
-endfunction
-
-
-function checkForNullSSN()
-
-	if applicantSSN$ = "" then
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ssn col did not contain a social for the current applicant", crlf)
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
-		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - no ssn", crlf + crlf)
-		checkForNullSSN = 1
-	else
-		checkForNullSSN = 0
+	'-------------------- phone
+	r = readexcel (employmentInquiryPath$, employmentInquiryPhoneCol$, arrApplicantPhone$())
+	if instr(str$(r), "-") <> 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading phone column.  error_code: (" + str$(r) + ")", crlf)
+		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (phone)", crlf)
+		loadEmploymentInquiryRows = 1
+		exitfunction
+	endif
+	'-------------------- 1st interview appointment
+	r = readexcel (employmentInquiryPath$, employmentInquiry1stAppCol$, arrApplicant1stApp$())
+	if instr(str$(r), "-") <> 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading 1st interview appointment column.  error_code: (" + str$(r) + ")", crlf)
+		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (1st interview appointment)", crlf)
+		loadEmploymentInquiryRows = 1
+		exitfunction
+	endif
+	'-------------------- text messages
+	r = readexcel (employmentInquiryPath$, employmentInquiryTextmsgCol$, arrTextmsgStatus$())
+	if instr(str$(r), "-") <> 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading text messages column.  error_code: (" + str$(r) + ")", crlf)
+		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (text messages)", crlf)
+		loadEmploymentInquiryRows = 1
+		exitfunction
 	endif
 
-endfunction
-
-function checkGMSStatus()
-
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": checking gms status", crlf)
-	if instr(gmsStatus$, "New Hire Invited") = 0 then
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status not set for gms entry", crlf)
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status of column: (" + gmsStatus$ + ")", crlf)
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
-		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status not set for gms entry; proceeding to next change event", crlf + crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": SSN: " + applicantSSN$, crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: status not set for gms entry", crlf + crlf)
-		checkGMSStatus = 1
-	else
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant set for gms entry", crlf)
-		checkGMSStatus = 0
-	endif
+	loadEmploymentInquiryRows = 0
 
 endfunction

@@ -1,19 +1,26 @@
-'##############################################################
-'##   			sub procedures
-'##############################################################
+/*#############################################################################################################################################################
+##  filename:						cg-globalSubDefinitions
+##
+##  purpose:						collection of sub procedures for use in caregiver workflow script development in order to minimize code
+##									duplication, increase script cleanliness/readability, and reduce maintenance efforts by providing a single
+##									centralized location for changes
+##
+##  contents:						criticalStop, nextScript
+##
+#############################################################################################################################################################*/
 
 sub criticalStop()
-	write(debugLogPath$, basicLogHdr$ + currScript$ + ": critical scan error encountered; stopping interval scan", crlf + crlf)
-	write(executionLogPath$, basicLogHdr$ + currScript$ + ": critical scan error encountered; stopping interval scan", crlf + crlf)
-	write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": critical scan error encountered; scan stopped", crlf)
-	write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": all change events beyond this point will not be processed", crlf + crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": critical scan error encountered; stopping interval scan", crlf + crlf)
+	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": critical scan error encountered; stopping interval scan", crlf + crlf)
+	write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": critical scan error encountered; scan stopped", crlf)
+	write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": all change events beyond this point will not be processed", crlf + crlf)
 	end(1)
 endsub
 
 sub nextScript()
-	write(debugLogPath$, basicLogHdr$ + currScript$ + ": critical script workflow error encountered; proceeding to next script/workflow", crlf + crlf)
-	write(executionLogPath$, basicLogHdr$ + currScript$ + ": critical script workflow error encountered; proceeding to next script/workflow", crlf + crlf)
-	write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": critical script workflow error encountered; proceeding to next script/workflow", crlf)
-	write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": all change events beyond this point will not be processed for this workflow ", crlf + crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": critical script workflow error encountered; proceeding to next script/workflow", crlf + crlf)
+	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": critical script workflow error encountered; proceeding to next script/workflow", crlf + crlf)
+	write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": critical script workflow error encountered; proceeding to next script/workflow", crlf)
+	write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": all change events beyond this point will not be processed for this workflow ", crlf + crlf)
 	i = 4999
 endsub

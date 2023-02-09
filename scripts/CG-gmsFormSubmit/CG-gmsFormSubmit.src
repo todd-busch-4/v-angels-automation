@@ -21,6 +21,7 @@ include "C:\v-angels-automation\framework\CG-globalWebFunctions\CG-globalWebFunc
 include "C:\v-angels-automation\framework\CG-globalWinFunctions\CG-globalWinFunctions.src"
 include "C:\v-angels-automation\framework\CG-globalWebValidations\CG-globalWebValidations.src"
 include "C:\v-angels-automation\framework\CG-globalFunctions\CG-globalFunctions.src"
+include "C:\v-angels-automation\framework\CG-gmsFunctions\CG-gmsFunctions.src"
 include "C:\v-angels-automation\framework\CG-globalLogging\CG-globalLogging.src"
 include "C:\v-angels-automation\framework\CG-globalSubDefinitions\CG-globalSubDefinitions.src"
 include "C:\v-angels-automation\framework\CG-globalVariables\CG-globalVariables.src" 
@@ -104,7 +105,7 @@ repeat
 
 
 			'-------------------- invoke browser
-			if invokeBrowser$("FF", gmsURL$) <> "0" then
+			if invokeBrowser("FF", gmsURL$) <> 0 then
 				nextScript()
 				goto nextIteration
 			endif
@@ -433,7 +434,7 @@ rehireFlow:
 				goto nextIteration
 			endif
 			pause 1
-			if gmsNoRehireCheck$() = "1" then
+			if gmsNoRehireCheck() = 1 then
 				goto nextIteration
 			endif
 			if webValidateElement("SPAN[OUTERTEXT='" + applicantLNameCaps$ + "',ID='label40v1']", "last name label", "entering ssn") <> 1 then
@@ -518,7 +519,7 @@ rehireFlow:
 
 
 		if curr_stage$ <> "On-board" then
-			write(debuglogpath$, currdate$ + "-" + currtime$ + ": " + currscript$ + ": stage did not trigger workflow", crlf)
+			write(debuglogpath$, currdate$ + "-" + currtime$ + ": " + currscript$ + ": stage did not trigger workflow", crlf + crlf)
 		endif
 
 
@@ -531,7 +532,7 @@ nextiteration:
 i = i + 1
 
 
-until i = 5000 	'iterate through all rows in arraNN<
+until i = 5000 	'iterate through all rows in array
 
 
 '#############################################################################################################################

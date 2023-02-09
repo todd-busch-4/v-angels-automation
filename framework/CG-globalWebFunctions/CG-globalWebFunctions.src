@@ -1,29 +1,30 @@
-'##############################################################################################################################################################
-'##  filename:						cg-globalWebfunctions																										 
-'##																																							 
-'##  purpose:						comprises a library of web-based functions to be used in caregiver workflow script development with the intent and goal 
-'##									to minimize code duplication and increase script cleanliness and readability as well as reduce maintenance efforts
-'##																																							
-'##  contents:						webEnterText, webClickElement, webSelectItem
-'##																																							 
-'##############################################################################################################################################################
+/*#############################################################################################################################################################
+##  filename:						cg-globalWebfunctions
+##
+##  purpose:						library of web-based functions for use in caregiver workflow script development in order to minimize code
+##									duplication, increase script cleanliness/readability, and reduce maintenance efforts by providing a single
+##									centralized location for changes
+##
+##  contents:						webEnterText, webClickElement, webSelectItem
+##
+#############################################################################################################################################################*/
 
-'=============================================================================================================================================================
-'== function name:           webEnterText
-'==
-'== developer:               todd busch
-'==
-'== purpose:                 enters specified text into the specified html element with error-handling included
-'==
-'== input parms:             object$:	descriptor of the html object to receive text
-'==                          text$:		the tet=xt to enter into the object
-'==							 step$:		terse description of the action/step in script (e.g. "clicking login")
-'==
-'== returns:                 string: "0" for success or error code encountered
-'==
-'== notes:                   n/a
-'==
-'=============================================================================================================================================================
+/*=============================================================================================================================================================
+== function name:           webEnterText
+==
+== developer:               todd busch
+==
+== purpose:                 enters specified text into the specified html element with error-handling included
+==
+== input parms:            	object$:	descriptor of the html object to receive text
+==							text$:		the text to enter into the object
+==							step$:		terse description of the action/step in the script (e.g. "clicking login")
+==
+== returns:                 int: 0 - on success	  error_code - on failure
+==
+== notes:                   none
+==
+=============================================================================================================================================================*/
 function webEnterText(object$, text$, step$)
 	local r
 
@@ -49,6 +50,21 @@ function webEnterText(object$, text$, step$)
 EndFunction
 
 
+/*=============================================================================================================================================================
+== function name:           webClickElement
+==
+== developer:               todd busch
+==
+== purpose:                 perform a left mouse click on the specified html element
+==
+== input parms:             object$:	descriptor of the html object to click
+==							step$:		terse description of the action/step in the script (e.g. "clicking login")
+==
+== returns:                 int: 0 - on success	  error_code - on failure
+==
+== notes:                   none
+==
+=============================================================================================================================================================*/
 function webClickElement(object$, step$)
 	local r
 
@@ -74,6 +90,23 @@ function webClickElement(object$, step$)
 
 endfunction
 
+
+/*=============================================================================================================================================================
+== function name:           webSelectItem
+==
+== developer:               todd busch
+==
+== purpose:                 select and item from the specified html combobox/dropdown or other multi-value object
+==
+== input parms:             object$:	descriptor of the html object
+==							item$:		the item/value to select
+==							step$:		terse description of the action/step in the script (e.g. "clicking login")
+==
+== returns:                 int: 0 - on success	  error_code - on failure
+==
+== notes:                   none
+==
+=============================================================================================================================================================*/
 
 function webSelectItem(object$, item$, step$)
 	local r

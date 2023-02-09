@@ -22,6 +22,7 @@ include "C:\v-angels-automation\framework\CG-globalDimDeclarations\CG-globalDimD
 include "C:\v-angels-automation\framework\CG-globalFunctions\CG-globalFunctions.src"
 include "C:\v-angels-automation\framework\CG-globalSubDefinitions\CG-globalSubDefinitions.src"
 include "C:\v-angels-automation\framework\CG-globalVariables\CG-globalVariables.src"
+include "C:\v-angels-automation\object-repos\zipwhip\zipwhipObjectRepository.src"
 
 
 currScript$ = "CG-zipWhipSendScheduleinitTxt"
@@ -31,69 +32,7 @@ currScript$ = "CG-zipWhipSendScheduleinitTxt"
 
 
 '-------------------------------------------------------------------------------------------------------------------------------- read in columns from employment inquiry doc
-'-------------------- record id
-cnt = readexcel (employmentInquiryPath$, employmentInquiryIdCol$, arrApplicantID$())
-if instr(str$(cnt), "-") <> 0 then				'look for dash which would indicate an error code
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading ID column.  error_code: (" + str$(cnt) + ")", crlf)
-	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (id column)", crlf)
-	criticalStop()
-else
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (" + str$(cnt) + ") rows read into array.", crlf)
-endif
-'-------------------- applicant first name
-res = readexcel (employmentInquiryPath$, employmentInquiryFNameCol$, arrApplicantFName$())	
-if instr(str$(res), "-") <> 0 then
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading first name column.  error_code: (" + str$(cnt) + ")", crlf)
-	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (applicant first name)", crlf)
-	criticalStop()
-endif
-'-------------------- applicant last name
-res = readexcel (employmentInquiryPath$, employmentInquiryLNameCol$, arrApplicantLName$())	
-if instr(str$(res), "-") <> 0 then
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading last name column.  error_code: (" + str$(cnt) + ")", crlf)
-	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (applicant last name)", crlf)
-	criticalStop()
-endif
-'-------------------- email
-res = readexcel (employmentInquiryPath$, employmentInquiryEmailCol$, arrApplicantEmail$())	
-if instr(str$(res), "-") <> 0 then
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading email column.  error_code: (" + str$(cnt) + ")", crlf)
-	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (applicant email)", crlf)
-	criticalStop()
-endif
-'-------------------- stage
-res = readexcel (employmentInquiryPath$, employmentInquiryStageCol$, arrCurrentStage$())
-if instr(str$(res), "-") <> 0 then
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading stage column.  error_code: (" + str$(cnt) + ")", crlf)
-	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (stage)", crlf)
-	criticalStop()
-endif
-'-------------------- change events
-res = readexcel (employmentInquiryPath$, employmentInquiryChangeEventCol$, arrChangeEvents$())
-if instr(str$(res), "-") <> 0 then
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading change events column.  error_code: (" + str$(cnt) + ")", crlf)
-	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (change events)", crlf)
-	criticalStop()
-endif
-'-------------------- phone
-res = readexcel (employmentInquiryPath$, employmentInquiryPhoneCol$, arrApplicantPhone$())
-if instr(str$(res), "-") <> 0 then
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading phone column.  error_code: (" + str$(cnt) + ")", crlf)
-	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (phone)", crlf)
-	criticalStop()
-endif
-'-------------------- 1st interview appointment
-res = readexcel (employmentInquiryPath$, employmentInquiry1stAppCol$, arrApplicant1stApp$())
-if instr(str$(res), "-") <> 0 then
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading 1st interview appointment column.  error_code: (" + str$(cnt) + ")", crlf)
-	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (1st interview appointment)", crlf)
-	criticalStop()
-endif
-'-------------------- text messages
-res = readexcel (employmentInquiryPath$, employmentInquiryTextmsgCol$, arrTextmsgStatus$())
-if instr(str$(res), "-") <> 0 then
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading text messages column.  error_code: (" + str$(cnt) + ")", crlf)
-	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (text messages)", crlf)
+if loadEmploymentInquiryRows() = 1 then
 	criticalStop()
 endif
 
@@ -276,7 +215,7 @@ repeat
 
 			'-------------------- invoke browser
 			ret = startbrowser("FF", zipWhipURL$, 3)
-			maximizewindow("FIREFOX.EXE|MozillaWindowClass|", 1)
+			maximizewindow(wndBrowser$, 1)
 			if ret <> 0 then
 				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error invoking browser", crlf)
 				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(ret) + ") msg: " + #errormsg$, crlf)
@@ -292,30 +231,30 @@ repeat
 
 
 			'-------------------- check for and handle login page
-			ret = existw("FIREFOX.EXE|MozillaWindowClass|Zipwhip - Login � Mozilla Firefox", 1)
+			ret = existw(wndLogin$, 1)
 			if ret = 1 then
 				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": account was not logged in", crlf)
 				'check for object indicating a 'remembered user' has been pre-filled
-				usepage("Zipwhip - Login")
-				res = existhtmlelement("DIV[DATA-TESTID='EXISTING_IDENTITY']")
+				usepage(pgLogin$)
+				res = existhtmlelement(selSavedIdentity$)
 				'log in steps for remembered user
 				if res = 1 then
-					usepage("Zipwhip - Login")
-					clickhtmlelement("DIV[OUTERTEXT='Next']")
-					writehtml("INPUT PASSWORD[NAME='password']", zipWhipPassword$)
-					clickhtmlelement("BUTTON[INNERTEXT='Log In']")
+					usepage(pgLogin$)
+					clickhtmlelement(lnkLoginNext$)
+					writehtml(txtPassword$, zipWhipPassword$)
+					clickhtmlelement(btnLogin$)
 				endif
 				'log in steps for empty user
 				if res  = 0 then
-					usepage("Zipwhip - Login")
-					writehtml("INPUT TEXT[NAME='identity']", zipWhipUsername$)
-					clickhtmlelement("DIV[OUTERTEXT='Next']")
-					writehtml("INPUT PASSWORD[NAME='password']", zipWhipPassword$)
-					clickhtmlelement("DIV[OUTERTEXT='Log', INDEX=7]")
+					usepage(pgLogin$)
+					writehtml(txtUsername$, zipWhipUsername$)
+					clickhtmlelement(lnkLoginNext$)
+					writehtml(txtPassword$, zipWhipPassword$)
+					clickhtmlelement(lnkLoginLink$)
 				endif
 				'------- validation
 				res$ = currentpage$()
-				if res$ <> "Zipwhip | Daniel Nelson" then
+				if res$ <> pgMainDan$ then
 					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": issue logging in. current page = (" + res$ + ").", crlf)
 					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-login_error.bmp", 1, 1)
 					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
@@ -327,7 +266,7 @@ repeat
 					goto nextIteration
 				endif
 				'------- debug logging
-				if res$ = "Zipwhip | Daniel Nelson" then
+				if res$ = pgMainDan$ then
 					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": browser invoked. log in was successful", crlf)
 				endif
 			endif
@@ -336,14 +275,14 @@ repeat
 			'-------------------------------------------------------------------------------------------------------------------------------- create contact
 			'-------------------- invoke browser
 			res$ = currentpage$()
-			if res$ = "Zipwhip | Daniel Nelson" then
+			if res$ = pgMainDan$ then
 				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": browser invoked. account already logged in", crlf)
 			endif
 
 
 			'-------------------- click 'contacts' icon
-			usepage("Zipwhip | Daniel Nelson")
-			res = clickhtmlelement("BUTTON[CLASS='zk-button zk-button-transparent z', INDEX=3]")
+			usepage(pgMainDan$)
+			res = clickhtmlelement(btnContacts$)
 			pause 2
 			'-------error handling
 			if res <> 0 then
@@ -363,7 +302,7 @@ repeat
 				ret = useocrengine(3)
 				pause 10 secs until
 					textocr("Contacts")
-					inwindow("FIREFOX.EXE|MozillaWindowClass|Zipwhip | Daniel Nelson � Mozilla Firefox", 1)
+					inwindow(wndMainDan$, 1)
 					inarea(574, 136, 51, 155)
 				pausefalse
 					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicking 'contact' icon validation failed", crlf)
@@ -382,7 +321,7 @@ repeat
 				ret = useocrengine(3)
 				pause 10 secs until
 					textocr("Contacts")
-					inwindow("FIREFOX.EXE|MozillaWindowClass|Zipwhip | Daniel Nelson � Mozilla Firefox", 1)
+					inwindow(wndMainDan$, 1)
 					inarea(438, 143, 71, 321)
 				pausefalse
 					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicking 'contact' icon validation failed", crlf)
@@ -424,7 +363,7 @@ repeat
 				ret = useocrengine(3)
 				pause 10 secs until
 					textocr("Add Contact")
-					inwindow("FIREFOX.EXE|MozillaWindowClass|Zipwhip | Daniel Nelson � Mozilla Firefox", 1)
+					inwindow(wndMainDan$, 1)
 					inarea(770, 187, 42, 223)
 				pausefalse
 					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicking 'add contact' icon validation failed", crlf)
@@ -443,7 +382,7 @@ repeat
 				ret = useocrengine(3)
 				pause 10 secs until
 					textocr("Add Contact")
-					inwindow("FIREFOX.EXE|MozillaWindowClass|Zipwhip | Daniel Nelson � Mozilla Firefox", 1)
+					inwindow(wndMainDan$, 1)
 					inarea(717, 220, 53, 343)
 				pausefalse
 					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicking 'add contact' icon validation failed", crlf)
@@ -615,7 +554,7 @@ repeat
 				goto nextIteration
 			endif
 			'------- validation
-			usepage("Zipwhip | Daniel Nelson")
+			usepage(pgMainDan$)
 			ret = existhtmlelement("INPUT TEXT[NAME='email']")
 			if ret <> 1 then
 				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicking 'more' link validation failed", crlf)
@@ -743,13 +682,13 @@ repeat
 
 
 			'-------------------- close contact card
-			usewindow("FIREFOX.EXE|MozillaWindowClass|Zipwhip | Daniel Nelson � Mozilla Firefox", 1)
+			usewindow(wndMainDan$, 1)
 			clickmouse(Left, Double, 515, 515, absolute)
 
 
 			'-------------------------------------------------------------------------------------------------------------------------------- send initial text message
 			'-------------------- navigate to conversations
-			usepage("Zipwhip | Daniel Nelson")
+			usepage(pgMainDan$)
 			res = clickhtmlelement("BUTTON[CLASS='zk-button zk-button-transparent z']")
 			pause 2
 			'------- error handling
@@ -768,7 +707,7 @@ repeat
 			'------- validation
 			pause 10 secs until
 				bitmap(imagePath$ + "zipwhip-conversationsPageIcon.bmp")
-				inwindow("FIREFOX.EXE|MozillaWindowClass|Zipwhip | Daniel Nelson � Mozilla Firefox", 1)
+				inwindow(wndMainDan$, 1)
 			pausefalse
 				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicking 'conversations' validation failed", crlf)
 				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicking 'expected element (bitmap) not found.", crlf)
@@ -788,7 +727,7 @@ repeat
 
 
 			'-------------------- enter applicant name as search criteria
-			usepage("Zipwhip | Daniel Nelson")
+			usepage(pgMainDan$)
 			res = writehtml("INPUT TEXT[NAME='contactSearch']", applicantFName$ + " " + applicantLName$)
 			pause 2
 			'------- error handling
@@ -883,7 +822,7 @@ repeat
 
 
 			'-------------------- click send button
-			usewindow("FIREFOX.EXE|MozillaWindowClass|Zipwhip | Daniel Nelson � Mozilla Firefox", 1)
+			usewindow(wndMainDan$, 1)
 			if iEnvironment = 1 then
 				movemouse(1300, 1010, absolute)
 				pause 1
@@ -916,7 +855,7 @@ repeat
 
 
 			'-------------------- navigate to conversations
-			usepage("Zipwhip | Daniel Nelson")
+			usepage(pgMainDan$)
 			res = clickhtmlelement("BUTTON[CLASS='zk-button zk-button-transparent z']")
 			pause 2
 			'------- error handling
@@ -935,7 +874,7 @@ repeat
 			'------- validation
 			pause 10 secs until
 				bitmap(imagePath$ + "zipwhip-conversationsPageIcon.bmp")
-				inwindow("FIREFOX.EXE|MozillaWindowClass|Zipwhip | Daniel Nelson � Mozilla Firefox", 1)
+				inwindow(wndMainDan$, 1)
 			pausefalse
 				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicking 'conversations' validation failed", crlf)
 				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicking 'expected element (bitmap) not found.", crlf)
@@ -1027,7 +966,7 @@ repeat
 
 
 			'-------------------- click 'clock' icon to schedule msg 
-			usepage("Zipwhip | Daniel Nelson")
+			usepage(pgMainDan$)
 			res = clickhtmlelement("BUTTON[CLASS='zk-button zk-button-transparent zk-hover-icon s', INDEX=2]")
 			pause 2
 			'------- error handling
@@ -1125,7 +1064,7 @@ repeat
 
 			'-------------------- select time picker control
 			ret = useocrengine(3)
-			usewindow("FIREFOX.EXE|MozillaWindowClass|Zipwhip | Daniel Nelson � Mozilla Firefox", 1)
+			usewindow(wndMainDan$, 1)
 			if iEnvironment = 1 then
 				res = clickontextocr("ET", left, single, inarea(1116, 992, 105, 38), -40, 0)
 			endif
@@ -1203,7 +1142,7 @@ repeat
 
 
 			'-------------------- compose day before msg
-			usepage("Zipwhip | Daniel Nelson")
+			usepage(pgMainDan$)
 			res = writehtml("TEXTAREA[CLASS='zk-text-editor_input']", "Hello " + applicantFName$ + ",<Enter>You are scheduled for an interview at Visiting Angels Grove City tomorrow " + firstAppDate$ + " at " +  firstAppTime$ + ". You should have received emails with Adobe documents to be filled out and signed electronically. It would be extremely helpful in streamlining your interview if you could complete those prior to your arrival. Also, if you have not already done so, please fill out our online application at https://generations.idb-sys.com/OnlineApplication.aspx?guid=ccfff3c9-c5ab-4bea-aeb5-9f8001115743 . Thank you and we look forward to seeing you!")
 			pause 2
 			'------- error handling
@@ -1226,7 +1165,7 @@ repeat
 
 
 			'-------------------- click 'schedule' button
-			usewindow("FIREFOX.EXE|MozillaWindowClass|Zipwhip | Daniel Nelson � Mozilla Firefox", 1)
+			usewindow(wndMainDan$, 1)
 			if iEnvironment = 1 then
 				clickmouse(left, double, 1300, 1010, absolute)
 			endif
@@ -1342,7 +1281,7 @@ dayOfConfirm:
 
 
 			'-------------------- click 'clock' icon to schedule msg 
-			usepage("Zipwhip | Daniel Nelson")
+			usepage(pgMainDan$)
 			res = clickhtmlelement("BUTTON[CLASS='zk-button zk-button-transparent zk-hover-icon s', INDEX=2]")
 			pause 2
 			'------- error handling
@@ -1440,7 +1379,7 @@ dayOfConfirm:
 
 			'-------------------- select time picker control
 			ret = useocrengine(3)
-			usewindow("FIREFOX.EXE|MozillaWindowClass|Zipwhip | Daniel Nelson � Mozilla Firefox", 1)
+			usewindow(wndMainDan$, 1)
 			if iEnvironment = 1 then
 				res = clickontextocr("ET", left, single, inarea(1116, 992, 105, 38), -40, 0)
 			endif
@@ -1518,7 +1457,7 @@ dayOfConfirm:
 
 
 			'-------------------- click 'schedule' button
-			usewindow("FIREFOX.EXE|MozillaWindowClass|Zipwhip | Daniel Nelson � Mozilla Firefox", 1)
+			usewindow(wndMainDan$, 1)
 			if iEnvironment = 1 then
 				clickmouse(left, double, 1300, 1010, absolute)
 			endif

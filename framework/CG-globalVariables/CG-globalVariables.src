@@ -1,10 +1,9 @@
-'##############################################################################################################################################################
-'##  filename:						cg-globalVariables																										 
-'##																																							 
-'##  purpose:						library of variables and parameters referenced throughout caregive workflow scripts and other resource files
-'##									the purpose it to abstract data elements from the scripts themselves as well as provide a single point of 
-'##																																							 
-'##############################################################################################################################################################
+/*#############################################################################################################################################################
+##  filename:						cg-globalVariables
+##
+##  purpose:						collection of variables and parameters referenced throughout caregive workflow scripts and other resource files
+##
+#############################################################################################################################################################*/
 
 '-------------------- automation config paths
 iEnvironment = 1																		'used to determine environment runnng in (1): for todd's thinkpad or (2): for angelhypdsktp

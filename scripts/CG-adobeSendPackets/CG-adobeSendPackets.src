@@ -31,55 +31,7 @@ currScript$ = "CG-adobeSendPackets"
 
 
 '-------------------------------------------------------------------------------------------------------------------------------- read in columns from employment inquiry doc
-'-------------------- record id
-cnt = readexcel (employmentInquiryPath$, employmentInquiryIdCol$, arrApplicantID$())
-if instr(str$(cnt), "-") <> 0 then				'look for dash which would indicate an error code
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading ID column.  error_code: (" + str$(cnt) + ")", crlf)
-	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (id column)", crlf)
-	criticalStop()
-else
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (" + str$(cnt) + ") rows read into array.", crlf)
-endif
-'-------------------- applicant first name
-res = readexcel (employmentInquiryPath$, employmentInquiryFNameCol$, arrApplicantFName$())	
-if instr(str$(res), "-") <> 0 then
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading first name column.  error_code: (" + str$(cnt) + ")", crlf)
-	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (applicant first name)", crlf)
-	criticalStop()
-endif
-'-------------------- applicant last name
-res = readexcel (employmentInquiryPath$, employmentInquiryLNameCol$, arrApplicantLName$())	
-if instr(str$(res), "-") <> 0 then
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading last name column.  error_code: (" + str$(cnt) + ")", crlf)
-	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (applicant last name)", crlf)
-	criticalStop()
-endif
-'-------------------- applicant email
-res = readexcel (employmentInquiryPath$, employmentInquiryEmailCol$, arrApplicantEmail$())	
-if instr(str$(res), "-") <> 0 then
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading email column.  error_code: (" + str$(cnt) + ")", crlf)
-	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (applicant email)", crlf)
-	criticalStop()
-endif
-'-------------------- adobe packet status
-res = readexcel (employmentInquiryPath$, employmentInquiryAdobeCol$, arrAdobePcktStatus$())
-if instr(str$(res), "-") <> 0 then
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading adobe packet status column.  error_code: (" + str$(cnt) + ")", crlf)
-	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (adobe packet status)", crlf)
-	criticalStop()
-endif
-'-------------------- stage
-res = readexcel (employmentInquiryPath$, employmentInquiryStageCol$, arrCurrentStage$())
-if instr(str$(res), "-") <> 0 then
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading stage column.  error_code: (" + str$(cnt) + ")", crlf)
-	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (stage)", crlf)
-	criticalStop()
-endif
-'-------------------- change events
-res = readexcel (employmentInquiryPath$, employmentInquiryChangeEventCol$, arrChangeEvents$())
-if instr(str$(res), "-") <> 0 then
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading change events column.  error_code: (" + str$(cnt) + ")", crlf)
-	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (change events)", crlf)
+if loadEmploymentInquiryRows() = 1 then
 	criticalStop()
 endif
 
@@ -154,7 +106,7 @@ repeat
 
 			'-------------------------------------------------------------------------------------------------------------------------------- send pre 1st interview packet
 			'-------------------- invoke browser window
-			if invokeBrowser$("CH", adobeURL$) <> "0" then
+			if invokeBrowser("CH", adobeURL$) <> 0 then
 				nextScript()
 				goto nextIteration
 			endif
@@ -713,7 +665,7 @@ firstInterviewSend:
 
 			'-------------------------------------------------------------------------------------------------------------------------------- send 1st interview packet
 			'-------------------- invoke browser window
-			if invokeBrowser$("CH", adobeURL$) <> "0" then
+			if invokeBrowser("CH", adobeURL$) <> 0 then
 				nextScript()
 				goto nextIteration
 			endif
@@ -1309,7 +1261,7 @@ firstInterviewSend:
 
 
 			'-------------------- invoke browser window
-			if invokeBrowser$("CH", adobeURL$) <> "0" then
+			if invokeBrowser("CH", adobeURL$) <> 0 then
 				nextScript()
 				goto nextIteration
 			endif
