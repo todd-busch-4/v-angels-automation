@@ -398,6 +398,8 @@ repeat
 
 
 rehireFlow:
+			errorCheck$ = ""
+
 			'-------------------- hit enter to close popup
 			usewindow(wndNewHireForm$, 1)
 			if winSendKeys("<enter>", "closing popup") <> 0 then
