@@ -5,7 +5,7 @@
 ##									duplication, increase script cleanliness/readability, and reduce maintenance efforts by providing a single
 ##									centralized location for changes
 ##
-##  contents:						invokeBrowser$, zeroPadDate$, formatSSN$, checkForNullSSN, loadEmploymentInquiryRows
+##  contents:						invokeBrowser, zeroPadDate$, formatSSN$, checkForNullSSN, loadEmploymentInquiryRows
 ##
 #############################################################################################################################################################*/
 

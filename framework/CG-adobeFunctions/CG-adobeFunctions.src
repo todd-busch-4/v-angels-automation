@@ -1,0 +1,51 @@
+/*#############################################################################################################################################################
+##  filename:						cg-adobeFunctions
+##
+##  purpose:						library of functions for use in adobe workflow script development in order to minimize code duplication,
+##									increase script cleanliness/readability, and reduce maintenance efforts by providing a single centralized
+##									location for changes
+##
+##  contents:						adobeSendStatusChk
+##
+#############################################################################################################################################################*/
+
+
+function adobeSendStatusChk(status$, name$)
+
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": checking packet status", crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": value of adobePcktStatus: " + adobePcktStatus$, crlf)
+    if instr(adobePcktStatus$, status$) <> 0 then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status indicates " + name$ + " packet has already been sent", crlf)
+        write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + name$ + " packet has been sent", crlf)
+        adobeSendStatusChk = 1
+    else
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status indicates it is ok to send " + name$ + "packet", crlf)
+        adobeSendStatusChk = 0
+    endif
+
+endfunction
+
+
+function adobeLogIn()
+
+    if existhtmlelement(txtUsername$) = 1 then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": adobe acct was not signed in", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": logging in", crlf)
+        usepage(pgLogin$)
+        writehtml(txtUsername$, adobeUsername$)
+        writehtml(txtPassword$, adobePassword$)
+        clickhtmlelement(btnContinue$)
+        pause 3
+        if currentpage$() <> pgHomePage$ then
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error logging in. browser not loaded to expected page", crlf)
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": expected: 'Adobe Acrobat Home'  actual: '" + currentpage$() + "'", crlf)
+            hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-login_error.bmp", 1, 1)
+            closebrowser()
+            adobeLogIn = 1
+        else
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": log in was successfull", crlf)
+            adobeLogIn = 0
+        endif
+    endif
+
+endfunction

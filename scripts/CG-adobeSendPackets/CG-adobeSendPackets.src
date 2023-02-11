@@ -20,9 +20,11 @@
 '###############################################################################################################################################
 include "C:\v-angels-automation\framework\CG-globalDimDeclarations\CG-globalDimDeclarations.src"
 include "C:\v-angels-automation\framework\CG-globalFunctions\CG-globalFunctions.src"
+include "C:\v-angels-automation\framework\CG-adobeFunctions\CG-adobeFunctions.src"
 include "C:\v-angels-automation\framework\CG-globalLogging\CG-globalLogging.src"
 include "C:\v-angels-automation\framework\CG-globalSubDefinitions\CG-globalSubDefinitions.src"
 include "C:\v-angels-automation\framework\CG-globalVariables\CG-globalVariables.src"
+include "C:\v-angels-automation\object-repos\adobe\adobeObjectRepository.src"
 
 
 currScript$ = "CG-adobeSendPackets"
@@ -64,7 +66,7 @@ repeat
 		curr_stage$ = arrCurrentStage$(i)
 
 
-'-------------------------------------------------------------------------------------------------------------------------------- 1st interview stage
+'------------------------------------------------------------------------------------------------------------------------------------------- 1st interview stage
 		if curr_stage$ = "1st Interview" then
 			iFirstCnt = iFirstCnt + 1		'stage counter
 			logStageMatch()
@@ -80,12 +82,7 @@ repeat
 
 
 			'-------------------- check for already sent packets
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": checking packet status", crlf)
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": value of adobePcktStatus: " + adobePcktStatus$, crlf)
-			if instr(adobePcktStatus$, "Pre 1st Pkt") <> 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status indicates pre 1st packet has already been sent", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": skipping to 1st interview packet", crlf)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": pre 1st packet has been sent, skipping to 1st interview packet", crlf)
+			if adobeSendStatusChk("Pre 1st Pkt", "pre 1st") = 1 then
 				goto firstInterviewSend
 			endif
 
@@ -98,55 +95,28 @@ repeat
 			endif
 	
 
-			'-------------------- check for login page
-			if existhtmlelement("INPUT EMAIL[NAME='username', ID='EmailPage-EmailField']") = 1 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre) adobe acct was not signed in", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre) logging in", crlf)
-				usepage("Adobe ID")
-				writehtml("INPUT EMAIL[NAME='username']", adobeUsername$)
-				writehtml("INPUT TEXT[NAME='password']", adobePassword$)
-				clickhtmlelement("SPAN[OUTERTEXT='Continue']")
-				pause 3
-				if currentpage$() <> "Adobe Acrobat Home" then
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre) error logging in. browser not loaded to expected page", crlf)
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre) expected: 'Adobe Acrobat Home'  actual: '" + currentpage$() + "'", crlf)
-					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre_login_error.bmp", 1, 1)
-					closebrowser()
-					nextScript()
-					goto nextIteration
-				else
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre) browser invoked and log in successfull", crlf)
-				endif
-			endif
-
-
-			if currentpage$() = "Adobe Acrobat Home" then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre) browser invoked. account already logged in", crlf)
+			'-------------------- log in if not already
+			if adobeLogIn() = 1 then
+				nextScript()
+				goto nextIteration
 			endif
 
 
 			'-------------------- click 'tools' link in upper-left of main frame
-			usepage("Adobe Acrobat Home")
-			res = clickhtmlelement("SPAN[OUTERTEXT='Tools']")
-			pause 3					
-			'------- error handling
-			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre) error clicking 'tools' link", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre) error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre) resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre_click_tools.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre) workflow failed; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - pre click tools", crlf + crlf)
-				closebrowser()
+			usepage(pgHomePage$)
+			if webClickElement(pgHomePage$, "clicking tools") <> 0 then
 				goto nextIteration
 			endif
+			pause 3					
+
+
+
+
 			'------- validation
 			ret = useocrengine(3)
 			pause 10 secs until
 				textocr("Request e-signatures")
-				inwindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+				inwindow(wndHomePage$, 1)
 				inarea(529, 374, 189, 281)
 			pausefalse
 				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre) clicking 'tools' link validation failed", crlf)
@@ -166,7 +136,7 @@ repeat
 
 
 			'-------------------- click 'request signatures' box in tools carousel menu
-			usepage("Adobe Acrobat Home")
+			usepage(pgHomePage$)
 			res = clickhtmlelement("DIV[OUTERTEXT='Request', INDEX=3]")
 			pause 2
 			'------- error handling
@@ -182,7 +152,7 @@ repeat
 				goto nextIteration
 			endif
 			'------- validation
-			usepage("Adobe Acrobat Home")
+			usepage(pgHomePage$)
 			ret = existhtmlelement("DIV[OUTERTEXT='Request e-signaturesRecentDocumentsMy', INDEX=2]")
 			if ret = 0 then
 				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre) clicking 'request signatures' link validation failed", crlf)
@@ -203,7 +173,7 @@ repeat
 
 
 			'-------------------- click 'documents' in top menu of request signatures popup
-			usepage("Adobe Acrobat Home")
+			usepage(pgHomePage$)
 			res = clickhtmlelement("SPAN[OUTERTEXT='Documents', INDEX=3]")
 			pause 2
 			'------- error handling
@@ -222,7 +192,7 @@ repeat
 			ret = useocrengine(3)
 			pause 10 secs until
 				textocr("Automated")
-				inwindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+				inwindow(wndHomePage$, 1)
 				inarea(611, 437, 337, 714)
 			pausefalse
 				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre) clicking 'documents' link validation failed", crlf)
@@ -243,7 +213,7 @@ repeat
 
 
 			'-------------------- click 'automated' folder
-			usepage("Adobe Acrobat Home")
+			usepage(pgHomePage$)
 			res = clickhtmlelement("DIV[OUTERTEXT='Auto', INDEX=9]")
 			pause 2
 			'------- error handling
@@ -263,7 +233,7 @@ repeat
 			if iEnvironment = 1 then
 				pause 10 secs until
 					textocr("Employee Forms")
-					inwindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+					inwindow(wndHomePage$, 1)
 					inarea(611, 437, 337, 714)
 				pausefalse
 					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre) clicking 'automated' folder validation failed", crlf)
@@ -281,7 +251,7 @@ repeat
 			if iEnvironment = 2 then
 				pause 10 secs until
 					textocr("Employee Forms")
-					inwindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+					inwindow(wndHomePage$, 1)
 					inarea(605, 583, 71, 523)
 				pausefalse
 					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre) clicking 'automated' folder validation failed", crlf)
@@ -303,7 +273,7 @@ repeat
 
 
 			'-------------------- click 'employee forms' folder
-			usepage("Adobe Acrobat Home")
+			usepage(pgHomePage$)
 			res = clickhtmlelement("DIV[CONTENT='EmployeEmployee']")
 			pause 2
 			'------- error handling
@@ -322,7 +292,7 @@ repeat
 			ret = useocrengine(3)
 			pause 10 secs until
 				textocr("Applicant to New Hire")
-				inwindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+				inwindow(wndHomePage$, 1)
 				inarea(611, 437, 337, 714)
 			pausefalse
 				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre) clicking 'employee forms' folder validation failed", crlf)
@@ -344,7 +314,7 @@ repeat
 
 			'-------------------- click 'applicant to new hire forms' folder
 			ret = useocrengine(3)
-			usewindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+			usewindow(wndHomePage$, 1)
 			if iEnvironment = 1 then
 				res = clickontextocr("Applicant to New Hire", left, single, inarea(641, 581, 628, 73))
 			endif
@@ -371,7 +341,7 @@ repeat
 
 
 			'-------------------- click 'pre 1st interview packet.pdf'
-			usepage("Adobe Acrobat Home")
+			usepage(pgHomePage$)
 			res = clickhtmlelement("DIV[CONTENT='PRE 1st IntervPRE']")
 			pause 2
 			'------- error handling
@@ -393,7 +363,7 @@ repeat
 
 
 			'-------------------- click 'continue' button
-			usepage("Adobe Acrobat Home")
+			usepage(pgHomePage$)
 			res = clickhtmlelement("BUTTON[INNERTEXT='Continue']")
 			pause 2
 			'------- error handling
@@ -412,7 +382,7 @@ repeat
 			ret = useocrengine(3)
 			pause 10 secs until
 				textocr("Get documents signed")
-				inwindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+				inwindow(wndHomePage$, 1)
 				inarea(497, 178, 105, 679)
 			pausefalse
 				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre) click 'continue' button validation failed", crlf)
@@ -434,7 +404,7 @@ repeat
 
 			'-------------------- enter applicant email
 			ret = useocrengine(3)
-			usewindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+			usewindow(wndHomePage$, 1)
 			if iEnvironment = 1 then
 				clickontextocr("Enter recipient email", left, single, inarea(655, 358, 165, 21))
 			endif
@@ -494,7 +464,7 @@ repeat
 
 			'-------------------- add applicant name to message box
 			ret = useocrengine(3)
-			usewindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+			usewindow(wndHomePage$, 1)
 			if iEnvironment = 1 then
 				clickontextocr("PRE", left, single, inarea(529, 575, 177, 32), -85, 0) 'offset to place cursor at beginning of text.
 			endif
@@ -550,11 +520,11 @@ repeat
 			ret = useocrengine(3)
 			pause 30 secs until
 				textocr("CONFIDENTIALITY OF PROTECTED")
-				inwindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+				inwindow(wndHomePage$, 1)
 				inarea(526, 313, 151, 685)
 			pausefalse
 				result = useocrengine(3)
-				var$ = captureocr$("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", topinstance())
+				var$ = captureocr$(wndHomePage$, topinstance())
 				if instr(var$, "Email provided is invalid") <> 0 then
 					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre) email provided is invalid; resuming scan for next change event", crlf + crlf)
 					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre_invalid_email.bmp", 1, 1)
@@ -610,7 +580,7 @@ repeat
 			ret = useocrengine(3)
 			pause 20 secs until
 				textocr(applicantFName$)
-				inwindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+				inwindow(wndHomePage$, 1)
 				inarea(568, 270, 148, 832)
 			pausefalse
 				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre) clicking 'send' button validation failed", crlf)
@@ -666,7 +636,7 @@ firstInterviewSend:
 				writehtml("INPUT TEXT[NAME='password']", adobePassword$)
 				clickhtmlelement("SPAN[OUTERTEXT='Continue']")
 				pause 3
-				if currentpage$() <> "Adobe Acrobat Home" then
+				if currentpage$() <> pgHomePage$ then
 					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st) error logging in. browser not loaded to expected page", crlf)
 					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st) expected: 'Adobe Acrobat Home' actual: " + currentpage$(), crlf)
 					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st_login_error.bmp", 1, 1)
@@ -679,14 +649,14 @@ firstInterviewSend:
 			endif
 
 
-			if currentpage$() = "Adobe Acrobat Home" then
+			if currentpage$() = pgHomePage$ then
 				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st) browser invoked. account already logged in", crlf)
 			endif
 
 
 			'-------------------- click 'tools' link in upper-left of main frame
-			usepage("Adobe Acrobat Home")
-			res = clickhtmlelement("SPAN[OUTERTEXT='Tools']")
+			usepage(pgHomePage$)
+			res = clickhtmlelement(lnkTools)
 			pause 3					
 			'------- error handling
 			if res <> 0 then
@@ -703,7 +673,7 @@ firstInterviewSend:
 			ret = useocrengine(3)
 			pause 10 secs until
 				textocr("Request e-signatures")
-				inwindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+				inwindow(wndHomePage$, 1)
 				inarea(529, 374, 189, 281)
 			pausefalse
 				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st) clicking 'tools' link validation failed", crlf)
@@ -723,7 +693,7 @@ firstInterviewSend:
 
 
 			'-------------------- click 'request signatures' box in tools carousel menu
-			usepage("Adobe Acrobat Home")
+			usepage(pgHomePage$)
 			res = clickhtmlelement("DIV[OUTERTEXT='Request', INDEX=3]")
 			pause 2
 			'------- error handling
@@ -739,7 +709,7 @@ firstInterviewSend:
 				goto nextIteration
 			endif
 			'------- validation
-			usepage("Adobe Acrobat Home")
+			usepage(pgHomePage$)
 			ret = existhtmlelement("DIV[OUTERTEXT='Request e-signaturesRecentDocumentsMy', INDEX=2]")
 			if ret = 0 then
 				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st) clicking 'request signatures' link validation failed", crlf)
@@ -760,7 +730,7 @@ firstInterviewSend:
 
 
 			'-------------------- click 'documents' in top menu of request signatures popup
-			usepage("Adobe Acrobat Home")
+			usepage(pgHomePage$)
 			res = clickhtmlelement("SPAN[OUTERTEXT='Documents', INDEX=3]")
 			pause 2
 			'------- error handling
@@ -779,7 +749,7 @@ firstInterviewSend:
 			ret = useocrengine(3)
 			pause 10 secs until
 				textocr("Automated")
-				inwindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+				inwindow(wndHomePage$, 1)
 				inarea(611, 437, 337, 714)
 			pausefalse
 				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st) clicking 'documents' link validation failed", crlf)
@@ -800,7 +770,7 @@ firstInterviewSend:
 
 
 			'-------------------- click 'automated' folder
-			usepage("Adobe Acrobat Home")
+			usepage(pgHomePage$)
 			res = clickhtmlelement("DIV[OUTERTEXT='Auto', INDEX=9]")
 			pause 2
 			'------- error handling
@@ -820,7 +790,7 @@ firstInterviewSend:
 			if iEnvironment = 1 then
 				pause 10 secs until
 					textocr("Employee Forms")
-					inwindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+					inwindow(wndHomePage$, 1)
 					inarea(611, 437, 337, 714)
 				pausefalse
 					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st) clicking 'automated' folder validation failed", crlf)
@@ -838,7 +808,7 @@ firstInterviewSend:
 			if iEnvironment = 2 then
 				pause 10 secs until
 					textocr("Employee Forms")
-					inwindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+					inwindow(wndHomePage$, 1)
 					inarea(605, 583, 71, 523)
 				pausefalse
 					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st) clicking 'automated' folder validation failed", crlf)
@@ -860,7 +830,7 @@ firstInterviewSend:
 
 
 			'-------------------- click 'employee forms' folder
-			usepage("Adobe Acrobat Home")
+			usepage(pgHomePage$)
 			res = clickhtmlelement("DIV[CONTENT='EmployeEmployee']")
 			pause 2
 			'------- error handling
@@ -879,7 +849,7 @@ firstInterviewSend:
 			ret = useocrengine(3)
 			pause 10 secs until
 				textocr("Applicant to New Hire")
-				inwindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+				inwindow(wndHomePage$, 1)
 				inarea(611, 437, 337, 714)
 			pausefalse
 				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st) clicking 'employee forms' folder validation failed", crlf)
@@ -901,7 +871,7 @@ firstInterviewSend:
 
 			'-------------------- click 'applicant to new hire forms' folder
 			ret = useocrengine(3)
-			usewindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+			usewindow(wndHomePage$, 1)
 			if iEnvironment = 1 then
 				res = clickontextocr("Applicant to New Hire", left, single, inarea(641, 581, 628, 73))
 			endif
@@ -943,7 +913,7 @@ firstInterviewSend:
 
 			if res <> 0 then
 				ret = useocrengine(3)
-				usewindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+				usewindow(wndHomePage$, 1)
 				result = clickontextocr("1st Interview Packet pdf", left, single, inarea(716, 448, 217, 26))
 				'------- error handling
 				if result <> 0 then
@@ -965,7 +935,7 @@ firstInterviewSend:
 
 
 			'-------------------- click 'continue' button
-			usepage("Adobe Acrobat Home")
+			usepage(pgHomePage$)
 			res = clickhtmlelement("BUTTON[INNERTEXT='Continue']")
 			pause 2
 			'------- error handling
@@ -984,7 +954,7 @@ firstInterviewSend:
 			ret = useocrengine(3)
 			pause 10 secs until
 				textocr("Get documents signed")
-				inwindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+				inwindow(wndHomePage$, 1)
 				inarea(497, 178, 105, 679)
 			pausefalse
 				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st) click 'continue' button validation failed", crlf)
@@ -1006,7 +976,7 @@ firstInterviewSend:
 
 			'-------------------- enter applicant email
 			ret = useocrengine(3)
-			usewindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+			usewindow(wndHomePage$, 1)
 			if iEnvironment = 1 then
 				clickontextocr("Enter recipient email", left, single, inarea(655, 358, 165, 21))
 			endif
@@ -1066,7 +1036,7 @@ firstInterviewSend:
 
 			'-------------------- add applicant name to message box
 			ret = useocrengine(3)
-			usewindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+			usewindow(wndHomePage$, 1)
 			if iEnvironment = 1 then
 				clickontextocr("Ist Interview", left, single, inarea(537, 572, 171, 33), -85, 0) 'offset to place cursor at beginning of text.
 			endif
@@ -1121,11 +1091,11 @@ firstInterviewSend:
 			ret = useocrengine(3)
 			pause 30 secs until
 				textocr("Skills Assessment")
-				inwindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+				inwindow(wndHomePage$, 1)
 				inarea(526, 313, 151, 685)
 			pausefalse
 				result = useocrengine(3)
-				var$ = captureocr$("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", topinstance())
+				var$ = captureocr$(wndHomePage$, topinstance())
 				if instr(var$, "Email provided is invalid") <> 0 then
 					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st) email provided is invalid; resuming scan for next change event", crlf + crlf)
 					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st_invalid_email.bmp", 1, 1)
@@ -1181,7 +1151,7 @@ firstInterviewSend:
 			ret = useocrengine(3)
 			pause 20 secs until
 				textocr(applicantFName$)
-				inwindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+				inwindow(wndHomePage$, 1)
 				inarea(568, 270, 148, 832)
 			pausefalse
 				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st) clicking 'send' button validation failed", crlf)
@@ -1260,7 +1230,7 @@ firstInterviewSend:
 				writehtml("INPUT TEXT[NAME='password']", adobePassword$)
 				clickhtmlelement("SPAN[OUTERTEXT='Continue']")
 				pause 3
-				if currentpage$() <> "Adobe Acrobat Home" then
+				if currentpage$() <> pgHomePage$ then
 					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error logging in. browser not loaded to expected page", crlf)
 					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": expected: 'Adobe Acrobat Home' actual: " + currentpage$(), crlf)
 					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-login_error.bmp", 1, 1)
@@ -1274,14 +1244,14 @@ firstInterviewSend:
 
 
 			'-------------------------------------------------------------------------------------------------------------------------------- send 2nd interview packet
-			if currentpage$() = "Adobe Acrobat Home" then
+			if currentpage$() = pgHomePage$ then
 				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": browser invoked. account already logged in", crlf)
 			endif
 
 
 			'-------------------- click 'tools' link in upper-left of main frame
-			usepage("Adobe Acrobat Home")
-			res = clickhtmlelement("SPAN[OUTERTEXT='Tools']")
+			usepage(pgHomePage$)
+			res = clickhtmlelement(lnkTools)
 			pause 3					
 			'------- error handling
 			if res <> 0 then
@@ -1298,7 +1268,7 @@ firstInterviewSend:
 			ret = useocrengine(3)
 			pause 10 secs until
 				textocr("Request e-signatures")
-				inwindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+				inwindow(wndHomePage$, 1)
 				inarea(529, 374, 189, 281)
 			pausefalse
 				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicking 'tools' link validation failed", crlf)
@@ -1318,7 +1288,7 @@ firstInterviewSend:
 
 
 			'-------------------- click 'request signatures' box in tools carousel menu
-			usepage("Adobe Acrobat Home")
+			usepage(pgHomePage$)
 			res = clickhtmlelement("DIV[OUTERTEXT='Request', INDEX=3]")
 			pause 2
 			'------- error handling
@@ -1334,7 +1304,7 @@ firstInterviewSend:
 				goto nextIteration
 			endif
 			'------- validation
-			usepage("Adobe Acrobat Home")
+			usepage(pgHomePage$)
 			ret = existhtmlelement("DIV[OUTERTEXT='Request e-signaturesRecentDocumentsMy', INDEX=2]")
 			if ret = 0 then
 				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicking 'request signatures' link validation failed", crlf)
@@ -1355,7 +1325,7 @@ firstInterviewSend:
 
 
 			'-------------------- click 'documents' in top menu of request signatures popup
-			usepage("Adobe Acrobat Home")
+			usepage(pgHomePage$)
 			res = clickhtmlelement("SPAN[OUTERTEXT='Documents', INDEX=3]")
 			pause 2
 			'------- error handling
@@ -1374,7 +1344,7 @@ firstInterviewSend:
 			ret = useocrengine(3)
 			pause 10 secs until
 				textocr("Automated")
-				inwindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+				inwindow(wndHomePage$, 1)
 				inarea(611, 437, 337, 714)
 			pausefalse
 				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicking 'documents' link validation failed", crlf)
@@ -1395,7 +1365,7 @@ firstInterviewSend:
 
 
 			'-------------------- click 'automated' folder
-			usepage("Adobe Acrobat Home")
+			usepage(pgHomePage$)
 			res = clickhtmlelement("DIV[OUTERTEXT='Auto', INDEX=9]")
 			pause 2
 			'------- error handling
@@ -1415,7 +1385,7 @@ firstInterviewSend:
 			if iEnvironment = 1 then
 				pause 10 secs until
 					textocr("Employee Forms")
-					inwindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+					inwindow(wndHomePage$, 1)
 					inarea(611, 437, 337, 714)
 				pausefalse
 					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicking 'automated' folder validation failed", crlf)
@@ -1433,7 +1403,7 @@ firstInterviewSend:
 			if iEnvironment = 2 then
 				pause 10 secs until
 					textocr("Employee Forms")
-					inwindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+					inwindow(wndHomePage$, 1)
 					inarea(605, 583, 71, 523)
 				pausefalse
 					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicking 'automated' folder validation failed", crlf)
@@ -1455,7 +1425,7 @@ firstInterviewSend:
 
 
 			'-------------------- click 'employee forms' folder
-			usepage("Adobe Acrobat Home")
+			usepage(pgHomePage$)
 			res = clickhtmlelement("DIV[CONTENT='EmployeEmployee']")
 			pause 2
 			'------- error handling
@@ -1474,7 +1444,7 @@ firstInterviewSend:
 			ret = useocrengine(3)
 			pause 10 secs until
 				textocr("Applicant to New Hire")
-				inwindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+				inwindow(wndHomePage$, 1)
 				inarea(611, 437, 337, 714)
 			pausefalse
 				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicking 'employee forms' folder validation failed", crlf)
@@ -1496,7 +1466,7 @@ firstInterviewSend:
 
 			'-------------------- click 'applicant to new hire forms' folder
 			ret = useocrengine(3)
-			usewindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+			usewindow(wndHomePage$, 1)
 			if iEnvironment = 1 then
 				res = clickontextocr("Applicant to New Hire", left, single, inarea(641, 581, 628, 73))
 			endif
@@ -1524,7 +1494,7 @@ firstInterviewSend:
 
 			'-------------------- click '2nd interview packet.pdf'
 			ret = useocrengine(3)
-			UseWindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+			UseWindow(wndHomePage$, 1)
 			res = clickOnTextOCR("2nd Interview Packet", left, single, inarea(600, 455, 712, 214))
 			'------- error handling
 			if res <> 0 then
@@ -1546,7 +1516,7 @@ firstInterviewSend:
 
 
 			'-------------------- click 'continue' button
-			usepage("Adobe Acrobat Home")
+			usepage(pgHomePage$)
 			res = clickhtmlelement("BUTTON[INNERTEXT='Continue']")
 			pause 2
 			'------- error handling
@@ -1565,7 +1535,7 @@ firstInterviewSend:
 			ret = useocrengine(3)
 			pause 10 secs until
 				textocr("Get documents signed")
-				inwindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+				inwindow(wndHomePage$, 1)
 				inarea(497, 178, 105, 679)
 			pausefalse
 				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": click 'continue' button validation failed", crlf)
@@ -1587,7 +1557,7 @@ firstInterviewSend:
 
 			'-------------------- enter applicant email
 			ret = useocrengine(3)
-			usewindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+			usewindow(wndHomePage$, 1)
 			if iEnvironment = 1 then
 				clickontextocr("Enter recipient email", left, single, inarea(655, 358, 165, 21))
 			endif
@@ -1647,7 +1617,7 @@ firstInterviewSend:
 
 			'-------------------- add applicant name to message box
 			ret = useocrengine(3)
-			usewindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+			usewindow(wndHomePage$, 1)
 			if iEnvironment = 1 then
 				clickontextocr("2nd", left, single, inarea(529, 575, 177, 32), -85, 0) 'offset to place cursor at beginning of text.
 			endif
@@ -1703,11 +1673,11 @@ firstInterviewSend:
 			ret = useocrengine(3)
 			pause 30 secs until
 				textocr("Interviewee Name")
-				inwindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+				inwindow(wndHomePage$, 1)
 				inarea(452, 359, 182, 814)
 			pausefalse
 				result = useocrengine(3)
-				var$ = captureocr$("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", topinstance())
+				var$ = captureocr$(wndHomePage$, topinstance())
 				if instr(var$, "Email provided is invalid") <> 0 then
 					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": email provided is invalid; resuming scan for next change event", crlf + crlf)
 					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-invalid_email.bmp", 1, 1)
@@ -1763,7 +1733,7 @@ firstInterviewSend:
 			ret = useocrengine(3)
 			pause 20 secs until
 				textocr(applicantFName$)
-				inwindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
+				inwindow(wndHomePage$, 1)
 				inarea(568, 270, 148, 832)
 			pausefalse
 				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicking 'send' button validation failed", crlf)
@@ -1790,7 +1760,7 @@ firstInterviewSend:
 			iSecondCompl = iSecondCompl + 1		'counter for records packets sent
 
 
-			usepage("Adobe Acrobat Home")
+			usepage(pgHomePage$)
 			closebrowser()
 
 
