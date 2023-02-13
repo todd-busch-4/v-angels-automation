@@ -5,7 +5,7 @@
 ##									duplication, increase script cleanliness/readability, and reduce maintenance efforts by providing a single
 ##									centralized location for changes
 ##
-##  contents:						webValidateText, webValidateElement, webValidateCurrPage
+##  contents:						webValidateText, webValidateElement, webValidateCurrPage, webWaitForText
 ##
 #############################################################################################################################################################*/
 
@@ -55,7 +55,7 @@ function webValidateText(object$, text$, step$)
         endif
 
         if var$ = text$ then
-        	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + step$ + " was successful", crlf)
+        	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + step$ + " validation was successful", crlf)
             webValidateText = 0
         endif
 
@@ -101,7 +101,7 @@ function webValidateElement(objectDesc$, objectName$, step$)
     endif
 
     if r = 1 then
-        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + step$ + " was successful", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + step$ + " validation was successful", crlf)
         webValidateElement = 1
     endif
 
@@ -140,8 +140,53 @@ function webValidateCurrPage(pageName$, step$)
 		closebrowser()
 		webValidateCurrPage = 1
 	else
-        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + step$ + " was successful", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + step$ + " validation was successful", crlf)
 		webValidateCurrPage = 0
 	endif
+
+endfunction
+
+
+/*=============================================================================================================================================================
+== function name:           webWaitForText
+==
+== developer:               todd busch
+==
+== purpose:                 terseDescription
+==
+== input parms:             paramName:  purpose
+==
+== returns:                 typeValue
+==
+== notes:                   pertinentinfo
+==
+=============================================================================================================================================================*/
+function webWaitForText(window$, text$, textName$, waitTime, step$, area1, area2, area3, area4)
+    local r
+
+    r = useocrengine(3)
+    pause waitTime secs until
+        textocr(text$)
+        inwindow(window$, 1)
+        inarea(area1, area2, area3, area4)
+    pausefalse
+        if adobeInvalidEmailChk() = 1 then
+			webWaitForText = 1
+			exitfunction
+        endif
+        
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ":  " + step$ + " validation failed", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": expected element text (" + textName$ + ") not found", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+        hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-" + step$ + ".bmp", 1, 1)
+        write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+        write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+        write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+        write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - " + step$, crlf + crlf)
+        webWaitForText = 1
+    endpause
+
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + step$ + " validation was successful", crlf)
+    webWaitForText = 0
 
 endfunction

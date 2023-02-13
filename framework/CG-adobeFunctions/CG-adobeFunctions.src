@@ -5,10 +5,24 @@
 ##									increase script cleanliness/readability, and reduce maintenance efforts by providing a single centralized
 ##									location for changes
 ##
-##  contents:						adobeSendStatusChk
+##  contents:						adobeSendStatusChk, adobeLogIn, adobeInvalidEmailChk
 ##
 #############################################################################################################################################################*/
 
+/*=============================================================================================================================================================
+== function name:           adobeSendStatusChk
+==
+== developer:               todd busch
+==
+== purpose:                 terseDescription
+==
+== input parms:             paramName:  purpose
+==
+== returns:                 typeValue
+==
+== notes:                   pertinentinfo
+==
+=============================================================================================================================================================*/
 
 function adobeSendStatusChk(status$, name$)
 
@@ -19,13 +33,27 @@ function adobeSendStatusChk(status$, name$)
         write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + name$ + " packet has been sent", crlf)
         adobeSendStatusChk = 1
     else
-        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status indicates it is ok to send " + name$ + "packet", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status indicates it is ok to send " + name$ + " packet", crlf)
         adobeSendStatusChk = 0
     endif
 
 endfunction
 
 
+/*=============================================================================================================================================================
+== function name:           funcName
+==
+== developer:               todd busch
+==
+== purpose:                 terseDescription
+==
+== input parms:             paramName:  purpose
+==
+== returns:                 typeValue
+==
+== notes:                   pertinentinfo
+==
+=============================================================================================================================================================*/
 function adobeLogIn()
 
     if existhtmlelement(txtUsername$) = 1 then
@@ -43,9 +71,42 @@ function adobeLogIn()
             closebrowser()
             adobeLogIn = 1
         else
-            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": log in was successfull", crlf)
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": log in was successful", crlf)
             adobeLogIn = 0
         endif
+    endif
+
+endfunction
+
+
+/*=============================================================================================================================================================
+== function name:           adobeInvalidEmailChk
+==
+== developer:               todd busch
+==
+== purpose:                 terseDescription
+==
+== input parms:             paramName:  purpose
+==
+== returns:                 typeValue
+==
+== notes:                   pertinentinfo
+==
+=============================================================================================================================================================*/
+function adobeInvalidEmailChk()
+    local val$, res
+
+    res = useocrengine(3)
+    val$ = captureocr$(wndHomePage$, topinstance())
+    if instr(val$, "Email provided is invalid") <> 0 then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": email provided is invalid; resuming scan for next change event", crlf + crlf)
+        hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-invalid_email.bmp", 1, 1)
+        write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+        write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+        write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+        write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: invalid email", crlf + crlf)
+        closebrowser()
+        adobeInvalidEmailChk = 1
     endif
 
 endfunction
