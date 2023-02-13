@@ -1,0 +1,39 @@
+/*#############################################################################################################################################################
+##  filename:						adobeObjectRepository
+##
+##  contents:						contains window and object definitions for the adobe web application
+##
+#############################################################################################################################################################*/
+
+'======================================================================= window definitions =====================================================================
+wndHomePage$ = "CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome"
+wndESign$ = "CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat E-Sign - Google Chrome"
+
+
+
+'======================================================================= page definitions =====================================================================
+pgLogin$ = "Adobe ID"
+pgHomePage$ = "Adobe Acrobat Home"
+
+
+
+
+'======================================================================= object definitions =====================================================================
+'-------------------- login page
+txtUsername$ = "INPUT EMAIL[NAME='username']"
+txtPassword$ = "INPUT TEXT[NAME='password']"
+btnContinue$ = "SPAN[OUTERTEXT='Continue']"
+
+'-------------------- home page
+lnkTools$ = "SPAN[OUTERTEXT='Tools']"
+lnkReqSigs$ = "DIV[OUTERTEXT='Request', INDEX=3]"
+diaFileSelect$ = "DIV[OUTERTEXT='Request e-signaturesRecentDocumentsMy', INDEX=2]"
+
+
+'-------------------- file select popup dialogbox
+lnkDocuments$ = "SPAN[OUTERTEXT='Documents', INDEX=3]"
+lnkAutomated$ = "DIV[OUTERTEXT='Auto', INDEX=9]"
+lnkEmployeeForms$ = "DIV[CONTENT='EmployeEmployee']"
+lnkPre1stPkt$ = "DIV[CONTENT='PRE 1st IntervPRE']"
+btnContinue$ = "BUTTON[INNERTEXT='Continue']"
+lnk1stIntPkt$ = "DIV[OUTERTEXT='1st', INDEX=8]"

@@ -1,0 +1,112 @@
+/*#############################################################################################################################################################
+##  filename:						cg-adobeFunctions
+##
+##  purpose:						library of functions for use in adobe workflow script development in order to minimize code duplication,
+##									increase script cleanliness/readability, and reduce maintenance efforts by providing a single centralized
+##									location for changes
+##
+##  contents:						adobeSendStatusChk, adobeLogIn, adobeInvalidEmailChk
+##
+#############################################################################################################################################################*/
+
+/*=============================================================================================================================================================
+== function name:           adobeSendStatusChk
+==
+== developer:               todd busch
+==
+== purpose:                 terseDescription
+==
+== input parms:             paramName:  purpose
+==
+== returns:                 typeValue
+==
+== notes:                   pertinentinfo
+==
+=============================================================================================================================================================*/
+
+function adobeSendStatusChk(status$, name$)
+
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": checking packet status", crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": value of adobePcktStatus: " + adobePcktStatus$, crlf)
+    if instr(adobePcktStatus$, status$) <> 0 then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status indicates " + name$ + " packet has already been sent", crlf)
+        write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + name$ + " packet has been sent", crlf)
+        adobeSendStatusChk = 1
+    else
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status indicates it is ok to send " + name$ + " packet", crlf)
+        adobeSendStatusChk = 0
+    endif
+
+endfunction
+
+
+/*=============================================================================================================================================================
+== function name:           funcName
+==
+== developer:               todd busch
+==
+== purpose:                 terseDescription
+==
+== input parms:             paramName:  purpose
+==
+== returns:                 typeValue
+==
+== notes:                   pertinentinfo
+==
+=============================================================================================================================================================*/
+function adobeLogIn()
+
+    if existhtmlelement(txtUsername$) = 1 then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": adobe acct was not signed in", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": logging in", crlf)
+        usepage(pgLogin$)
+        writehtml(txtUsername$, adobeUsername$)
+        writehtml(txtPassword$, adobePassword$)
+        clickhtmlelement(btnContinue$)
+        pause 3
+        if currentpage$() <> pgHomePage$ then
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error logging in. browser not loaded to expected page", crlf)
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": expected: 'Adobe Acrobat Home'  actual: '" + currentpage$() + "'", crlf)
+            hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-login_error.bmp", 1, 1)
+            closebrowser()
+            adobeLogIn = 1
+        else
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": log in was successful", crlf)
+            adobeLogIn = 0
+        endif
+    endif
+
+endfunction
+
+
+/*=============================================================================================================================================================
+== function name:           adobeInvalidEmailChk
+==
+== developer:               todd busch
+==
+== purpose:                 terseDescription
+==
+== input parms:             paramName:  purpose
+==
+== returns:                 typeValue
+==
+== notes:                   pertinentinfo
+==
+=============================================================================================================================================================*/
+function adobeInvalidEmailChk()
+    local val$, res
+
+    res = useocrengine(3)
+    val$ = captureocr$(wndHomePage$, topinstance())
+    if instr(val$, "Email provided is invalid") <> 0 then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": email provided is invalid; resuming scan for next change event", crlf + crlf)
+        hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-invalid_email.bmp", 1, 1)
+        write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+        write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+        write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+        write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: invalid email", crlf + crlf)
+        closebrowser()
+        adobeInvalidEmailChk = 1
+    endif
+
+endfunction

@@ -10,6 +10,30 @@
 #############################################################################################################################################################*/
 
 /*=============================================================================================================================================================
+== function name:           logWorkflowStepSuccess
+==
+== developer:               todd busch
+==
+== purpose:                 writes lines to the log files that workflow was successful using specified text
+==
+== input parms:            	text$:	text to use as part of the log
+==
+== returns:                 int:	0 for success
+==
+== notes:                   n/a
+==
+=============================================================================================================================================================*/
+function logWorkflowStepSuccess(text$)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + text$, crlf)
+	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ":  " + text$, crlf)
+	write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+	write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+	write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + text$, crlf + crlf)
+	logWorkflowSuccess = 0
+endfunction
+
+
+/*=============================================================================================================================================================
 == function name:           logWorkflowSuccess
 ==
 == developer:               todd busch
@@ -123,6 +147,5 @@ endfunction
 function logDataValues()
 	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
 	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": SSN: " + applicantSSN$, crlf)
-	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": starting workflow for:" + applicantFName$ + " " + applicantLName$ + " record id: " + "(" + applicantID$ + ")", crlf)
+	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": starting workflow for: " + applicantFName$ + " " + applicantLName$ + " record id: " + "(" + applicantID$ + ")", crlf)
 endfunction

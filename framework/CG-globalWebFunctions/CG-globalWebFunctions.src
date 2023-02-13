@@ -5,7 +5,7 @@
 ##									duplication, increase script cleanliness/readability, and reduce maintenance efforts by providing a single
 ##									centralized location for changes
 ##
-##  contents:						webEnterText, webClickElement, webSelectItem
+##  contents:						webEnterText, webClickElement, webSelectItem, webLeftSingleClickOCRText
 ##
 #############################################################################################################################################################*/
 
@@ -31,6 +31,7 @@ function webEnterText(object$, text$, step$)
 	r = writehtml(object$, text$)
 
 	if r = 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + step$ + " was successfull", crlf)
 		webEnterText = 0
 	endif
 
@@ -78,13 +79,13 @@ function webClickElement(object$, step$)
 		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
 		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
 		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": SSN: " + applicantSSN$, crlf)
 		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - " + step$, crlf + crlf)
 		closebrowser()
 		webClickElement = r
 	endif
 
 	if r = 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + step$ + " was successfull", crlf)
 		webClickElement = 0
 	endif
 
@@ -121,14 +122,56 @@ function webSelectItem(object$, item$, step$)
 		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
 		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
 		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": SSN: " + applicantSSN$, crlf)
 		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - " + step$, crlf + crlf)
 		closebrowser()
 		webSelectItem = r
 	endif
 
 	if r = 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + step$ + " was successfull", crlf)
 		webSelectItem = 0
+	endif
+
+endfunction
+
+
+/*=============================================================================================================================================================
+== function name:           webLeftSingleClickOCRText
+==
+== developer:               todd busch
+==
+== purpose:                 terseDescription
+==
+== input parms:            	paramName:	purpose
+==
+== returns:                 typeValue
+==
+== notes:                   pertinentinfo
+==
+=============================================================================================================================================================*/
+function webLeftSingleClickOCRText(text$, area1, area2, area3, area4, offset1, offset2, step$)
+	local r
+
+	res = useocrengine(3)
+
+	r = clickontextocr(text$, left, single, inarea(area1, area2, area3, area4), offset1, offset2)
+
+	if r <> 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error " + step$, crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(r) + ") msg: " + #errormsg$, crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+		hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-" + step$ + ".bmp", 1, 1)
+		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - " + step$, crlf + crlf)
+		closebrowser()
+		webLeftSingleClickOCRText = r
+	endif
+
+	if r = 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + step$ + " was successfull", crlf)
+		webLeftSingleClickOCRText = 0
 	endif
 
 endfunction

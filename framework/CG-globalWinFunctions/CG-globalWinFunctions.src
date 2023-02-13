@@ -5,7 +5,7 @@
 ##									duplication, increase script cleanliness/readability, and reduce maintenance efforts by providing a single
 ##									centralized location for changes
 ##
-##  contents:						winSendKeys
+##  contents:						winSendKeys, winMouseLeftDblClick
 ##
 #############################################################################################################################################################*/
 
@@ -44,7 +44,33 @@ function winSendKeys(key_list$, step$)
 	endif
 
 	if r = 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + step$ + " was successful", crlf)
 		winSendKeys = 0
 	endif
+
+endfunction
+
+
+/*=============================================================================================================================================================
+== function name:           winMouseLeftDblClick
+==
+== developer:               todd busch
+==
+== purpose:                 conducts a double-click of left mouse button on coordinates specified
+==
+== input parms:            	x:		x coordinate		
+==							y:		y coordinate
+==							step$:	terse description of the action/step in the script (e.g. "closing popup")
+==
+== returns:                 none
+==
+== notes:                   none
+==
+=============================================================================================================================================================*/
+function winMouseLeftDblClick(x, y, step$)
+
+	clickmouse(left, double, x, y, absolute)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + step$ + " was successful", crlf)
+	exitfunction
 
 endfunction
