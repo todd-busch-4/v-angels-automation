@@ -740,7 +740,7 @@ firstInterviewSend:
 
 
 		if curr_stage$ <> "1st Interview" and curr_stage$ <> "2nd Interview" then
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status for change event at row: (" + str$(iExcelRow) + ") did not trigger workflow", crlf)
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage for change event at row: (" + str$(iExcelRow) + ") did not trigger workflow", crlf)
 			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 		endif
 

@@ -9,24 +9,24 @@
 ##
 #############################################################################################################################################################*/
 
-'=============================================================================================================================================================
-'== function name:           invokeBrowser
-'==
-'== developer:               todd busch
-'==
-'== purpose:                 attempts to start the specified browser and load the specified url. if an error is encountered it will retry the number of
-'==                          of times defined in iRetry (default: 3). if number of retry attempts defined is exceeded it will log messages, close the
-'==                          the browser, and return the error code
-'==
-'== input parms:             str_app$:   browser code to invoke ("CH" = Chrome  "FF" = FireFox)
-'==                          str_url$:   url to navigate to on browser invoke
-'==
-'== returns:                 int:	0 - success		error_code - on failure
-'==
-'== notes:                   n/a
-'==
-'=============================================================================================================================================================
-
+/*=============================================================================================================================================================
+== function name:           invokeBrowser
+==
+== developer:               todd busch
+==
+== purpose:                 attempts to start the specified browser and load the specified url. if an error is encountered it will retry the number of
+==							times defined in iRetry (default: 3). if number of retry attempts defined is exceeded it will log messages, close the
+==							browser, and return the error code
+==
+== input parms:            	str_app$:	browser code to invoke ("CH" = Chrome  "FF" = FireFox)
+==							str_url:	url to navigate to
+==
+== returns:                 int:	0 - on success
+==									error_code - on failure
+==
+== notes:                   none
+==
+=============================================================================================================================================================*/
 function invokeBrowser(str_app$, str_url$)
 	local iRetry, r, iAttempt
 
@@ -143,9 +143,10 @@ endfunction
 ==
 == developer:               todd busch
 ==
-== purpose:                 checks value from employment inquiry sn column for blank value
+== purpose:                 checks value from employment inquiry ssn column for blank value
 ==
-== returns:                 int:	0 - contained ssn	  1 - ssn was null
+== returns:                 int:	0 - contained ssn
+==									1 - ssn was null
 ==
 == notes:                   none
 ==
@@ -174,7 +175,8 @@ endfunction
 ==
 == purpose:                 loads data needed from employment inquiry spreadsheet into arrays
 ==
-== returns:                 int:	0 - if all items read successfully	  1 - if any item fails
+== returns:                 int:	0 - if all items read successfully	  
+==									1 - if any item fails
 ==
 == notes:                   pertinentinfo
 ==
@@ -278,6 +280,14 @@ function loadEmploymentInquiryRows()
 	if instr(str$(r), "-") <> 0 then
 		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading text messages column.  error_code: (" + str$(r) + ")", crlf)
 		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (text messages)", crlf)
+		loadEmploymentInquiryRows = 1
+		exitfunction
+	endif
+	'-------------------- background check
+	res = readexcel (employmentInquiryPath$, employmentInquiryBackGroundChkCol$, arrBackGroundChk$())
+	if instr(str$(res), "-") <> 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading background check column.  error_code: (" + str$(r) + ")", crlf)
+		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (background check)", crlf)
 		loadEmploymentInquiryRows = 1
 		exitfunction
 	endif

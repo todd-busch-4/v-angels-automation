@@ -14,13 +14,14 @@
 ==
 == developer:               todd busch
 ==
-== purpose:                 enters specified text into the specified html element with error-handling included
+== purpose:                 enters specified text into the specified html element with error-handling/logging
 ==
 == input parms:            	object$:	descriptor of the html object to receive text
 ==							text$:		the text to enter into the object
 ==							step$:		terse description of the action/step in the script (e.g. "clicking login")
 ==
-== returns:                 int: 0 - on success	  error_code - on failure
+== returns:                 int:	0 - on success	  
+==									error_code - on failure
 ==
 == notes:                   none
 ==
@@ -31,7 +32,7 @@ function webEnterText(object$, text$, step$)
 	r = writehtml(object$, text$)
 
 	if r = 0 then
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + step$ + " was successfull", crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + step$ + " was successful", crlf)
 		webEnterText = 0
 	endif
 
@@ -56,12 +57,13 @@ EndFunction
 ==
 == developer:               todd busch
 ==
-== purpose:                 perform a left mouse click on the specified html element
+== purpose:                 perform a single left mouse click on the specified html element with error-handling/logging
 ==
 == input parms:             object$:	descriptor of the html object to click
 ==							step$:		terse description of the action/step in the script (e.g. "clicking login")
 ==
-== returns:                 int: 0 - on success	  error_code - on failure
+== returns:                 int: 	0 - on success	  
+==									error_code - on failure
 ==
 == notes:                   none
 ==
@@ -85,7 +87,7 @@ function webClickElement(object$, step$)
 	endif
 
 	if r = 0 then
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + step$ + " was successfull", crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + step$ + " was successful", crlf)
 		webClickElement = 0
 	endif
 
@@ -97,13 +99,14 @@ endfunction
 ==
 == developer:               todd busch
 ==
-== purpose:                 select and item from the specified html combobox/dropdown or other multi-value object
+== purpose:                 selects specified item from the specified html combobox/dropdown or other multi-value object with error-handling/logging
 ==
 == input parms:             object$:	descriptor of the html object
 ==							item$:		the item/value to select
 ==							step$:		terse description of the action/step in the script (e.g. "clicking login")
 ==
-== returns:                 int: 0 - on success	  error_code - on failure
+== returns:                 int:	0 - on success
+==									error_code - on failure
 ==
 == notes:                   none
 ==
@@ -128,7 +131,7 @@ function webSelectItem(object$, item$, step$)
 	endif
 
 	if r = 0 then
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + step$ + " was successfull", crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + step$ + " was successful", crlf)
 		webSelectItem = 0
 	endif
 
@@ -140,13 +143,21 @@ endfunction
 ==
 == developer:               todd busch
 ==
-== purpose:                 terseDescription
+== purpose:                 conducts a left button single click on the specified text found in the location (area) specified
 ==
-== input parms:            	paramName:	purpose
+== input parms:            	text$:		the text to look for
+==							area1:		x coordinate to the topleft point of the area to look in
+==							area2:		y coordinate to the topleft point of the area to look in
+==							area3:		height of the area to look in
+==							area4:		width of the area to look in
+==							offset1:	x coordinate specifying an offset distance from the middl#End Region
+==							offset2:	y coordinate specifying an offset distance from the middl#End Region
+==							step$:		terse description of the action/step in the script (e.g. "clicking login")
 ==
-== returns:                 typeValue
+== returns:                 int:	0 - on success
+==									error_code - on failure
 ==
-== notes:                   pertinentinfo
+== notes:                   none
 ==
 =============================================================================================================================================================*/
 function webLeftSingleClickOCRText(text$, area1, area2, area3, area4, offset1, offset2, step$)
@@ -170,7 +181,7 @@ function webLeftSingleClickOCRText(text$, area1, area2, area3, area4, offset1, o
 	endif
 
 	if r = 0 then
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + step$ + " was successfull", crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + step$ + " was successful", crlf)
 		webLeftSingleClickOCRText = 0
 	endif
 

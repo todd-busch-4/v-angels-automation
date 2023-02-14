@@ -5,7 +5,7 @@
 ##									increase script cleanliness/readability, and reduce maintenance efforts by providing a single centralized
 ##									location for changes
 ##
-##  contents:						adobeSendStatusChk, adobeLogIn, adobeInvalidEmailChk
+##  contents:						adobeSendStatusChk, adobeLogIn, adobeInvalidEmailChk, adobeCancelStatusChk, clickSearchIcon, adobeChkForCancelStatus
 ##
 #############################################################################################################################################################*/
 
@@ -14,13 +14,15 @@
 ==
 == developer:               todd busch
 ==
-== purpose:                 terseDescription
+== purpose:                 compares current value of adobe status column to specified status to determine if packet should be sent or bypassed
 ==
-== input parms:             paramName:  purpose
+== input parms:             status$:    text that if found in current column value will bypass sending pkt
+==                          name$:      name of the packet
 ==
-== returns:                 typeValue
+== returns:                 int:    1 - if text was found and send should be bypassed
+==                                  0 - if not found and workflow should continue
 ==
-== notes:                   pertinentinfo
+== notes:                   none
 ==
 =============================================================================================================================================================*/
 
@@ -41,17 +43,19 @@ endfunction
 
 
 /*=============================================================================================================================================================
-== function name:           funcName
+== function name:           adobeLogIn
 ==
 == developer:               todd busch
 ==
-== purpose:                 terseDescription
+== purpose:                 looks for object associated with the login page in most recent invoked browser to determine if account was not logged in;
+==                          if found logs into account with credentials defined in variables 
 ==
-== input parms:             paramName:  purpose
+== input parms:             none
 ==
-== returns:                 typeValue
+== returns:                 int:    1 - if found and not able to log in successfully
+==                                  0 - in not found or if found and log in was successful
 ==
-== notes:                   pertinentinfo
+== notes:                   variables used are defined in cg-globalVaruables and currently use the caremgr@v-angels.com account
 ==
 =============================================================================================================================================================*/
 function adobeLogIn()
@@ -74,6 +78,9 @@ function adobeLogIn()
             write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": log in was successful", crlf)
             adobeLogIn = 0
         endif
+    else
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": account was already signed in", crlf)
+        adobeLogIn = 0
     endif
 
 endfunction
@@ -84,13 +91,14 @@ endfunction
 ==
 == developer:               todd busch
 ==
-== purpose:                 terseDescription
+== purpose:                 captures text on current page using ocrengine and checks for text indicating an email entered was invalid
 ==
-== input parms:             paramName:  purpose
+== input parms:             none
 ==
-== returns:                 typeValue
+== returns:                 int:    1 - if text was found indicating error exists
 ==
-== notes:                   pertinentinfo
+== notes:                   this function is called from within a waitForText validation used throughout the adobeSend script to check
+==                          if an error encountered was because of an invalid email eliminating the need for further troubleshooting
 ==
 =============================================================================================================================================================*/
 function adobeInvalidEmailChk()
@@ -107,6 +115,204 @@ function adobeInvalidEmailChk()
         write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: invalid email", crlf + crlf)
         closebrowser()
         adobeInvalidEmailChk = 1
+    endif
+
+endfunction
+
+
+/*=============================================================================================================================================================
+== function name:           adobeCancelStatusChk
+==
+== developer:               todd busch
+==
+== purpose:                 evaluates current value of adobe status column to determine if packet should be cancelled or bypassed
+==
+== input parms:             packet$:    name of packet checking status for
+==
+== returns:                 int:    0 - if workflow should continue
+==                                  1 - if text for packet being checked was found indicating packet is complete and cant be cancelled or
+==                                      is already cancelled
+==
+== notes:                   none
+==
+=============================================================================================================================================================*/
+function adobeCancelStatusChk(packet$)
+
+    if packet$ = "pre 1st" then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": checking status oF pre 1st interview packet", crlf)
+        if instr(adobePcktStatus$, "Pre 1st Pkt Complete") <> 0 then
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": pre 1st packet has 'complete' status and can't be cancelled", crlf)
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": skipping to 1st interview packet", crlf)
+            write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": pre 1st packet has 'complete' status and can't be cancelled", crlf)
+            adobeCancelStatusChk = 1
+            exitfunction
+        endif
+        if instr(adobePcktStatus$, "Pre 1st Pkt Canceled") <> 0 then
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": pre 1st packet has already been cancelled", crlf)
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": skipping to 1st interview packet", crlf)
+            write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": pre 1st packet has already been cancelled", crlf)
+            adobeCancelStatusChk = 1
+            exitfunction
+        endif
+            
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status indicates packet can be cancelled", crlf)
+        adobeCancelStatusChk = 0
+        exitfunction
+    endif
+
+endfunction
+
+
+/*=============================================================================================================================================================
+== function name:           clickSearchIcon
+==
+== developer:               todd busch
+==
+== purpose:                 due to a glitch that occurs with adobe intermittently this function was created to try clicking the search icon
+==                          multiple times
+==
+== input parms:             none
+==
+== returns:                 int:    0 - on success
+==                                  error_code - on failure
+==
+== notes:                   pertinentinfo
+==
+=============================================================================================================================================================*/
+function clickSearchIcon()
+    local iRetry, r, iAttempt
+
+    while iRetry <= 2
+        usepage(pgHomePage$)
+        r = clickhtmlelement(btnSearch$)
+        pause 2
+        iAttempt = iRetry + 1
+
+        if r <> 0 then
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error clicking search icon on attempt: [" + str$(iAttempt) + "]", crlf)
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(r) + "); retrying", crlf)
+            iRetry = iRetry + 1
+            pause 2
+        endif
+
+        if r = 0 then
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicked search icon", crlf)
+            clickSearchIcon = 0
+            exitfunction
+        endif
+    wend
+
+    if r <> 0 then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": search icon could not be clicked after: [" + str$(iAttempt) + "] attempts", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(r) + "); msg: " + #errormsg$, crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+        hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_search_" + str$(iAttempt) + ".bmp", 1, 1)
+        write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ":  workflow failed; proceeding to next change event", crlf + crlf)
+        write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+        write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+        write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error -  clicking search icon", crlf + crlf)
+        closebrowser()
+        clickSearchIcon = r
+    endif
+
+endfunction
+
+
+/*=============================================================================================================================================================
+== function name:           adobeChkForCancelStatus
+==
+== developer:               todd busch
+==
+== purpose:                 terseDescription
+==
+== input parms:             paramName:  purpose
+==
+== returns:                 typeValue
+==
+== notes:                   pertinentinfo
+==
+=============================================================================================================================================================*/
+function adobeChkForCancelStatus(packet$)
+    local r
+
+    r = existhtmlelement(lblPacketStatus$)
+    if r = 1 then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + packet$ + " is already in cancelled state", crlf)
+        if packet$ = "pre 1st pkt" then
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": skipping to 1st interview packet", crlf)
+            write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + packet$ + " is already cancelled", crlf)
+            hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "cancel_check.bmp", 1, 1)
+            closebrowser()
+           adobeChkForCancelStatus = 1
+      else
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+            write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": packet already cancelled; proceeding to next event", crlf + crlf)
+            hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "cancel_check.bmp", 1, 1)
+            closebrowser()
+            adobeChkForCancelStatus = 1
+       endif
+    endif
+
+    if r = 0 then
+        adobeChkForCancelStatus = 0
+    endif
+
+endfunction
+
+/*=============================================================================================================================================================
+== function name:           funcName
+==
+== developer:               todd busch
+==
+== purpose:                 terseDescription
+==
+== input parms:             paramName:  purpose
+==
+== returns:                 typeValue
+==
+== notes:                   pertinentinfo
+==
+=============================================================================================================================================================*/
+function adobeCancelPacket(packet$)
+    local r, iRetry, iAttempt
+
+    while iRetry <= 2
+        r = clickhtmlelement(btnCancel$, left)
+        pause 2
+        iAttempt = iRetry + 1
+
+        if r <> 0 then
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error clicking 'cancel' button on attempt: [" + str$(iAttempt) + "]", crlf)
+            hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_cancel_button-" + iAttempt + ".bmp", 1, 1)
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(r) + ") retrying", crlf)
+            iRetry = iRetry + 1
+            pause 2
+        endif
+
+        if r = 0 then
+            adobeCancelPacket = 0
+            exitfunction
+        endif
+    wend
+
+    if r <> 0 then
+        write(debuglogpath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": could not click cancel after [" + str$(iattempt) + "] attempts", crlf)
+        write(debuglogpath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(r) + ") msg: " + #errormsg$, crlf)
+            if packet$ = "pre 1st pkt" then
+                write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": skipping to 1st interview packet", crlf)
+                write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": cancel pre 1st pkt failed", crlf)
+                write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+                write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+                write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - pre 1st cancel", crlf + crlf)
+            else
+                write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+                write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": cancel " + packet$ + " failed; proceeding to next change event", crlf + crlf)
+                write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+                write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+                write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - " + packet$ + " cancel", crlf + crlf)
+            endif
+        closebrowser()
+        adobeCancelPacket = 1
     endif
 
 endfunction

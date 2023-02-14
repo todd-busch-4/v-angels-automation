@@ -28,7 +28,11 @@ btnContinue$ = "SPAN[OUTERTEXT='Continue']"
 lnkTools$ = "SPAN[OUTERTEXT='Tools']"
 lnkReqSigs$ = "DIV[OUTERTEXT='Request', INDEX=3]"
 diaFileSelect$ = "DIV[OUTERTEXT='Request e-signaturesRecentDocumentsMy', INDEX=2]"
-
+btnSearch$ = "BUTTON[CLASS='spectrum-Tool Search']"
+divPre1stPktRow$ = "DIV[OUTERTEXT='" + applicantFName$ + " " + applicantLName$ + " PRE', INDEX=8]"
+lblNoResultsMsg$ = "DIV[OUTERTEXT='No', INDEX=8]"
+lblPacketTitle$ = "DIV[OUTERTEXT='" + applicantFName$ + " " + applicantLName$ + " PRE', INDEX=6]"
+lblPacketStatus$ = "SPAN[OUTERTEXT='Canceled']"
 
 '-------------------- file select popup dialogbox
 lnkDocuments$ = "SPAN[OUTERTEXT='Documents', INDEX=3]"
@@ -37,3 +41,15 @@ lnkEmployeeForms$ = "DIV[CONTENT='EmployeEmployee']"
 lnkPre1stPkt$ = "DIV[CONTENT='PRE 1st IntervPRE']"
 btnContinue$ = "BUTTON[INNERTEXT='Continue']"
 lnk1stIntPkt$ = "DIV[OUTERTEXT='1st', INDEX=8]"
+
+'-------------------- e-sign page
+
+
+'-------------------- document view - right verticle panel
+btnCancel$ = "BUTTON[INNERTEXT='Cancel']"
+
+'-------------------- cancel popup dialogbox
+diaCancelPktPopup$ = "TEXTAREA[CLASS='spectrum-Textfield s']"
+
+'======================================================================= data definitions =====================================================================
+dataPre1stPktSrcString$ = "<Doublequote>" + applicantFName$ + " " + applicantLName$ + " PRE<Doublequote><enter>"

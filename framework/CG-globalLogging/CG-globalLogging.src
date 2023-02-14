@@ -5,7 +5,7 @@
 ##									duplication, increase script cleanliness/readability, and reduce maintenance efforts by providing a single
 ##									centralized location for changes
 ##
-##  contents:						logWorkflowSuccess, logStartScript, logStageMatch, logEventFound, logDataValues
+##  contents:						logWorkflowStepSuccess, logWorkflowSuccess, logStartScript, logStageMatch, logEventFound, logDataValues
 ##
 #############################################################################################################################################################*/
 
@@ -14,9 +14,9 @@
 ==
 == developer:               todd busch
 ==
-== purpose:                 writes lines to the log files that workflow was successful using specified text
+== purpose:                 writes lines to the log files using specified text that one portion of the workflow was successful 
 ==
-== input parms:            	text$:	text to use as part of the log
+== input parms:            	text$:	text to use as part of the log statement
 ==
 == returns:                 int:	0 for success
 ==
@@ -38,7 +38,7 @@ endfunction
 ==
 == developer:               todd busch
 ==
-== purpose:                 writes lines to the log files that workflow was successful using specified text
+== purpose:                 writes lines to the log files using specified text that entire workflow was successful 
 ==
 == input parms:            	text$:	text to use as part of the log
 ==

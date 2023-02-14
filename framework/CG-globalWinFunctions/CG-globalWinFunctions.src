@@ -19,7 +19,8 @@
 == input parms:            	key_list$:	the keys to be typed
 ==                          step$:		terse description of the action/step in the script (e.g. "closing popup")
 ==
-== returns:                 int:	0 - on success		error_code - on failure
+== returns:                 int:	0 - on success		
+==									error_code - on failure
 ==
 == notes:                   be sure the last context set was to a window to receive the typed keys
 ==

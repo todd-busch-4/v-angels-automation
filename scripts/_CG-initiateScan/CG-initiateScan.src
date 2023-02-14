@@ -95,7 +95,7 @@ endif
 if res = 0 then
 	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicked download link", crlf)
 endif
-
+pause 2
 
 '-------------------- click save
 usewindow("CHROME.EXE|#32770|Save As", 4)

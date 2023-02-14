@@ -1,0 +1,469 @@
+'#############################################################################################################################
+'## author:                 todd busch
+'##
+'## date:                   12/05/2022
+'##
+'## description:            scans spreadsheet in package downloads folder for workflow change events (="yes") and sends
+'##							pre 1st interview and 1st interview packets for events with 1st interview stage and 2nd  
+'##							interview packet for events with a 2nd interview stage
+'##
+'## run in:					chrome
+'##
+'## notes:                  called by 'CG-initiateScan'
+'##							
+'##
+'## chg control:    ver     name        description
+'##--------------------------------------------------------------------------------------------------------------------------
+'## 01/16/2023      1.0     tbusch      initial version
+'##										
+'#############################################################################################################################
+
+'#############################################################################################################################
+'##   													script prep									 						##
+'#############################################################################################################################
+include "C:\office_automation\framework\CG-globalDimDeclarations\CG-globalDimDeclarations-v1.0.src"
+include "C:\office_automation\framework\CG-globalFunctions\CG-globalFunctions-v1.0.src"
+include "C:\office_automation\framework\CG-globalSubDefinitions\CG-globalSubDefinitions-v1.0.src"
+include "C:\office_automation\framework\CG-globalVariables\CG-globalVariables-v1.0.src"
+
+
+currScript$ = "CG-adobeSendPackets"
+
+
+#IgnoreErrors = 1
+
+
+'-------------------------------------------------------------------------------------------------------------------------------- read in columns from employment inquiry doc
+if loadEmploymentInquiryRows() = 1 then
+	criticalStop()
+endif
+
+
+'#############################################################################################################################
+'##   													script start								 						##
+'#############################################################################################################################
+logStartScript("arcs submit")
+
+
+'------------------------------------------------------------------------------------------------------------------------------------- begin iterating through change event column
+i = 0
+
+
+repeat
+
+
+	'-------------------- get change status of current row
+	curr_status$ = arrChangeEvents$(i)
+
+
+	if curr_status$ = "Yes" then
+
+
+		iEventCnt = iEventCnt + 1	'change event counter
+		iExcelRow = i + 2			'add 1 for header row and 1 for zero indexed arrays
+		logEventFound()
+		
+
+		'-------------------- get the stage for the current change event
+		curr_stage$ = arrCurrentStage$(i)
+
+
+		if curr_stage$ = "2nd Interview" or curr_stage$ = "2nd Interview Rescheduled" or curr_stage$ = "On-board" then
+
+
+			iTriggeredCnt = iTriggeredCnt + 1
+			write(debugLogPath$, basicLogHdr$ + currScript$ + ": stage for change event triggers workflow", crlf)
+			write(executionLogPath$, basicLogHdr$ + currScript$ + ": change event at row: " + str$(iExcelRow) + " triggered workflow", crlf)
+			write(debugLogPath$, basicLogHdr$ + currScript$ + ": getting data from employment inquiry for current row", crlf)
+			
+			
+			'-------------------- get data values for current record from employment inquiry
+			applicantID$ = arrApplicantID$(i)
+			applicantFName$ = arrApplicantFName$(i)
+			applicantLName$ = arrApplicantLName$(i)
+			backGroundChk$ = arrBackGroundChk$(i)
+			applicantSSN$ = arrApplicantSSN$(i)
+			write(debugLogPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+			write(debugLogPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+			write(executionLogPath$, basicLogHdr$ + currScript$ + ": starting workflow for:" + applicantFName$ + " " + applicantLName$ + " record id: " + "[" + applicantID$ + "]", crlf)
+
+
+			'-------------------- verify background check is ready to be submitted
+			write(debugLogPath$, basicLogHdr$ + currScript$ + ": checking for flag to submit application", crlf)
+			if backGroundChk$ = "Yes" then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": background check flag set to 'yes' for current applicant", crlf)
+
+
+'--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- log in
+				'-------------------- invoke browser
+				res = startbrowser("CH", arcsURL$, 3)
+				'------- error handling
+				if res <> 0 then
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": error starting browser; error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": stopping workflow for current record; resuming scan for next change event", crlf + crlf)
+					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-start_browser.bmp", 1, 1)
+					write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - start browser", crlf + crlf)
+					closebrowser()
+					goto nextIteration
+				endif
+				'------- validation
+				if currentpage$() <> "Login" then
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": invoke browser validation failed; current page did not match expected", crlf)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": expected: (Login)   actual: (" + currentpage$() + ")", crlf)
+					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-start_browser.bmp", 1, 1)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": stopping workflow for current record; resuming scan for next change event", crlf + crlf)
+					write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - start browser", crlf + crlf)
+					closebrowser()
+					goto nextIteration
+				endif
+				'------- debug logging
+				if res = 0 then
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": browser invoked successfully to arcs homepage", crlf)
+				endif
+
+
+				'-------------------- enter username
+				usepage("Login")
+				res = writehtmlpaste("INPUT TEXT[NAME='UserName']", arcsUsername$, delete)
+				'------- error handling
+				if res <> 0 then
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": error entering username; error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": stopping workflow for current record; resuming scan for next change event", crlf + crlf)
+					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-enter_username.bmp", 1, 1)
+					write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - enter username", crlf + crlf)
+					closebrowser()
+					goto nextIteration
+				endif
+				'------- validation
+				ret = gethtmledittext("INPUT TEXT[NAME='UserName']", val$)
+				if ret <> 0 then
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": enter username validation failed", crlf)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": error getting text from object; error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-enter_username.bmp", 1, 1)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": continuing though system is in unknown state", crlf)
+				endif
+				if ret = 0 then
+					if val$ <> arcsUsername$ then
+						write(debugLogPath$, basicLogHdr$ + currScript$ + ": enter username validation failed; text did not match expected", crlf)
+						write(debugLogPath$, basicLogHdr$ + currScript$ + ": expected: (" + arcsUsername$ + ")   actual: (" + val$ + ")", crlf)
+						hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-enter_username.bmp", 1, 1)
+						write(debugLogPath$, basicLogHdr$ + currScript$ + ": stopping workflow for current record; resuming scan for next change event", crlf + crlf)
+						write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+						write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+						write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+						write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - enter username", crlf + crlf)
+						closebrowser()
+						goto nextIteration
+					endif
+				endif
+				'------- debug logging
+				if res = 0 then
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": entered username", crlf)
+				endif
+
+
+				'-------------------- enter password
+				res = writehtmlpaste("INPUT PASSWORD[NAME='Password']", arcsPassword$, delete)
+				'------- error handling
+				if res <> 0 then
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": error entering password; error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": stopping workflow for current record; resuming scan for next change event", crlf + crlf)
+					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-enter_password.bmp", 1, 1)
+					write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - enter password", crlf + crlf)
+					closebrowser()
+					goto nextIteration
+				endif
+				'------- validation
+				ret = gethtmledittext("INPUT PASSWORD[NAME='Password']", val$)
+				if ret <> 0 then
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": enter password validation failed", crlf)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": error getting text from object; error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-enter_password.bmp", 1, 1)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": continuing though system is in unknown state", crlf)
+				endif
+				if ret = 0 then
+					if val$ <> arcsPassword$ then
+						write(debugLogPath$, basicLogHdr$ + currScript$ + ": enter password validation failed; text did not match expected", crlf)
+						write(debugLogPath$, basicLogHdr$ + currScript$ + ": expected: (" + arcsPassword$ + ")   actual: (" + val$ + ")", crlf)
+						hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-enter_password.bmp", 1, 1)
+						write(debugLogPath$, basicLogHdr$ + currScript$ + ": stopping workflow for current record; resuming scan for next change event", crlf + crlf)
+						write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+						write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+						write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+						write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - enter password", crlf + crlf)
+						closebrowser()
+						goto nextIteration
+					endif
+				endif
+				'------- debug logging
+				if res = 0 then
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": entered password", crlf)
+				endif
+
+
+				'-------------------- click login button
+				res = clickhtmlelement("BUTTON[INNERTEXT='Login']", left)
+				'------- error handling
+				if res <> 0 then
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": error clicking login button; error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": stopping workflow for current record; resuming scan for next change event", crlf + crlf)
+					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_login.bmp", 1, 1)
+					write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - click login", crlf + crlf)
+					closebrowser()
+					goto nextIteration
+				endif
+				'------- validation
+				ret = existhtmlelement("IMG[SRC='https://arcs.ohio.go']")
+				if ret <> 1 then
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": login validation failed", crlf)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": expected element (arcs logo) was not found on page", crlf)
+					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_login.bmp", 1, 1)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": stopping workflow for current record; resuming scan for next change event", crlf + crlf)
+					write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - click login", crlf + crlf)
+					closebrowser()
+					goto nextIteration
+				endif
+				'------- debug logging
+				if res = 0 then
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": login successful", crlf)
+				endif
+
+
+				'-------------------- accept end user agreement if presented
+				res = existhtmlelement("INPUT CHECKBOX[NAME='Accepted']")
+				if res = 1 then
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": end user agreement was presented on login", crlf)
+					ret = clickhtmlelement ("INPUT CHECKBOX[NAME='Accepted']")
+					ret = clickhtmlelement ("BUTTON[INNERTEXT='Submit']")
+					'------- error handling
+					if ret <> 0 then
+						write(debugLogPath$, basicLogHdr$ + currScript$ + ": error accepting end user agreement; error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+						write(debugLogPath$, basicLogHdr$ + currScript$ + ": stopping workflow for current record; resuming scan for next change event", crlf + crlf)
+						hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-accept_end_user_agreement.bmp", 1, 1)
+						write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+						write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+						write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+						write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - accepting end user agreement", crlf + crlf)
+						closebrowser()
+						goto nextIteration
+					endif
+					'------- validation
+					pause 10 secs until
+						text("Welcome")
+						inwindow("CHROME.EXE|Chrome_WidgetWin_1|ARCS Home - Google Chrome",1)
+					pausefalse
+						write(debugLogPath$, basicLogHdr$ + currScript$ + ": accept end user agreement validation failed", crlf + crlf)
+						write(debugLogPath$, basicLogHdr$ + currScript$ + ": expected text (welcome) was not found on page", crlf + crlf)
+						hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-accept_end_user_agreement.bmp", 1, 1)
+						write(debugLogPath$, basicLogHdr$ + currScript$ + ": stopping workflow for current record; resuming scan for next change event", crlf + crlf)
+						write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+						write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+						write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+						write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - click login", crlf + crlf)
+						closebrowser()
+						goto nextIteration
+					endpause
+					'------- debug logging
+					if ret - 0 then
+						write(debugLogPath$, basicLogHdr$ + currScript$ + ": end user agreement accepted", crlf)
+					endif
+				endif
+
+
+'--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- search for existing application
+
+				'-------------------- navigate to new applicants page
+				res = navigate("https://arcs.ohio.gov/BCS/NewScreening")
+				'------- error handling
+				if instr(str$(res), "-") <> 0 then
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": error navigating to new applicants page; error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": stopping workflow for current record; resuming scan for next change event", crlf + crlf)
+					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-nav_to_new_applicant.bmp", 1, 1)
+					write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - navigating to new applicants page", crlf + crlf)
+					closebrowser()
+					goto nextIteration
+				endif
+				'------- validation
+				if currentpage$() <> "ARCS New Applicant" then
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": nav to new applicants validation failed; expected page did not match expected", crlf)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": expected: (ARCS New Applicant)   actual: (" + currentpage$() + ")", crlf)
+					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-nav_to_new_applicants.bmp", 1, 1)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": stopping workflow for current record; resuming scan for next change event", crlf + crlf)
+					write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - nav to new applicants", crlf + crlf)
+					closebrowser()
+					goto nextIteration
+				endif
+				'------- debug logging
+				if currentpage$() = "ARCS New Applicant" then
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": navigated to new applicants page", crlf)
+				endif
+
+
+				'-------------------- enter ssn
+				usepage("ARCS New Applicant")
+				res = writehtmlpaste("INPUT TEXT[NAME='Ssn']", applicantSSN$, delete)
+				'------- error handling
+				if res <> 0 then
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": error entering ssn; error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": stopping workflow for current record; resuming scan for next change event", crlf + crlf)
+					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-enter_ssn.bmp", 1, 1)
+					write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - enter ssn", crlf + crlf)
+					closebrowser()
+					goto nextIteration
+				endif
+				'------- validation
+				ret = gethtmledittext("INPUT TEXT[NAME='Ssn']", val$)
+				if ret <> 0 then
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": enter ssn validation failed", crlf)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": error getting text from object; error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-enter_ssn.bmp", 1, 1)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": continuing though system is in unknown state", crlf)
+				endif
+				if ret = 0 then
+					if val$ <> applicantSSN$ then
+						write(debugLogPath$, basicLogHdr$ + currScript$ + ": enter ssn validation failed; text did not match expected", crlf)
+						write(debugLogPath$, basicLogHdr$ + currScript$ + ": expected: (" + applicantSSN$ + ")   actual: (" + val$ + ")", crlf)
+						hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-enter_ssn.bmp", 1, 1)
+						write(debugLogPath$, basicLogHdr$ + currScript$ + ": stopping workflow for current record; resuming scan for next change event", crlf + crlf)
+						write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+						write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+						write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+						write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - enter ssn", crlf + crlf)
+						closebrowser()
+						goto nextIteration
+					endif
+				endif
+				'------- debug logging
+				if res = 0 then
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": entered ssn", crlf)
+				endif
+
+
+				'-------------------- enter last name
+				res = writehtmlpaste("INPUT TEXT[NAME='LastName']", applicantLName$, delete)
+				'------- error handling
+				if res <> 0 then
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": error entering last name; error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": stopping workflow for current record; resuming scan for next change event", crlf + crlf)
+					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-enter_last_name.bmp", 1, 1)
+					write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - enter last name", crlf + crlf)
+					closebrowser()
+					goto nextIteration
+				endif
+				'------- validation
+				ret = gethtmledittext("INPUT TEXT[NAME='LastName']", val$)
+				if ret <> 0 then
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": enter last name validation failed", crlf)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": error getting text from object; error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-enter_last_name.bmp", 1, 1)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": continuing though system is in unknown state", crlf)
+				endif
+				if ret = 0 then
+					if val$ <> applicantLName$ then
+						write(debugLogPath$, basicLogHdr$ + currScript$ + ": enter last name validation failed; text did not match expected", crlf)
+						write(debugLogPath$, basicLogHdr$ + currScript$ + ": expected: (" + applicantLName$ + ")   actual: (" + val$ + ")", crlf)
+						hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-enter_last_name.bmp", 1, 1)
+						write(debugLogPath$, basicLogHdr$ + currScript$ + ": stopping workflow for current record; resuming scan for next change event", crlf + crlf)
+						write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+						write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+						write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+						write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: validation error - enter last name", crlf + crlf)
+						closebrowser()
+						goto nextIteration
+					endif
+				endif
+				'------- debug logging
+				if res = 0 then
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": entered last name", crlf)
+				endif
+
+
+				'-------------------- click search button
+				res = clickhtmlelement("BUTTON[INNERTEXT='Search']")
+				'------- error handling
+				if res <> 0 then
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": error clicking search button; error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": stopping workflow for current record; resuming scan for next change event", crlf + crlf)
+					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_search.bmp", 1, 1)
+					write(executionLogPath$, basicLogHdr$ + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": record id: " + applicantID$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+					write(scanFailuresPath$, basicLogHdr$ + currScript$ + ": result: script error - click search", crlf + crlf)
+					closebrowser()
+					goto nextIteration
+				endif
+				'------- validation
+				'------- debug logging
+				if res = 0 then
+					write(debugLogPath$, basicLogHdr$ + currScript$ + ": login successful", crlf)
+				endif
+
+
+'--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- enter new application
+
+
+
+
+
+
+
+
+
+			endif		'/yes flag - submit app
+
+			'-------------------- handle background check not ready to be submitted
+			if backGroundChk$ <> "Yes" then
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": background check flag NOT set to 'yes' for current applicant", crlf)
+				write(debugLogPath$, basicLogHdr$ + currScript$ + ": stopping workflow for current record; resuming scan for next change event", crlf + crlf)
+				write(executionLogPath$, basicLogHdr$ + currScript$ + ": flag not set to start background for current applicant; proceeding to next change event", crlf)
+				goto nextIteration
+			endif		'/no flag - don't submit
+
+
+		endif		'/matching stages
+
+
+	endif		'/found change event
+
+
+nextIteration:
+
+
+i = i + 1
+
+
+until i = 5000	'iterate through all rows in array
+
+
+
+

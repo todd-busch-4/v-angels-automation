@@ -20,7 +20,8 @@
 ==                          text$:      the expected text value
 ==                          step$:		terse description of the action/step in the script (e.g. "clicking login")
 ==
-== returns:                 int:    0 - on success   1 - on failure
+== returns:                 int:    0 - on success   
+==                                  1 - on failure
 ==
 == notes:                   none
 ==
@@ -72,10 +73,11 @@ endfunction
 == purpose:                 validates the existence of the specified html object on the current page w/error-handling & logging
 ==
 == input parms:             objectDesc$:	descriptor of the html object to verify
-==                          objectName$:    name /title of the object
+==                          objectName$:    name/title of the object
 ==                          step$:		    terse description of the action/step in the script (e.g. "clicking login")
 ==
-== returns:                 int:    1 - if object found   error_code - on failure or object not found
+== returns:                 int:    1 - if object found   
+==                                  error_code - on failure or object not found
 ==
 == notes:                   none
 ==
@@ -118,7 +120,8 @@ endfunction
 == input parms:             pageName$:  name of the expected page
 ==                          step$:		terse description of the action/step in the script (e.g. "clicking login")
 ==
-== returns:                 int:    0 - on match/success    1 - on failure/no match
+== returns:                 int:    0 - on match/success    
+==                                  1 - on failure/no match
 ==
 == notes:                   none
 ==
@@ -152,13 +155,21 @@ endfunction
 ==
 == developer:               todd busch
 ==
-== purpose:                 terseDescription
+== purpose:                 uses ocrengine and waits the specified time for the specified text to appear in the specified area
 ==
-== input parms:             paramName:  purpose
+== input parms:             window$:    name of window to look for text
+==                          text$:      the text to look for
+==                          waitTime:   the amount of time to wait for text to appear
+==							area1:		x coordinate to the topleft point of the area to look in
+==							area2:		y coordinate to the topleft point of the area to look in
+==							area3:		height of the area to look in
+==							area4:		width of the area to look in
 ==
-== returns:                 typeValue
+== returns:                 int:    0 - on success
+==                                  1 - on failure
 ==
-== notes:                   pertinentinfo
+== notes:                   in the event of a failure to find the text a call is made to adobeInvalidEmailChk function to 
+==                          determine if the failure was a result of an invalid email
 ==
 =============================================================================================================================================================*/
 function webWaitForText(window$, text$, textName$, waitTime, step$, area1, area2, area3, area4)

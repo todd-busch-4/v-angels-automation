@@ -18,7 +18,9 @@
 ==
 == input parms:            	none
 ==
-== returns:                 string - "0": for ocrengine failure; "rehire": for previous employee; "1": for all other errors
+== returns:                 string -	"0": for ocrengine failure;
+==										"1": for all other errors
+== 										"rehire": for previous employee; 
 ==
 == notes:                   dialogbox cannot be seen by wintask at all. capturing ocr in area where it pops up and analyzes text found if any to determine
 ==							what/if any error occurred
@@ -111,7 +113,8 @@ endfunction
 ==
 == input parms:            	none
 ==
-== returns:                 int - (0) if warning found or ocrengine failure to continue; (1) if any other error/warning was found
+== returns:                 int - 	0 if warning found or ocrengine failure to continue; 
+==									1 if any other error/warning was found
 ==
 == notes:                   none
 ==
@@ -188,9 +191,10 @@ endfunction
 ==
 == purpose:                 checks value of gms status column for value to trigger form submission
 ==
-== returns:                 int:	0 - status matched trigger	  1 - value did not match trigger
+== returns:                 int:	0 - status matched trigger	  
+==									1 - value did not match trigger
 ==
-== notes:                   pertinentinfo
+== notes:                   none
 ==
 =============================================================================================================================================================*/
 
