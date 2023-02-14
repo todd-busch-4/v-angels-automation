@@ -144,35 +144,8 @@ repeat
 
 
 			'-------------------- ensure correct company is active
-			ret = useocrengine(3)
-			sCompany$ = captureareaocr$(wndEnhancedDashboard$, topinstance(), 823, 138, 28, 472)
-			sActiveCompany$ = mid$(sCompany$, 12, 5)
-
-			if sActiveCompany$ = sTargetCompany$ then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": target company: (" + sTargetCompany$ + ") is active", crlf)
-			endif
-
-
-			if sActiveCompany$ <> sTargetCompany$ then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": active company: (" + sActiveCompany$ + ") is not target company: (" + sTargetCompany$ + ")", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": switching companies", crlf)
-				ret = useocrengine(3)
-				usewindow(wndEnhancedDashboard$, 1)
-				clickontextocr("(" + sActiveCompany$ + ")", left, single, inarea(749, 138, 685, 28))
-
-				usepage(pgCompanySrc$)
-				clickhtmlelement("TD[OUTERTEXT='" + sTargetCompany$ + "']")
-
-				sCompany$ = captureareaocr$(wndEnhancedDashboard$, topinstance(), 823, 138, 28, 472)
-				sActiveCompany$ = mid$(sCompany$, 12, 5)
-				if sActiveCompany$ = sTargetCompany$ then
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": target company: (" + sTargetCompany$ + ") is now active", crlf)
-				else
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": script could not set the target company active", crlf)
-					closebrowser()
-					nextScript()
-					goto nextIteration
-				endif
+			if gmsCompanyChk = 1 then
+				goto nextiteration
 			endif
 
 
@@ -439,7 +412,7 @@ rehireFlow:
 			if gmsNoRehireCheck() = 1 then
 				goto nextIteration
 			endif
-			if webValidateElement("SPAN[OUTERTEXT='" + applicantLNameCaps$ + "',ID='label40v1']", "last name label", "entering ssn") <> 1 then
+			if webValidateElement(lblLastNameLabel$, "last name label", "entering ssn") <> 1 then
 				goto nextIteration
 			endif
 

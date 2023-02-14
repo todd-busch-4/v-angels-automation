@@ -217,3 +217,59 @@ function checkGMSStatus()
 	endif
 
 endfunction
+
+
+/*=============================================================================================================================================================
+== function name:           gmsCompanyChk
+==
+== developer:               todd busch
+==
+== purpose:                 checks to make sure the active company displayed at the top of the gms enhanced dashboard window matches the target company
+==							defined in the globalVariables sTargetCompany$ variable. if it does not it attempts to select the target company
+==
+== input parms:            	none
+==
+== returns:                 int:	0 - on match or success selecting
+==									1 - failure to select target company
+==
+== notes:                   none
+==
+=============================================================================================================================================================*/
+function gmsCompanyChk()
+	local r
+
+	r = useocrengine(3)
+	sCompany$ = captureareaocr$(wndEnhancedDashboard$, topinstance(), 823, 138, 28, 472)
+	sActiveCompany$ = mid$(sCompany$, 12, 5)
+
+	if sActiveCompany$ = sTargetCompany$ then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": target company: (" + sTargetCompany$ + ") is active", crlf)
+		gmsCompanyChk = 0
+		exitfunction
+	endif
+
+	if sActiveCompany$ <> sTargetCompany$ then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": active company: (" + sActiveCompany$ + ") is not target company: (" + sTargetCompany$ + ")", crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": switching companies", crlf)
+		r = useocrengine(3)
+		usewindow(wndEnhancedDashboard$, 1)
+		clickontextocr("(" + sActiveCompany$ + ")", left, single, inarea(749, 138, 685, 28))
+
+		usepage(pgCompanySrc$)
+		clickhtmlelement("TD[OUTERTEXT='" + sTargetCompany$ + "']")
+
+		sCompany$ = captureareaocr$(wndEnhancedDashboard$, topinstance(), 823, 138, 28, 472)
+		sActiveCompany$ = mid$(sCompany$, 12, 5)
+		if sActiveCompany$ = sTargetCompany$ then
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": target company: (" + sTargetCompany$ + ") is now active", crlf)
+			gmsCompanyChk = 0
+			exitfunction
+		else
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": script could not set the target company active", crlf)
+			closebrowser()
+			gmsCompanyChk = 1
+			exitfunction
+		endif
+	endif
+
+endfunction
