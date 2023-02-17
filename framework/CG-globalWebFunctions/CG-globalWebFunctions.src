@@ -5,7 +5,7 @@
 ##									duplication, increase script cleanliness/readability, and reduce maintenance efforts by providing a single
 ##									centralized location for changes
 ##
-##  contents:						webEnterText, webClickElement, webSelectItem, webLeftSingleClickOCRText
+##  contents:						webEnterText, webPasteText, webClickElement, webSelectItem, webLeftSingleClickOCRText, webNavigate
 ##
 #############################################################################################################################################################*/
 
@@ -50,6 +50,49 @@ function webEnterText(object$, text$, step$)
 	endif
 
 EndFunction
+
+
+/*=============================================================================================================================================================
+== function name:           webPasteText
+==
+== developer:               todd busch
+==
+== purpose:                 pastes specified text into the specified html object wrapped with error-handling/logging
+==
+== input parms:            	object$:	descriptor of the html object to receive text
+==							text$:		the text to enter into the object
+==							step$:		terse description of the action/step in the script (e.g. "clicking login")
+==
+== returns:                 int:	0 - on success	  
+==									error_code - on failure
+==
+== notes:                   pertinentinfo
+==
+=============================================================================================================================================================*/
+function webPasteText(object$, text$, step$)
+	local r
+
+	r = writehtmlpaste(object$, text$, delete)
+
+	if r = 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + step$ + " was successful", crlf)
+		webPasteText = 0
+	endif
+
+	if r <> 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error " + step$, crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(r) + ") msg: " + #errormsg$, crlf)
+		hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-enter_" + step$ + ".bmp", 1, 1)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - " + step$, crlf + crlf)
+		closebrowser()
+		webPasteText = r 
+	endif
+
+endfunction
 
 
 /*=============================================================================================================================================================
@@ -183,6 +226,49 @@ function webLeftSingleClickOCRText(text$, area1, area2, area3, area4, offset1, o
 	if r = 0 then
 		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + step$ + " was successful", crlf)
 		webLeftSingleClickOCRText = 0
+	endif
+
+endfunction
+
+
+/*=============================================================================================================================================================
+== function name:           webNavigate
+==
+== developer:               todd busch
+==
+== purpose:                 the wintask navigate function wrapped with error-handling/logging
+==
+== input parms:            	url$:		the url of the page to navigate to
+==							page$:		name of the page for logging purposes
+==
+== returns:                 typeValue
+==
+== notes:                   pertinentinfo
+==
+=============================================================================================================================================================*/
+function webNavigate(url$, page$)
+	local r
+
+	r = navigate(url$)
+	
+	if instr(str$(r), "-") <> 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error navigating to [" + page$ + "] page", crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(r) + ") msg: " + #errormsg$, crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+		hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-nav_to_" + page$ + ".bmp", 1, 1)
+		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - navigating to " + page$, crlf + crlf)
+		closebrowser()
+		webNavigate = r
+		exitfunction
+	endif
+
+	if r = 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": navigated to " + page$ + " page", crlf)
+		webNavigate = 0
+		exitfunction
 	endif
 
 endfunction

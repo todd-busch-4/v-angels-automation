@@ -28,7 +28,7 @@
 =============================================================================================================================================================*/
 
 function webValidateText(object$, text$, step$)
-    local r, var$
+    local r, object$, text$, var$
 
     r = gethtmledittext(object$, var$)
 
@@ -181,7 +181,7 @@ function webWaitForText(window$, text$, textName$, waitTime, step$, area1, area2
         inwindow(window$, 1)
         inarea(area1, area2, area3, area4)
     pausefalse
-        if adobeInvalidEmailChk() = 1 then
+        if adobeInvalidEmailChk = 1 then
 			webWaitForText = 1
 			exitfunction
         endif
