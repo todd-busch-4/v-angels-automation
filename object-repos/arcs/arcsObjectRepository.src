@@ -1,0 +1,64 @@
+/*#############################################################################################################################################################
+##  filename:						adobeObjectRepository
+##
+##  contents:						contains window and object definitions for the arcs web application
+##
+#############################################################################################################################################################*/
+
+urlArcsNewScreening$ = "https://arcs.ohio.gov/BCS/NewScreening"
+
+'======================================================================= window definitions =====================================================================
+wndArcsHomePage$ = "CHROME.EXE|Chrome_WidgetWin_1|ARCS Home - Google Chrome"
+
+
+'======================================================================= page definitions =====================================================================
+pgArcsLogin$ = "Login"
+pgArcsNewApplicant$ = "ARCS New Applicant"
+
+
+
+
+'======================================================================= object definitions =====================================================================
+'-------------------- login page
+inputArcsUsername$ = "INPUT TEXT[NAME='UserName']"
+inputArcsPassword$ = "INPUT PASSWORD[NAME='Password']"
+btnArcsLogin$ = "BUTTON[INNERTEXT='Login']"
+
+'-------------------- home page
+imgARCSLogo$ = "IMG[SRC='https://arcs.ohio.go']"
+
+'-------------------- end user agreement
+chkArcsAccepted$ = "INPUT CHECKBOX[NAME='Accepted']"
+btnArcsSubmit$ = "BUTTON[INNERTEXT='Submit']"
+
+'-------------------- new applicant search
+inputArcsSSN$ = "INPUT TEXT[NAME='Ssn']"
+inputArcsLName$ = "INPUT TEXT[NAME='LastName']"
+btnArcaSearch$ = "BUTTON[INNERTEXT='Search']"
+btnArcsAddNewApplicant$ = "BUTTON[INNERTEXT='Add New Applicant']"
+
+'-------------------- person summary page
+btnArcsAddNewApplication$ = "BUTTON[INNERTEXT='Add New Application']"
+btnArcsCaseNotes$ = "BUTTON[INNERTEXT='Case Notes']"
+
+'-------------------- new applicant form - personal & demographic
+hdrArcsProfile$ = "H1[CONTENT='Profile']"
+inputArcsFName$ = "INPUT TEXT[NAME='FirstName']"
+inputArcsConfirmSsn$ = "INPUT TEXT[NAME='ConfirmSsn']"
+inputArcsMName$ = "INPUT TEXT[NAME='MiddleName']"
+inputArcsAddress1$ = "INPUT TEXT[NAME='StreetLine1']"
+inputArcsAddress2$ = "INPUT TEXT[NAME='StreetLine2']"
+inputArcsCity$ = "INPUT TEXT[NAME='City']"
+selArcsState$ = "SELECT[NAME='StateId']"
+inputArcsZip$ = "INPUT TEXT[NAME='Zip']"
+selArcsCounty$ = "SELECT[NAME='CountyId']"
+inputArcsDOB$ = "INPUT TEXT[NAME='DateOfBirth']"
+inputArcsPhone$ = "INPUT TEXT[NAME='Phone']"
+inputArcsEmail$ = "INPUT TEXT[NAME='Email']"
+btnArcsAddAlias$ = "BUTTON[INNERTEXT='Add Alias']"
+btnArcsAddPriorAddr$ = "BUTTON[INNERTEXT='Add Prior Address']"
+btnArcsNext$ = "BUTTON[INNERTEXT='Next']"
+
+
+
+'======================================================================= data definitions =====================================================================

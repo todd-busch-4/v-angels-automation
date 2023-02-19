@@ -5,7 +5,7 @@
 ##									duplication, increase script cleanliness/readability, and reduce maintenance efforts by providing a single
 ##									centralized location for changes
 ##
-##  contents:						invokeBrowser, zeroPadDate$, formatSSN$, checkForNullSSN, loadEmploymentInquiryRows
+##  contents:						invokeBrowser, zeroPadDate$, formatSSN$, checkForNullSSN, loadEmploymentInquiryRows, convertStateFromCode$
 ##
 #############################################################################################################################################################*/
 
@@ -39,6 +39,7 @@ function invokeBrowser(str_app$, str_url$)
 			iRetry = 3
 			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": start browser was successful", crlf)
 			invokeBrowser = 0
+			exitfunction
 		endif
 
 		if r <> 0 then
@@ -284,8 +285,8 @@ function loadEmploymentInquiryRows()
 		exitfunction
 	endif
 	'-------------------- background check
-	res = readexcel (employmentInquiryPath$, employmentInquiryBackGroundChkCol$, arrBackGroundChk$())
-	if instr(str$(res), "-") <> 0 then
+	r = readexcel (employmentInquiryPath$, employmentInquiryBackGroundChkCol$, arrBackGroundChk$())
+	if instr(str$(r), "-") <> 0 then
 		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading background check column.  error_code: (" + str$(r) + ")", crlf)
 		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (background check)", crlf)
 		loadEmploymentInquiryRows = 1
@@ -301,6 +302,165 @@ function loadEmploymentInquiryRows()
 	endif
 
 
+	'-------------------- middle name
+	r = readexcel (employmentInquiryPath$, employmentInquiryMNameCol$, arrApplicantMName$())
+	if instr(str$(r), "-") <> 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading middle name column.  error_code: (" + str$(r) + ")", crlf)
+		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (middle name)", crlf)
+		loadEmploymentInquiryRows = 1
+		exitfunction
+	endif
+	'-------------------- birthday
+	r = readexcel (employmentInquiryPath$, employmentInquiryBDayCol$, arrApplicantBDay$())
+	if instr(str$(r), "-") <> 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading birthday column.  error_code: (" + str$(r) + ")", crlf)
+		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (birthday)", crlf)
+		loadEmploymentInquiryRows = 1
+		exitfunction
+	endif
+	'-------------------- id state
+	r = readexcel (employmentInquiryPath$, employmentInquiryIDStateCol$, arrApplicantIDState$())
+	if instr(str$(r), "-") <> 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading id state column.  error_code: (" + str$(r) + ")", crlf)
+		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (id state)", crlf)
+		loadEmploymentInquiryRows = 1
+		exitfunction
+	endif
+	'-------------------- id number
+	r = readexcel (employmentInquiryPath$, employmentInquiryIDNumCol$, arrApplicantIDNum$())
+	if instr(str$(r), "-") <> 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading id number column.  error_code: (" + str$(r) + ")", crlf)
+		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (id number)", crlf)
+		loadEmploymentInquiryRows = 1
+		exitfunction
+	endif
+	'-------------------- id exp date
+	r = readexcel (employmentInquiryPath$, employmentInquiryIDExpDateCol$, arrApplicantIDExpDate$())
+	if instr(str$(r), "-") <> 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading id exp date column.  error_code: (" + str$(r) + ")", crlf)
+		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (id exp date)", crlf)
+		loadEmploymentInquiryRows = 1
+		exitfunction
+	endif
+	'-------------------- address 1
+	r = readexcel (employmentInquiryPath$, employmentInquiryAddr1Col$, arrApplicantAddr1$())
+	if instr(str$(r), "-") <> 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading address 1 column.  error_code: (" + str$(r) + ")", crlf)
+		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (address 1)", crlf)
+		loadEmploymentInquiryRows = 1
+		exitfunction
+	endif
+	'-------------------- address 2
+	r = readexcel (employmentInquiryPath$, employmentInquiryAddr2Col$, arrApplicantAddr2$())
+	if instr(str$(r), "-") <> 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading address 2 column.  error_code: (" + str$(r) + ")", crlf)
+		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (address 2)", crlf)
+		loadEmploymentInquiryRows = 1
+		exitfunction
+	endif
+	'-------------------- city
+	r = readexcel (employmentInquiryPath$, employmentInquiryCityCol$, arrApplicantCity$())
+	if instr(str$(r), "-") <> 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading city column.  error_code: (" + str$(r) + ")", crlf)
+		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (city)", crlf)
+		loadEmploymentInquiryRows = 1
+		exitfunction
+	endif
+	'-------------------- state
+	r = readexcel (employmentInquiryPath$, employmentInquiryStateCol$, arrApplicantState$())
+	if instr(str$(r), "-") <> 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading state column.  error_code: (" + str$(r) + ")", crlf)
+		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (state)", crlf)
+		loadEmploymentInquiryRows = 1
+		exitfunction
+	endif
+	'-------------------- county
+	r = readexcel (employmentInquiryPath$, employmentInquiryCountyCol$, arrApplicantCounty$())
+	if instr(str$(r), "-") <> 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading county column.  error_code: (" + str$(r) + ")", crlf)
+		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (county)", crlf)
+		loadEmploymentInquiryRows = 1
+		exitfunction
+	endif
+	'-------------------- alias
+	r = readexcel (employmentInquiryPath$, employmentInquiryAliasCol$, arrApplicantAlias$())
+	if instr(str$(r), "-") <> 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading alias column.  error_code: (" + str$(r) + ")", crlf)
+		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (alias)", crlf)
+		loadEmploymentInquiryRows = 1
+		exitfunction
+	endif
+	'-------------------- nick name
+	r = readexcel (employmentInquiryPath$, employmentInquiryNNameCol$, arrApplicantNName$())
+	if instr(str$(r), "-") <> 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading nick name column.  error_code: (" + str$(r) + ")", crlf)
+		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (nick name)", crlf)
+		loadEmploymentInquiryRows = 1
+		exitfunction
+	endif
+	'-------------------- maiden name
+	r = readexcel (employmentInquiryPath$, employmentInquiryMaidNameCol$, arrApplicantMaidName$())
+	if instr(str$(r), "-") <> 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading maiden name column.  error_code: (" + str$(r) + ")", crlf)
+		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (maiden name)", crlf)
+		loadEmploymentInquiryRows = 1
+		exitfunction
+	endif
+	'-------------------- prior city
+	r = readexcel (employmentInquiryPath$, employmentInquiryPriorCityCol$, arrApplicantPriorCity$())
+	if instr(str$(r), "-") <> 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading prior city column.  error_code: (" + str$(r) + ")", crlf)
+		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (prior city)", crlf)
+		loadEmploymentInquiryRows = 1
+		exitfunction
+	endif
+	'-------------------- prior state
+	r = readexcel (employmentInquiryPath$, employmentInquiryPriorStateCol$, arrApplicantPriorState$())
+	if instr(str$(r), "-") <> 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading prior state column.  error_code: (" + str$(r) + ")", crlf)
+		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (prior state)", crlf)
+		loadEmploymentInquiryRows = 1
+		exitfunction
+	endif
+	'-------------------- year from
+	r = readexcel (employmentInquiryPath$, employmentInquiryYrFromCol$, arrApplicantYrFrom$())
+	if instr(str$(r), "-") <> 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading year from column.  error_code: (" + str$(r) + ")", crlf)
+		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (year from)", crlf)
+		loadEmploymentInquiryRows = 1
+		exitfunction
+	endif
+	'-------------------- year to
+	r = readexcel (employmentInquiryPath$, employmentInquiryYrToCol$, arrApplicantYrTo$())
+	if instr(str$(r), "-") <> 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading year to column.  error_code: (" + str$(r) + ")", crlf)
+		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (year to)", crlf)
+		loadEmploymentInquiryRows = 1
+		exitfunction
+	endif
+
 	loadEmploymentInquiryRows = 0
+
+endfunction
+
+/*=============================================================================================================================================================
+== function name:           convertStateFromCode$
+==
+== developer:               todd busch
+==
+== purpose:                 terseDescription
+==
+== input parms:            	paramName:	purpose
+==
+== returns:                 typeValue
+==
+== notes:                   pertinentinfo
+==
+=============================================================================================================================================================*/
+function convertStateFromCode$(state$)
+
+	if state$ = "OH" then
+		convertStateFromCode$ = "Ohio"
+	endif
 
 endfunction

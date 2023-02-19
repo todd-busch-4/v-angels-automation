@@ -63,20 +63,37 @@ dayOfAppMinutes$ = "00"																	'minutes to use when scheduling day of c
 dayOfDayNight$ = "AM"																	'designator to use when scheduling day of confirmation text
 
 
-'-------------------- employment inquiry excel column definitions
-employmentInquiryIdCol$ = "B2:B5001"													'mapping for id column
-employmentInquiryFNameCol$ = "C2:C5001"													'mapping for first name column
-employmentInquiryLNameCol$ = "D2:D5001"													'mapping for last name column
-employmentInquiryEmailCol$ = "L2:L5001"													'mapping for applicant email column
-employmentInquiryPhoneCol$ = "I2:I5001"													'mapping for applicant phone number column
-employmentInquiry1stAppCol$ = "E2:E5001"												'mapping for scheduled 1st appointment column
-employmentInquiryAdobeCol$ = "H2:H5001"													'mapping for adobe packet status column
-employmentInquiryStageCol$ = "A2:A5001"													'mapping for stage column
-employmentInquiryTextMsgCol$ = "F2:F5001"												'mapping for text messages status column
-employmentInquiryChangeEventCol$ = "AC2:AC5001"											'mapping for wintask change event column
-employmentInquiryGMSCol$ = "O2:O5001"													'mapping for gms status column
-employmentInquiryBackGroundChkCol$ = "M2:M5001"											'mapping for background check received column
-employmentInquirySSNCol$ = "AD2:AD5001"													'mapping for social security column
+'-------------------- employment inquiry list column definitions
+employmentInquiryIdCol$ = "B2:B51"													'mapping for id column
+employmentInquiryFNameCol$ = "C2:C51"													'mapping for first name column
+employmentInquiryLNameCol$ = "D2:D51"													'mapping for last name column
+employmentInquiryEmailCol$ = "L2:L51"													'mapping for applicant email column
+employmentInquiryPhoneCol$ = "I2:I51"													'mapping for applicant phone number column
+employmentInquiry1stAppCol$ = "E2:E51"												'mapping for scheduled 1st appointment column
+employmentInquiryAdobeCol$ = "H2:H51"													'mapping for adobe packet status column
+employmentInquiryStageCol$ = "A2:A51"													'mapping for stage column
+employmentInquiryTextMsgCol$ = "F2:F51"												'mapping for text messages status column
+employmentInquiryChangeEventCol$ = "AC2:AC51"											'mapping for wintask change event column
+employmentInquiryGMSCol$ = "O2:O51"													'mapping for gms status column
+employmentInquiryBackGroundChkCol$ = "M2:M51"											'mapping for background check received column
+employmentInquirySSNCol$ = "AD2:AD51"													'mapping for social security column
+employmentInquiryMNameCol$ = "AE2:AE51"												'mapping for middle name column
+employmentInquiryBDayCol$ = "AF2:AF51"												'mapping for birthday column
+employmentInquiryIDStateCol$ = "AG2:AG51"												'mapping for dl/id state column
+employmentInquiryIDNumCol$ = "AH2:AH51"												'mapping for dl/id number column
+employmentInquiryIDExpDateCol$ = "AI2:AI51"											'mapping for dl/id expiration date column
+employmentInquiryAddr1Col$ = "AJ2:AJ51"     											'mapping for address 1 column
+employmentInquiryAddr2Col$ = "AK2:AK51"  	    										'mapping for address 2 column
+employmentInquiryCityCol$ = "AL2:AL51"  	    										'mapping for address 2 column
+employmentInquiryStateCol$ = "AM2:AM51"  	    										'mapping for state column
+employmentInquiryCountyCol$ = "AN2:AN51" 	    										'mapping for county column
+employmentInquiryAliasCol$ = "AO2:AO51" 	    										'mapping for alias column
+employmentInquiryNNameCol$ = "AP2:AP51" 	    										'mapping for nick name column
+employmentInquiryMaidNameCol$ = "AQ2:AQ51" 	    									'mapping for maiden name column
+employmentInquiryPriorCityCol$ = "AR2:AR51" 	    									'mapping for prior city column
+employmentInquiryPriorStateCol$ = "AS2:AS51" 	    									'mapping for prior state column
+employmentInquiryYrFromCol$ = "AT2:AT51" 	    									    'mapping for year from column
+employmentInquiryYrToCol$ = "AU2:AU51" 	    									    'mapping for year to column
 employmentinquiryTermedLOADateCol$ = "Z2:Z5001"                                         'mapping for termed/LOA date
 
 

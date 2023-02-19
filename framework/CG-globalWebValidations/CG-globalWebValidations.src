@@ -28,7 +28,7 @@
 =============================================================================================================================================================*/
 
 function webValidateText(object$, text$, step$)
-    local r, var$
+    local r, object$, text$, var$
 
     r = gethtmledittext(object$, var$)
 

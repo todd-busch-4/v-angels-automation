@@ -1,0 +1,264 @@
+/*#############################################################################################################################################################
+##  filename:						cg-arcsFunctions
+##
+##  purpose:						library of functions for use in arcs workflow script development in order to minimize code duplication,
+##									increase script cleanliness/readability, and reduce maintenance efforts by providing a single centralized
+##									location for changes
+##
+##  contents:						arcsStatusChk, arcsAcceptUserAgreement, evalARCSNewAppSrcResult, arcsGetCurrData
+##
+#############################################################################################################################################################*/
+
+/*=============================================================================================================================================================
+== function name:           arcsStatusChk
+==
+== developer:               todd busch
+==
+== purpose:                 checks current value of background check column for status indicating if workflow should continue or bypass row
+==
+== input parms:             none
+==
+== returns:                 int:    0 - if status indicates continue
+                                    1 - if status indicates bypass
+==
+== notes:                   none
+==
+=============================================================================================================================================================*/
+function arcsStatusChk()
+
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": checking for flag to submit application", crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": background col status: [" + backGroundChk$ + "]", crlf)
+
+    if instr(backGroundChk$, "Needs Reviewed") <> 0 then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": column status indicates application can be submitted", crlf)
+        arcsStatusChk = 0
+        exitfunction
+    endif
+
+    if instr(backGroundChk$, "Needs Reviewed") = 0 then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": column status indicates application is not ready for submission", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+        write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ":  app not ready for submission; proceeding to next change event", crlf + crlf)
+        arcsStatusChk = 1
+        exitfunction
+    endif
+
+endfunction
+
+/*=============================================================================================================================================================
+== function name:           arcsAcceptUserAgreement
+==
+== developer:               todd busch
+==
+== purpose:                 terseDescription
+==
+== input parms:             paramName:  purpose
+==
+== returns:                 typeValue
+==
+== notes:                   pertinentinfo
+==
+=============================================================================================================================================================*/
+function arcsAcceptUserAgreement()
+    local r, res
+
+    r = existhtmlelement(chkArcsAccepted$)
+    if r = 1 then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": end user agreement was presented", crlf)
+        res = clickhtmlelement (chkArcsAccepted$)
+        res = clickhtmlelement (btnArcsSubmit$)
+        '------- error handling
+        if res <> 0 then
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error accepting end user agreement; error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+            hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-accept_end_user_agreement.bmp", 1, 1)
+            closebrowser()
+            arcsAcceptUserAgreement = res
+            exitfunction
+        endif
+        '------- validation
+        pause 10 secs until
+            text("Welcome")
+            inwindow(wndArcsHomePage$, 1)
+        pausefalse
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": accept end user agreement validation failed", crlf)
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": expected text (welcome) was not found on page", crlf)
+            hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-accept_end_user_agreement.bmp", 1, 1)
+            closebrowser()
+            arcsAcceptUserAgreement = 1
+            exitfunction
+        endpause
+        '------- debug logging
+        if res = 0 then
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": end user agreement accepted", crlf)
+            arcsAcceptUserAgreement = 0
+            exitfunction
+        endif
+    endif
+
+    if r = 0 then
+        arcsAcceptUserAgreement = 0
+        exitfunction
+    endif
+
+endfunction
+
+/*=============================================================================================================================================================
+== function name:           evalARCSNewAppSrcResult
+==
+== developer:               todd busch
+==
+== purpose:                 determines if new applicant search found an existing application for the applicant or not 
+==
+== input parms:             none
+==
+== returns:                 int:    0 - if not found and is new applicant
+==                                  1 - if found and will be new application for existing applicant
+==
+== notes:                   none
+==
+=============================================================================================================================================================*/
+function evalARCSNewAppSrcResult()
+
+    if existhtmlelement(btnArcsCaseNotes$) = 1 then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant has existing application in arcs", crlf)
+        evalARCSNewAppSrcResult = 1
+        exitfunction
+    else
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": no application info returned for applicant", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": this is a new application", crlf)
+        write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": no app found for applicant; entering new applicant form", crlf)
+        evalARCSNewAppSrcResult = 0
+        exitfunction
+   endif
+
+endfunction
+
+
+/*=============================================================================================================================================================
+== function name:           arcsGetCurrData
+==
+== developer:               todd busch
+==
+== purpose:                 retrieves the values of all the employment list worksheet columns needed for the current row being processed
+==
+== input parms:             none
+==
+== returns:                 int:    0 - for success
+==
+== notes:                   none
+==
+=============================================================================================================================================================*/
+function arcsGetCurrData()
+
+    applicantID$ = arrApplicantID$(i)                               'worksheet row id number
+    applicantFName$ = arrApplicantFName$(i)                         'first name
+    applicantLName$ = arrApplicantLName$(i)                         'last name
+    applicantEmail$ = arrApplicantEmail$(i)                         'email address
+    backGroundChk$ = arrBackGroundChk$(i)                           'background check status column
+    applicantSSN$ = arrApplicantSSN$(i)                             'social security number
+    applicantMName$ = arrApplicantMName$(i)                         'middle name
+    applicantBDay$ = arrApplicantBDay$(i)                           'birthdate
+    applicantIDState$ = arrApplicantIDState$(i)                     'dl/id state
+    applicantIDNum$ = arrApplicantIDNum$(i)                         'dl/id number
+    applicantIDExpDate$ = arrApplicantIDExpDate$(i)                 'dl/id expiration date
+    applicantAddr1$ = arrApplicantAddr1$(i)                         'address line 1
+    applicantAddr2$ = arrApplicantAddr2$(i)                         'address line 2
+    applicantCity$ = arrApplicantCity$(i)                           'address city
+    applicantState$ = arrApplicantState$(i)                         'address state
+    applicantCounty$ = arrApplicantCounty$(i)                       'address county
+    applicantAlias$ = arrApplicantAlias$(i)                         'alias
+    applicantNName$ = arrApplicantNName$(i)                         'nick name
+    applicantMaidName$ = arrApplicantMaidName$(i)                   'maiden name
+    applicantPriorCity$ = arrApplicantPriorCity$(i)                 'prior city
+    applicantPriorState$ = arrApplicantPriorState$(i)               'prior state
+    applicantYrFrom$ = arrApplicantYrFrom$(i)                       'yr from
+    applicantYrTo$ = arrApplicantYrTo$(i)                           'yr to
+    applicantPhone$ = arrApplicantPhone$(i)                         'phone
+
+    arcsGetCurrData = 0
+
+endfunction
+
+
+/*=============================================================================================================================================================
+== function name:           funcName
+==
+== developer:               todd busch
+==
+== purpose:                 terseDescription
+==
+== input parms:             paramName:  purpose
+==
+== returns:                 typeValue
+==
+== notes:                   pertinentinfo
+==
+=============================================================================================================================================================*/
+function arcsRequiredDataChk()
+
+    if applicantFName$ = "" then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employment inquiry list did not include required [first name]", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+        write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": required data missing; proceeding to next change event", crlf + crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: missing required data", crlf + crlf)
+        arcsRequiredDataChk = 1
+    endif
+    if applicantLName$ = "" then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employment inquiry list did not include required [last name]", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+        write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": required data missing; proceeding to next change event", crlf + crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: missing required data", crlf + crlf)
+        arcsRequiredDataChk = 1
+    endif
+    if applicantSSN$ = "" then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employment inquiry list did not include required [ssn]", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+        write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": required data missing; proceeding to next change event", crlf + crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: missing required data", crlf + crlf)
+        arcsRequiredDataChk = 1
+    endif
+    if applicantBDay$ = "" then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employment inquiry list did not include required [dob]", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+        write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": required data missing; proceeding to next change event", crlf + crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: missing required data", crlf + crlf)
+        arcsRequiredDataChk = 1
+    endif
+    if applicantAddr1$ = "" then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employment inquiry list did not include required [address line 1]", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+        write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": required data missing; proceeding to next change event", crlf + crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: missing required data", crlf + crlf)
+        arcsRequiredDataChk = 1
+    endif
+    if applicantCity$ = "" then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employment inquiry list did not include required [city]", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+        write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": required data missing; proceeding to next change event", crlf + crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: missing required data", crlf + crlf)
+        arcsRequiredDataChk = 1
+    endif
+    if applicantState$ = "" then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employment inquiry list did not include required [state]", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+        write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": required data missing; proceeding to next change event", crlf + crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: missing required data", crlf + crlf)
+        arcsRequiredDataChk = 1
+    endif
+
+
+endfunction
