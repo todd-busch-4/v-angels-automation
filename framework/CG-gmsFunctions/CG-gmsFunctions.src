@@ -5,7 +5,8 @@
 ##									increase script cleanliness/readability, and reduce maintenance efforts by providing a single centralized
 ##									location for changes
 ##
-##  contents:						gmsErrorCheck$, gmsNoRehireCheck, checkGMSStatus
+##  contents:						gmsErrorCheck$, gmsNoRehireCheck, gmsChkSubmitStatus, gmsChkTerminateStatus, gmsCompanyChk, gmsChkTerminationStage,
+==									gmsTermsGetData
 ##
 #############################################################################################################################################################*/
 
@@ -185,7 +186,7 @@ function gmsNoRehireCheck()
 endfunction
 
 /*=============================================================================================================================================================
-== function name:           checkGMSStatus
+== function name:           gmsChkSubmitStatus
 ==
 == developer:               todd busch
 ==
@@ -198,7 +199,7 @@ endfunction
 ==
 =============================================================================================================================================================*/
 
-function checkGMSStatus()
+function gmsChkSubmitStatus()
 
 	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": checking gms status", crlf)
 	if instr(gmsStatus$, "New Hire Invited") = 0 then
@@ -210,10 +211,41 @@ function checkGMSStatus()
 		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
 		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": SSN: " + applicantSSN$, crlf)
 		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: status not set for gms entry", crlf + crlf)
-		checkGMSStatus = 1
+		gmsChkSubmitStatus = 1
 	else
 		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant set for gms entry", crlf)
-		checkGMSStatus = 0
+		gmsChkSubmitStatus = 0
+	endif
+
+endfunction
+
+/*=============================================================================================================================================================
+== function name:           gmsChkTerminateStatus
+==
+== developer:               todd busch
+==
+== purpose:                 evaluate the value of the gms status column to determine if triggers the termination or not
+==
+== input parms:            	none
+==
+== returns:                 int:	0 - if status matched a triggering value and should continue
+==									1 - if status did not match a triggering value and should bypass
+==
+== notes:                   none
+==
+=============================================================================================================================================================*/
+function gmsChkTerminateStatus()
+
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": checking gms status", crlf)
+	if instr(gmsStatus$, "Termed Rehire") = 0 and instr(gmsStatus$, "DO NOT HIRE Termed") = 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status not set for gms termination", crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status of column: (" + gmsStatus$ + ")", crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status not set for gms termination; proceeding to next change event", crlf + crlf)
+		gmsChkTerminateStatus = 1
+	else
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status set for gms termination", crlf)
+		gmsChkTerminateStatus = 0
 	endif
 
 endfunction
@@ -271,5 +303,81 @@ function gmsCompanyChk()
 			exitfunction
 		endif
 	endif
+
+endfunction
+
+/*=============================================================================================================================================================
+== function name:           gmsChkTerminationStage
+==
+== developer:               todd busch
+==
+== purpose:                 checks current stage variable value for the current row for existence of trigger stages
+==
+== input parms:            	none
+==
+== returns:                 int:	0 - if any of the triggering values is found
+==									1 - if no triggering values are found
+==
+== notes:                   none
+==
+=============================================================================================================================================================*/
+function gmsChkTerminationStage()
+
+	if curr_stage$ = "Termed ReHire" or curr_stage$ = "LOA / In-Active Employee" or curr_stage$ = "NO ReHire Termed" then
+		gmsChkTerminationStage = 0
+	else
+		gmsChkTerminationStage = 1
+	endif
+
+endfunction
+
+/*=============================================================================================================================================================
+== function name:           gmsTermsGetData
+==
+== developer:               todd busch
+==
+== purpose:                 get data for the current row from data arrays
+==
+== input parms:            	none
+==
+== returns:                 int:	0 - for success
+==
+== notes:                   none
+==
+=============================================================================================================================================================*/
+function gmsTermsGetData()
+
+	applicantID$ = arrApplicantID$(i)
+	applicantFName$ = arrApplicantFName$(i)
+	applicantLName$ = arrApplicantLName$(i)
+	gmsStatus$ = arrGMSStatus$(i)
+	applicantSSN$ = arrApplicantSSN$(i)
+	termedLOADate$ = arrTermedLOADate$(i)
+
+	gmsTermsGetData = 0
+
+endfunction
+
+/*=============================================================================================================================================================
+== function name:           gmsFmtTermDate$
+==
+== developer:               todd busch
+==
+== purpose:                 strips column value down to just the date and adds leading zero to single-digit month/day values
+==
+== input parms:            	none
+==
+== returns:                 string:		formatted date value
+==
+== notes:                   none
+==
+=============================================================================================================================================================*/
+function gmsFmtTermDate$()
+	local r
+
+	r = instrrev(termedLOADate$, "/")
+	termedLOADate$ = left$(termedLOADate$, r + 4)
+	termedLOADate$ = zeroPadDate$(termedLOADate$)
+	gmsFmtTermDate$ = termedLOADate$
 
 endfunction

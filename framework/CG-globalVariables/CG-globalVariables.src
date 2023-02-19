@@ -77,6 +77,7 @@ employmentInquiryChangeEventCol$ = "AC2:AC5001"											'mapping for wintask c
 employmentInquiryGMSCol$ = "O2:O5001"													'mapping for gms status column
 employmentInquiryBackGroundChkCol$ = "M2:M5001"											'mapping for background check received column
 employmentInquirySSNCol$ = "AD2:AD5001"													'mapping for social security column
+employmentinquiryTermedLOADateCol$ = "Z2:Z5001"                                         'mapping for termed/LOA date
 
 
 '-------------------- workflow data
