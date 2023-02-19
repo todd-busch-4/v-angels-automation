@@ -288,7 +288,7 @@ function adobeCancelPacket(packet$)
 
         if r <> 0 then
             write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error clicking 'cancel' button on attempt: [" + str$(iAttempt) + "]", crlf)
-            hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_cancel_button-" + iAttempt + ".bmp", 1, 1)
+            hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_cancel_button-" + str$(iAttempt) + ".bmp", 1, 1)
             write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(r) + ") retrying", crlf)
             iRetry = iRetry + 1
             pause 2

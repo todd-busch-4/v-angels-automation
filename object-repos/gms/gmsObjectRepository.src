@@ -6,9 +6,9 @@
 #############################################################################################################################################################*/
 
 '======================================================================= window definitions =====================================================================
-wndEnhancedDashboard$ = "FIREFOX.EXE|MozillaWindowClass|Group Management Services - Enhanced Dashboard ï¿½ Mozilla Firefox"
-wndNewHireForm$ = "FIREFOX.EXE|MozillaWindowClass|Group Management Services - New Hire ï¿½ Mozilla Firefox"
-wndRehireForm$ = "FIREFOX.EXE|MozillaWindowClass|Group Management Services - Rehire ï¿½ Mozilla Firefox"
+wndEnhancedDashboard$ = "FIREFOX.EXE|MozillaWindowClass|Group Management Services - Enhanced Dashboard — Mozilla Firefox"
+wndNewHireForm$ = "FIREFOX.EXE|MozillaWindowClass|Group Management Services - New Hire — Mozilla Firefox"
+wndRehireForm$ = "FIREFOX.EXE|MozillaWindowClass|Group Management Services - Rehire — Mozilla Firefox"
 
 
 '======================================================================= page definitions =====================================================================

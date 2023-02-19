@@ -17,6 +17,7 @@
 '##   													script prep									 						##
 '#############################################################################################################################
 include "C:\v-angels-automation\framework\CG-globalDimDeclarations\CG-globalDimDeclarations.src"
+include "C:\v-angels-automation\framework\CG-loadWorkflowData\CG-loadWorkflowData.src"
 include "C:\v-angels-automation\framework\CG-globalWebFunctions\CG-globalWebFunctions.src"
 include "C:\v-angels-automation\framework\CG-globalWinFunctions\CG-globalWinFunctions.src"
 include "C:\v-angels-automation\framework\CG-globalWebValidations\CG-globalWebValidations.src"
@@ -35,7 +36,7 @@ currScript$ = "CG-gmsFormSubmit"
 
 
 '-------------------- read in columns from employment inquiry doc
-loadEmploymentInquiryRows()
+loadEmploymentInquiryData()
 
 
 '#############################################################################################################################

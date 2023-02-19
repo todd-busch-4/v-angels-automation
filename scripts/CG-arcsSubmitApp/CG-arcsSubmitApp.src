@@ -15,6 +15,7 @@
 '##   													script prep																			  ##
 '###############################################################################################################################################
 include "C:\v-angels-automation\framework\CG-globalDimDeclarations\CG-globalDimDeclarations.src"
+include "C:\v-angels-automation\framework\CG-loadWorkflowData\CG-loadWorkflowData.src"
 include "C:\v-angels-automation\framework\CG-globalFunctions\CG-globalFunctions.src"
 include "C:\v-angels-automation\framework\CG-arcsFunctions\CG-arcsFunctions.src"
 include "c:\v-angels-automation\framework\CG-globalWinFunctions\CG-globalWinFunctions.src"
@@ -33,7 +34,7 @@ currScript$ = "CG-arcsSubmitApp"
 
 
 '----------------------------------------------------------------------------------------------------------------------------------------------- read in columns from employment inquiry doc
-if loadEmploymentInquiryRows() = 1 then
+if loadEmploymentInquiryData() = 1 then
 	criticalStop()
 endif
 
@@ -50,7 +51,7 @@ i = 0
 
 repeat
 
-mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm...............................                                                                                                                                                                           ]]]]]]]]]]\][[[[;';;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;[[[[[[[[[[[[[[[[[[[[[]/["::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::{,[m
+
 	'-------------------- get change status of current row
 	curr_status$ = arrChangeEvents$(i)
 
