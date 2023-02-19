@@ -99,7 +99,7 @@ repeat
 
 
 			'-------------------- check status for value to trigger form submission
-			if checkGMSStatus() = 1 then
+			if gmsChkSubmitStatus() = 1 then
 				goto nextIteration
 			endif
 

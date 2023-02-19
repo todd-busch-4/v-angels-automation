@@ -5,7 +5,8 @@
 ##									increase script cleanliness/readability, and reduce maintenance efforts by providing a single centralized
 ##									location for changes
 ##
-##  contents:						adobeSendStatusChk, adobeLogIn, adobeInvalidEmailChk, adobeCancelStatusChk, clickSearchIcon, adobeChkForCancelStatus
+##  contents:						adobeSendStatusChk, adobeLogIn, adobeInvalidEmailChk, adobeCancelStatusChk, adobeClickSearchIcon, adobeChkForCancelStatus,
+##                                  adobeCancelPacket
 ##
 #############################################################################################################################################################*/
 
@@ -27,7 +28,8 @@
 =============================================================================================================================================================*/
 
 function adobeSendStatusChk(status$, name$)
-
+    local status$, name$
+    
     write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": checking packet status", crlf)
     write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": value of adobePcktStatus: " + adobePcktStatus$, crlf)
     if instr(adobePcktStatus$, status$) <> 0 then
@@ -48,14 +50,14 @@ endfunction
 == developer:               todd busch
 ==
 == purpose:                 looks for object associated with the login page in most recent invoked browser to determine if account was not logged in;
-==                          if found logs into account with credentials defined in variables 
+==                          if found logs into account with credentials defined in cg-globalVariables
 ==
 == input parms:             none
 ==
 == returns:                 int:    1 - if found and not able to log in successfully
-==                                  0 - in not found or if found and log in was successful
+==                                  0 - if not found or if found and log in was successful
 ==
-== notes:                   variables used are defined in cg-globalVaruables and currently use the caremgr@v-angels.com account
+== notes:                   variables used are defined in cg-globalVariables and currently use the caremgr@v-angels.com account
 ==
 =============================================================================================================================================================*/
 function adobeLogIn()
@@ -137,6 +139,7 @@ endfunction
 ==
 =============================================================================================================================================================*/
 function adobeCancelStatusChk(packet$)
+    local packet$
 
     if packet$ = "pre 1st" then
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": checking status oF pre 1st interview packet", crlf)
@@ -164,7 +167,7 @@ endfunction
 
 
 /*=============================================================================================================================================================
-== function name:           clickSearchIcon
+== function name:           adobeClickSearchIcon
 ==
 == developer:               todd busch
 ==
@@ -179,7 +182,7 @@ endfunction
 == notes:                   pertinentinfo
 ==
 =============================================================================================================================================================*/
-function clickSearchIcon()
+function adobeClickSearchIcon()
     local iRetry, r, iAttempt
 
     while iRetry <= 2
@@ -197,7 +200,7 @@ function clickSearchIcon()
 
         if r = 0 then
             write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicked search icon", crlf)
-            clickSearchIcon = 0
+            adobeClickSearchIcon = 0
             exitfunction
         endif
     wend
@@ -212,7 +215,7 @@ function clickSearchIcon()
         write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
         write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error -  clicking search icon", crlf + crlf)
         closebrowser()
-        clickSearchIcon = r
+        adobeClickSearchIcon = r
     endif
 
 endfunction
@@ -223,17 +226,18 @@ endfunction
 ==
 == developer:               todd busch
 ==
-== purpose:                 terseDescription
+== purpose:                 checks status of packet in adobe to see if it was previously cancelled
 ==
-== input parms:             paramName:  purpose
+== input parms:             packet$:    the name of the packet being checked
 ==
-== returns:                 typeValue
+== returns:                 int:    0 - if packet is not in a cancelled state
+==                                  1 - if packet is in a cancelled state/status
 ==
-== notes:                   pertinentinfo
+== notes:                   none
 ==
 =============================================================================================================================================================*/
 function adobeChkForCancelStatus(packet$)
-    local r
+    local r, packet$
 
     r = existhtmlelement(lblPacketStatus$)
     if r = 1 then
@@ -260,13 +264,14 @@ function adobeChkForCancelStatus(packet$)
 endfunction
 
 /*=============================================================================================================================================================
-== function name:           funcName
+== function name:           adobeCancelPacket
 ==
 == developer:               todd busch
 ==
-== purpose:                 terseDescription
+== purpose:                 due to a bug in adobe where intermittently the cancel button is initally loaded in an unclickable state, this function was
+==                          created to attempt the click multiple times before failing the script
 ==
-== input parms:             paramName:  purpose
+== input parms:             packet$:    the name of the packet being cancelled
 ==
 == returns:                 typeValue
 ==
@@ -274,7 +279,7 @@ endfunction
 ==
 =============================================================================================================================================================*/
 function adobeCancelPacket(packet$)
-    local r, iRetry, iAttempt
+    local r, iRetry, iAttempt, packet$
 
     while iRetry <= 2
         r = clickhtmlelement(btnCancel$, left)

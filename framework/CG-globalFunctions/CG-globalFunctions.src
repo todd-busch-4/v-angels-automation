@@ -292,6 +292,15 @@ function loadEmploymentInquiryRows()
 		loadEmploymentInquiryRows = 1
 		exitfunction
 	endif
+	'-------------------- termed/loa date
+	res = readexcel (employmentInquiryPath$, employmentinquiryTermedLOADateCol$, arrTermedLOADate$())
+	if instr(str$(res), "-") <> 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading background check column.  error_code: (" + str$(r) + ")", crlf)
+		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (background check)", crlf)
+		loadEmploymentInquiryRows = 1
+		exitfunction
+	endif
+
 
 	'-------------------- middle name
 	r = readexcel (employmentInquiryPath$, employmentInquiryMNameCol$, arrApplicantMName$())

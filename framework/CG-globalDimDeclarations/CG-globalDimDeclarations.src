@@ -4,6 +4,7 @@
 ##  purpose:						single central location for all dim array declarations used in caregive workflow scripts
 ##
 #############################################################################################################################################################*/
+
 Dim arrApplicantEmail$(50)
 Dim arrApplicantFName$(50)
 Dim arrApplicantLName$(50)
@@ -17,7 +18,6 @@ Dim arrChangeEvents$(50)
 Dim arrGMSStatus$(50)
 Dim arrBackGroundChk$(50)
 Dim arrApplicantSSN$(50)
-
 Dim arrApplicantMName$(50)
 Dim arrApplicantBDay$(50)
 Dim arrApplicantIDState$(50)
@@ -35,3 +35,4 @@ Dim arrApplicantPriorCity$(50)
 Dim arrApplicantPriorState$(50)
 Dim arrApplicantYrFrom$(50)
 Dim arrApplicantYrTo$(50)
+

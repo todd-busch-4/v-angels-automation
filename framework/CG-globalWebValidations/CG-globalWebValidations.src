@@ -181,11 +181,6 @@ function webWaitForText(window$, text$, textName$, waitTime, step$, area1, area2
         inwindow(window$, 1)
         inarea(area1, area2, area3, area4)
     pausefalse
-        if adobeInvalidEmailChk = 1 then
-			webWaitForText = 1
-			exitfunction
-        endif
-        
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ":  " + step$ + " validation failed", crlf)
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": expected element text (" + textName$ + ") not found", crlf)
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)

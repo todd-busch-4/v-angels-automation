@@ -77,7 +77,6 @@ employmentInquiryChangeEventCol$ = "AC2:AC51"											'mapping for wintask cha
 employmentInquiryGMSCol$ = "O2:O51"													'mapping for gms status column
 employmentInquiryBackGroundChkCol$ = "M2:M51"											'mapping for background check received column
 employmentInquirySSNCol$ = "AD2:AD51"													'mapping for social security column
-'-------------------- background check additions
 employmentInquiryMNameCol$ = "AE2:AE51"												'mapping for middle name column
 employmentInquiryBDayCol$ = "AF2:AF51"												'mapping for birthday column
 employmentInquiryIDStateCol$ = "AG2:AG51"												'mapping for dl/id state column
@@ -95,6 +94,7 @@ employmentInquiryPriorCityCol$ = "AR2:AR51" 	    									'mapping for prior cit
 employmentInquiryPriorStateCol$ = "AS2:AS51" 	    									'mapping for prior state column
 employmentInquiryYrFromCol$ = "AT2:AT51" 	    									    'mapping for year from column
 employmentInquiryYrToCol$ = "AU2:AU51" 	    									    'mapping for year to column
+employmentinquiryTermedLOADateCol$ = "Z2:Z5001"                                         'mapping for termed/LOA date
 
 
 '-------------------- workflow data
