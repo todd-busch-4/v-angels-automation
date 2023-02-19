@@ -1,0 +1,233 @@
+'###############################################################################################################################################
+'## author:                 todd busch
+'##
+'## date:                   02/17/2023
+'##
+'## description:            scans the change event column in employment inquiry list.xlsx spreadsheet in package downloads folder; it will 
+'##							send the appropriate packets (pre and 1st int or 2nd int) for rows flagged 'yes' that have a 1st or 2nd  
+'##							interview stage and do not have any reference to those packets in the adobe status column (e.g. [1st int pkt sent]) 
+'##
+'## run in:					chrome
+'##
+'## notes:                  
+'##							
+'###############################################################################################################################################
+
+'###############################################################################################################################################
+'##   													script prep																			  
+'###############################################################################################################################################
+include "C:\v-angels-automation\framework\CG-globalDimDeclarations\CG-globalDimDeclarations.src"
+include "C:\v-angels-automation\framework\CG-globalFunctions\CG-globalFunctions.src"
+include "C:\v-angels-automation\framework\CG-gmsFunctions\CG-gmsFunctions.src"
+include "c:\v-angels-automation\framework\CG-globalWinFunctions\CG-globalWinFunctions.src"
+include "c:\v-angels-automation\framework\CG-globalWebFunctions\CG-globalWebFunctions.src"
+include "c:\v-angels-automation\framework\CG-globalWebValidations\CG-globalWebValidations.src"
+include "C:\v-angels-automation\framework\CG-globalLogging\CG-globalLogging.src"
+include "C:\v-angels-automation\framework\CG-globalSubDefinitions\CG-globalSubDefinitions.src"
+include "C:\v-angels-automation\framework\CG-globalVariables\CG-globalVariables.src"
+Include "C:\v-angels-automation\object-repos\gms\gmsObjectRepository.src"
+
+
+currScript$ = "CG-gmsTerminations"
+
+
+#IgnoreErrors = 1
+
+
+'-------------------- read in columns from employment inquiry doc
+if loadEmploymentInquiryRows() = 1 then
+	criticalStop()
+endif
+
+
+'#############################################################################################################################
+'##   													script start								 						
+'#############################################################################################################################
+logStartScript("gms terminations")
+
+
+'------------------------------------------------------------------------------------------------------------------------------ begin iterating through change event column
+i = 0
+
+
+repeat
+
+
+	'-------------------- get change status of current row
+	curr_status$ = arrChangeEvents$(i)
+
+
+    if curr_status$ = "Yes" then
+        iEventCnt = iEventCnt + 1	'change event counter
+        iExcelRow = i + 2			'add 1 for header row and 1 for zero indexed arrays
+        logEventFound()
+
+
+        '-------------------- get the stage for the current change event
+		curr_stage$ = arrCurrentStage$(i)
+
+
+'------------------------------------------------------------------------------------------------------------------------------ check stage column for triggers
+
+
+        if gmsChkTerminationStage = 0 then
+            iStageCnt = iStageCnt + 1
+            logStageMatch()
+        endif
+
+
+        '-------------------- get data for current row
+        gmsTermsGetData()
+        logDataValues()        
+        termedLOADate$ = gmsFmtTermDate$()
+        
+
+        '-------------------- check gms status column for qualifying values
+        if gmsChkTerminateStatus() = 1 then
+            goto nextIteration
+        endif
+
+
+ '------------------------------------------------------------------------------------------------------------------------------ log in
+ 
+ 
+        '-------------------- invoke browser
+        if invokeBrowser("FF", gmsURL$) = 1 then
+            nextScript()
+            goto nextIteration
+        endif
+
+
+        '-------------------- enter username
+        usepage(pgGMSLogin$)
+        if webEnterText(txtUsername$, gmsUsername$, "entering username") <> 0 then
+            goto nextIteration
+        endif
+        if webValidateText(txtUsername$, gmsUsername$, "entering username") <> 0 then
+            goto nextIteration
+        endif
+
+
+        '-------------------- enter password
+        usepage(pgGMSLogin$)
+        if webEnterText(txtPassword$, gmsPassword$, "entering password") <> 0 then
+            goto nextIteration
+        endif
+        if webValidateText(txtPassword$, gmsPassword$, "entering password") <> 0 then
+            goto nextIteration
+        endif
+
+
+        '-------------------- click 'sign in' button
+        if webClickElement(btnLogin$, "clicking login button") <> 0 then
+            goto nextIteration
+        endif
+        pause 5
+        if webValidateElement(bmpLogo$, "gms logo", "clicking login button") <> 1 then
+            goto nextIteration
+        endif
+
+
+        '-------------------- ensure correct company is active
+        if gmsCompanyChk = 1 then
+            goto nextiteration
+        endif
+
+
+'------------------------------------------------------------------------------------------------------------------------------ employee search
+
+
+        '-------------------- nav to employee terminations
+        if webClickElement(lnkGMSEmployeeTerm$, "clicking employee terminations link") <> 0 then
+            goto nextIteration
+        endif
+        pause 2
+        if webValidateCurrPage(pgEmployeeTerminations$, "clicking employee terminations link") <> 0 then
+            goto nextIteration
+        endif
+
+
+        '-------------------- enter search criteria
+        if webEnterText(inputGMSEmployeeSrc$, applicantFName$ + " " + applicantLName$, "entering search criteria") <> 0 then
+            goto nextIteration
+        endif
+        pause 3
+        if webValidateElement(rowGMSSrcResults$, "search result row", "entering search criteria") <> 1 then
+            goto nextIteration
+        endif
+
+
+        '-------------------- select employee
+        if webClickElement(rowGMSSrcResults$, "selecting employee") <> 0 then
+            goto nextIteration
+        endif
+        res = clickhtmlelement (rowGMSSrcResults$)
+        if webValidateElement(rowGMSCurrEmplStatus$, "curr status", "selecting employee") <> 1 then
+            goto nextIteration
+        endif
+
+
+        '-------------------- select termination status code
+        if webSelectItem(selGMSTermStatusCode$, "TERMINATED", "selecting term status code") <> 0 then
+            goto nextIteration
+        endif
+        if webValidateText(selGMSTermStatusCode$, "T", "selecting term status code") <> 0 then
+            goto nextIteration
+        endif
+
+
+        '-------------------- select reason code
+        if webSelectItem(selGMSReasonCode$, "TERMINATED", "selecting term reason code") <> 0 then
+            goto nextIteration
+        endif
+        if webValidateText(selGMSReasonCode$, "TERM", "selecting term reason code") <> 0 then
+            goto nextIteration
+        endif
+
+
+        '-------------------- enter termination date
+        if webEnterText(dtGMSTerminationDate$, termedLOADate$, "entering termed/loa date") <> 0 then
+            goto nextIteration
+        endif
+        if webValidateText(dtGMSTerminationDate$, termedLOADate$, "entering termed/loa date") <> 0 then
+            goto nextIteration
+        endif
+
+
+        '-------------------- select rehire designation
+        if curr_stage$ = "NO ReHire Termed" then
+            if webSelectItem(selGMSRehireDesignation$, "No", "Selecting rehire designation") <> 0 then
+                goto nextIteration
+            endif
+            if webValidateText(selGMSRehireDesignation$, "N", "Selecting rehire designation") <> 0 then
+                goto nextIteration
+            endif
+        else
+            if webSelectItem(selGMSRehireDesignation$, "Yes", "Selecting rehire designation") <> 0 then
+                goto nextIteration
+            endif
+            if webValidateText(selGMSRehireDesignation$, "Y", "Selecting rehire designation") <> 0 then
+                goto nextIteration
+            endif
+
+        endif
+
+
+
+
+
+
+
+
+		end()
+
+
+    endif   '/curr-status$ = yes
+
+nextiteration:
+
+
+i = i + 1
+
+
+until i = 5000 	'iterate through all rows in array

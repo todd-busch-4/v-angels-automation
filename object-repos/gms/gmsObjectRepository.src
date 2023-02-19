@@ -17,6 +17,7 @@ pgCompanySrc$ = "Group Management Services - Search All Companies"
 pgEnhancedDashboard$ = "Group Management Services - Enhanced Dashboard"
 pgNewHireForm$ = "Group Management Services - New Hire"
 pgRehireForm$ = "Group Management Services - Rehire"
+pgEmployeeTerminations$ = "Group Management Services - Employee Termination"
 
 
 '======================================================================= object definitions =====================================================================
@@ -30,6 +31,7 @@ bmpLogo$ = "IMG[SRC='https://gms.prismhr.']"
 '-------------------- enhanced dashboard
 lnkNewHire$ = "TD[OUTERTEXT='New']"
 lnkRehire$ = "TD[OUTERTEXT='Rehire']"
+lnkGMSEmployeeTerm$ = "TD[OUTERTEXT='Employee']"
 
 
 '-------------------- new hire form
@@ -63,3 +65,13 @@ lblLastNameLabel$ = "SPAN[OUTERTEXT='" + applicantLNameCaps$ + "',ID='label40v1'
 'save button has same descriptor as on new hire page
 
 
+'-------------------- terminations form
+inputGMSEmployeeSrc$ = "INPUT TEXT[NAME='HrpyWorkWGlobalSearch1']"
+rowGMSSrcResults$ = "TABLE[CONTENT='Employee Matches']"
+rowGMSCurrEmplStatus$ = "SPAN[OUTERTEXT='ACTIVE']"
+lblGMSCurrEmplStatus$ = "SPAN[OUTERTEXT='Current Employment']"
+selGMSTermStatusCode$ = "SELECT[NAME='EmployeeActionFormsT']"
+selGMSReasonCode$ = "SELECT[NAME='EmployeeActionFormsR']"
+dtGMSTerminationDate$ = "INPUT TEXT[NAME='EmployeeActionFormsT']"
+selGMSRehireDesignation$ = "SELECT[NAME='EmployeeActionFormsReh']"
+btnGMSTerminationSave$ = "BUTTON[INNERTEXT='Save']"
