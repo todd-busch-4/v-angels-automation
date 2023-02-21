@@ -298,7 +298,7 @@ repeat
 firstInterviewSend:
 			'-------------------- check for already sent packets
 			if adobeSendStatusChk("1st Int Pkt", "1st interview packet") = 1 then
-				goto firstInterviewSend
+				goto nextIteration
 			endif
 
 

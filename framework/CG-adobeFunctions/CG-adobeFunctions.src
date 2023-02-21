@@ -36,9 +36,11 @@ function adobeSendStatusChk(status$, name$)
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status indicates " + name$ + " packet has already been sent", crlf)
         write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + name$ + " packet has been sent", crlf)
         adobeSendStatusChk = 1
+        exitfunction
     else
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status indicates it is ok to send " + name$ + " packet", crlf)
         adobeSendStatusChk = 0
+        exitfunction
     endif
 
 endfunction

@@ -288,7 +288,7 @@ nextIteration:
 i = i + 1
 
 
-until i = 50	'iterate through all rows in array
+until i = 5000	'iterate through all rows in array
 
 
 
