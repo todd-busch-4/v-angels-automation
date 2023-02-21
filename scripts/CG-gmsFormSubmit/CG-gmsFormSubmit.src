@@ -74,13 +74,9 @@ repeat
 			logStageMatch()
 
 			'-------------------- get data values for current record
-			applicantID$ = arrApplicantID$(i)
-			applicantFName$ = arrApplicantFName$(i)
-			applicantLName$ = arrApplicantLName$(i)
-			gmsStatus$ = arrGMSStatus$(i)
-			applicantEmail$ = arrApplicantEmail$(i)
-			applicantSSN$ = arrApplicantSSN$(i)
-			applicantLNameCaps$ = ucase$(applicantLName$)
+			if gmsSubmitGetData() = 1 then
+				goto nextIteration
+			endif
 			logDataValues()
 
 
@@ -88,15 +84,9 @@ repeat
 			'------- add leading zeroes to single char day/month in company start date
 			startDateCompany$ = zeroPadDate$(startDateCompany$)
 			
+			
 			'------- add dashes to ssn's that don't have them
 			applicantSSN$ = formatSSN$(applicantSSN$)
-
-
-			'-------------------- verify ssn has been added to spreadsheet
-			if checkForNullSSN() = 1 then
-				goto nextIteration
-			endif
-
 
 
 			'-------------------- check status for value to trigger form submission

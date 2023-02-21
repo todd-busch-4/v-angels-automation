@@ -6,7 +6,7 @@
 ##									location for changes
 ##
 ##  contents:						gmsErrorCheck$, gmsNoRehireCheck, gmsChkSubmitStatus, gmsChkTerminateStatus, gmsCompanyChk, gmsChkTerminationStage,
-==									gmsTermsGetData
+==									gmsTermsGetData, gmsFmtTermDate$, gmsTermsLogStats, gmsTermsErrorChck, gmsTermsEarlyDateChk, gmsSubmitGetData
 ##
 #############################################################################################################################################################*/
 
@@ -546,4 +546,38 @@ function gmsTermsEarlyDateChk()
 		exitfunction
 	endif
 
+endfunction
+
+/*=============================================================================================================================================================
+== function name:           gmsSubmitGetData
+==
+== developer:               todd busch
+==
+== purpose:                 get data from data arrays for the current row being processed
+==
+== input parms:            	paramName:	purpose
+==
+== returns:                 typeValue
+==
+== notes:                   pertinentinfo
+==
+=============================================================================================================================================================*/
+function gmsSubmitGetData()
+	applicantID$ = arrApplicantID$(i)
+	applicantFName$ = arrApplicantFName$(i)
+	applicantLName$ = arrApplicantLName$(i)
+	gmsStatus$ = arrGMSStatus$(i)
+	applicantEmail$ = arrApplicantEmail$(i)
+	applicantSSN$ = arrApplicantSSN$(i)
+	if applicantSSN$ = "" then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": SSN was blank for current row", crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": blank ssn; proceeding to next change event", crlf + crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employee: " + applicantFName$ + " " + applicantLName$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: gmsSubmitGetData - no ssn", crlf + crlf)
+		gmsSubmitGetData = 1
+		exitfunction
+	endif
+	applicantLNameCaps$ = ucase$(applicantLName$)
 endfunction
