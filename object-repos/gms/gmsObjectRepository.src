@@ -9,6 +9,8 @@
 wndEnhancedDashboard$ = "FIREFOX.EXE|MozillaWindowClass|Group Management Services - Enhanced Dashboard — Mozilla Firefox"
 wndNewHireForm$ = "FIREFOX.EXE|MozillaWindowClass|Group Management Services - New Hire — Mozilla Firefox"
 wndRehireForm$ = "FIREFOX.EXE|MozillaWindowClass|Group Management Services - Rehire — Mozilla Firefox"
+wndTerminationForm$ = "FIREFOX.EXE|MozillaWindowClass|Group Management Services - Employee Termination — Mozilla Firefox"
+wndWindowsDesktop$ = "EXPLORER.EXE|SysListView32|FolderView"
 
 
 '======================================================================= page definitions =====================================================================
@@ -75,3 +77,6 @@ selGMSReasonCode$ = "SELECT[NAME='EmployeeActionFormsR']"
 dtGMSTerminationDate$ = "INPUT TEXT[NAME='EmployeeActionFormsT']"
 selGMSRehireDesignation$ = "SELECT[NAME='EmployeeActionFormsReh']"
 btnGMSTerminationSave$ = "BUTTON[INNERTEXT='Save']"
+lblReassignPendAppr$ = "SPAN[OUTERTEXT='Reassign']"
+
+

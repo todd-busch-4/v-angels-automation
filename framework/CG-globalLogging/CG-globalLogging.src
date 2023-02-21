@@ -109,6 +109,24 @@ function logStageMatch()
 	logStageMatch = 0
 endfunction
 
+/*=============================================================================================================================================================
+== function name:           logStageBypass
+==
+== developer:               todd busch
+==
+== purpose:                 terseDescription
+==
+== input parms:            	paramName:	purpose
+==
+== returns:                 typeValue
+==
+== notes:                   pertinentinfo
+==
+=============================================================================================================================================================*/
+function logStageBypass()
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage for change event at row: (" + str$(iExcelRow) + ") did not trigger workflow", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+endfunction
 
 /*=============================================================================================================================================================
 == function name:           logEventFound

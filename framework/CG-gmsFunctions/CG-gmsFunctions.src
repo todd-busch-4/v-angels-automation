@@ -369,7 +369,7 @@ endfunction
 ==
 == returns:                 string:		formatted date value
 ==
-== notes:                   none
+== notes:                   employment inquiry value contains timestamp and single-digit months/days which causes issues with GMS's date validations
 ==
 =============================================================================================================================================================*/
 function gmsFmtTermDate$()
@@ -379,5 +379,171 @@ function gmsFmtTermDate$()
 	termedLOADate$ = left$(termedLOADate$, r + 4)
 	termedLOADate$ = zeroPadDate$(termedLOADate$)
 	gmsFmtTermDate$ = termedLOADate$
+
+endfunction
+
+/*=============================================================================================================================================================
+== function name:           gmsTermsLogStats
+==
+== developer:               todd busch
+==
+== purpose:                 logs the end of workflow messages/data to log files for Terminations script
+==
+== input parms:            	none
+==
+== returns:                 int:	0 - for success
+==
+== notes:                   none
+==
+=============================================================================================================================================================*/
+function gmsTermsLogStats()
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events detected:                    " + str$(iEventCnt), crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": events w/qualifying stages:                " + str$(iStageCnt), crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": terminations processed:                    " + str$(iProcessed), crlf)
+	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf)
+	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events detected:                    " + str$(iEventCnt), crlf)
+	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": events w/qualifying stages:                " + str$(iStageCnt), crlf)
+	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": terminations processed:                    " + str$(iProcessed), crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
+	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
+	write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
+	write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
+
+	gmsTermsLogStats = 0
+endfunction
+
+/*=============================================================================================================================================================
+== function name:           gmsTermsErrorChck
+==
+== developer:               todd busch
+==
+== purpose:                 checks for error popup when exiting the search field and handles certain known errors individually. contains a general "catch-all"
+==							if statement for all unkown errors that could be returned
+==
+== input parms:            	none
+==
+== returns:                 int:	0 - if no error popup was displayed
+==									1 - if there was an error 
+==
+== notes:                   pertinentinfo
+==
+=============================================================================================================================================================*/
+function gmsTermsErrorChk()
+	local r, err$
+
+	r = useocrengine(3)
+
+	'return error if ocrengine fails
+	if r <> 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ocrengine failed trying to capture error popup", crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(r) + ") msg: " + #errormsg$, crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": continuing though app is in unverified state", crlf)
+		gmsTermsErrorChk$ = "0"
+		exitfunction
+	endif
+
+	'capture area error popup is typically displayed in
+	err$ = captureareaocr$(wndNewHireForm$, topinstance(), 739, 467, 191, 442)
+
+	'exit function if no error found
+	if err$ = "" then
+		gmsTermsErrorChk = 0
+		exitfunction
+	endif
+
+	'check for in onboarding error
+	if instr(err$, "This person is still being OnBoarded") <> 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employee is still being onboarded", crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employee in onboarding; proceeding to next change event", crlf + crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employee: " + applicantFName$ + " " + applicantLName$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: gmsTermsErrorCheck - employee in onboarding", crlf + crlf)
+		closebrowser()
+		gmsTermsErrorChk = 1
+		exitfunction
+	endif
+
+	'check for already terminated
+	if instr(err$, "already terminated") <> 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employee is already terminated", crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employee is already terminated; proceeding to next change event", crlf + crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employee: " + applicantFName$ + " " + applicantLName$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: gmsTermsErrorCheck - employee is already terminated", crlf + crlf)
+		closebrowser()
+		gmsTermsErrorChk = 1
+		exitfunction
+	endif
+
+	'catch-all for any other errors
+	if err$ <> "" then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error was encountered entering search criteria", crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_msg: (" + err$ + ") msg: ", crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employee: " + applicantFName$ + " " + applicantLName$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: gmsTermsErrorCheck - src criteria error", crlf + crlf)
+		gmsTermsErrorChk = 1
+		exitfunction
+	endif
+
+endfunction
+
+/*=============================================================================================================================================================
+== function name:           gmsTermsEarlyDateChk
+==
+== developer:               todd busch
+==
+== purpose:                 checks for date before hire date error popup when entering loa/termination date. if found it updates the loa/termination date
+==							to the day after the hire date listed in the error
+==
+== input parms:            	none
+==
+== returns:                 int:	0 - if error not found
+==									1 - if error found
+==
+== notes:                   after function is exited code to handle reentering with the updated date is in the script itself
+==
+=============================================================================================================================================================*/
+function gmsTermsEarlyDateChk()
+	local r, err$, iEnd
+
+	r = useocrengine(3)
+
+	'return error if ocrengine fails
+	if r <> 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ocrengine failed trying to capture error popup", crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(r) + ") msg: " + #errormsg$, crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": continuing though app is in unverified state", crlf)
+		gmsTermsEarlyDateChk$ = "0"
+		exitfunction
+	endif
+
+	'capture area error popup is typically displayed in
+	err$ = captureareaocr$(wndTerminationForm$, topinstance(), 739, 467, 191, 442)
+
+	'check for error text
+	if instr(err$, "is prior to employee's hire date") <> 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": termination date before hire date", crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": adjusting the termination date", crlf)
+
+		'extract the hire date and update term date variable
+		iEnd = instr(err$, ",")
+		termedLOADate$ = mid$(err$, iEnd - 10, 10)
+		termedLOADate$ = DatetoDate$("d", 1, termedLOADate$)
+		termedLOADate$ = zeroPadDate$(termedLOADate$)
+		
+		'close error popup dialogbox
+		usewindow(wndWindowsDesktop$)
+		clickmouse(left, double, 1120, 600, absolute)
+		pause 1
+
+		gmsTermsEarlyDateChk = 1
+		exitfunction
+	endif
 
 endfunction

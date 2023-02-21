@@ -74,6 +74,9 @@ repeat
         if gmsChkTerminationStage = 0 then
             iStageCnt = iStageCnt + 1
             logStageMatch()
+        else
+            logStageBypass()
+            goto nextIteration
         endif
 
 
@@ -163,9 +166,15 @@ repeat
             goto nextIteration
         endif
         res = clickhtmlelement (rowGMSSrcResults$)
+        if gmsTermsErrorChk() = 1 then
+            goto nextIteration
+        endif
         if webValidateElement(rowGMSCurrEmplStatus$, "curr status", "selecting employee") <> 1 then
             goto nextIteration
         endif
+
+
+'------------------------------------------------------------------------------------------------------------------------------ complete termination form
 
 
         '-------------------- select termination status code
@@ -186,9 +195,16 @@ repeat
         endif
 
 
+retryEnterTermDate:
         '-------------------- enter termination date
+        usepage(pgEmployeeTerminations$)
         if webEnterText(dtGMSTerminationDate$, termedLOADate$, "entering termed/loa date") <> 0 then
             goto nextIteration
+        endif
+        clickhtmlelement(lblReassignPendAppr$)
+        pause 1
+        if gmsTermsEarlyDateChk() = 1 then
+            goto retryEnterTermDate
         endif
         if webValidateText(dtGMSTerminationDate$, termedLOADate$, "entering termed/loa date") <> 0 then
             goto nextIteration
@@ -210,20 +226,29 @@ repeat
             if webValidateText(selGMSRehireDesignation$, "Y", "Selecting rehire designation") <> 0 then
                 goto nextIteration
             endif
-
         endif
 
 
+        '-------------------- click save
+        if webClickElement(btnGMSTerminationSave$, "saving termination") <> 0 then
+            goto nextIteration
+        endif
+        pause 5
+        if webValidateText(inputGMSEmployeeSrc$, "", "saving termination") <> 0 then
+            goto nextIteration
+        endif
 
 
+        closebrowser()
 
 
-
-
-		end()
+        '-------------------- complete workflow
+        logWorkflowSuccess("termination saved successfully")
+        iProcessed = iProcessed + 1
 
 
     endif   '/curr-status$ = yes
+
 
 nextiteration:
 
@@ -232,3 +257,9 @@ i = i + 1
 
 
 until i = 5000 	'iterate through all rows in array
+
+
+'#############################################################################################################################
+'##   												end	script										 						
+'#############################################################################################################################
+gmsTermsLogStats()

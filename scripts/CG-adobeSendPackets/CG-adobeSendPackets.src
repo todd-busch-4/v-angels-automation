@@ -264,7 +264,7 @@ repeat
 				endif
 			endif
 			if iEnvironment = 2 then
-				winMouseLeftDblClick(500, 940, "clicking next")
+				winMouseLeftDblClick(565, 945, "clicking next")
 			endif
 			pause 2
 			if webWaitForText(wndHomePage$, "CONFIDENTIALITY OF PROTECTED", "doc title", 30, "clicking next", 526, 313, 151, 685) = 1 then
@@ -475,7 +475,7 @@ firstInterviewSend:
 				endif
 			endif
 			if iEnvironment = 2 then
-				winMouseLeftDblClick(500, 940, "clicking next")
+				winMouseLeftDblClick(565, 945, "clicking next")
 			endif
 			pause 2
 			if webWaitForText(wndHomePage$, "Skills Assessment", "doc title", 30, "clicking next", 526, 313, 151, 685) = 1 then
@@ -703,7 +703,7 @@ firstInterviewSend:
 				endif
 			endif
 			if iEnvironment = 2 then
-				winMouseLeftDblClick(560, 940, "clicking next")
+				winMouseLeftDblClick(565, 945, "clicking next")
 			endif
 			pause 2
 			if webWaitForText(wndHomePage$, "Interviewee Name", "doc title", 30, "clicking next", 452, 359, 182, 814) = 1 then
@@ -759,7 +759,7 @@ until i = 5000	'iterate through all rows in array
 
 
 '#############################################################################################################################
-'##   												end	script										 						##
+'##   												end	script										 						
 '#############################################################################################################################
 write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf)
 write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events detected:                    " + str$(iEventCnt), crlf)
