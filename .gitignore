@@ -5,7 +5,10 @@
 *.rob
 *.log
 *.xlsx
+*.txt
+*.bmp
 
 #################
 #  Directories  #
 #################
+\images
