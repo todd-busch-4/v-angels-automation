@@ -25,6 +25,10 @@
 include "C:\v-angels-automation\framework\CG-globalDimDeclarations\CG-globalDimDeclarations.src"
 include "C:\v-angels-automation\framework\CG-loadWorkflowData\CG-loadWorkflowData.src"
 include "C:\v-angels-automation\framework\CG-globalFunctions\CG-globalFunctions.src"
+include "c:\v-angels-automation\framework\CG-globalWinFunctions\CG-globalWinFunctions.src"
+include "c:\v-angels-automation\framework\CG-globalWebFunctions\CG-globalWebFunctions.src"
+include "c:\v-angels-automation\framework\CG-globalWebValidations\CG-globalWebValidations.src"
+include "C:\v-angels-automation\framework\CG-globalLogging\CG-globalLogging.src"
 include "C:\v-angels-automation\framework\CG-globalSubDefinitions\CG-globalSubDefinitions.src"
 include "C:\v-angels-automation\framework\CG-globalVariables\CG-globalVariables.src"
 
@@ -36,7 +40,7 @@ currScript$ = "CG-adobeCancelPackets"
 
 
 '-------------------------------------------------------------------------------------------------------------------------------- read in columns from employment inquiry doc
-if loadEmploymentInquiryData() = 1 then
+if LoadWorkflowData(currScript$) = 1 then
 	criticalStop()
 endif
 
@@ -119,7 +123,7 @@ repeat
 			
 
 			'-------------------- invoke browser window
-			if invokeBrowser("CH", adobeURL$) <> 0 then
+			if webInvokeBrowser("CH", adobeURL$) <> 0 then
 				nextScript()
 				goto nextIteration
 			endif
@@ -459,7 +463,7 @@ firstInterviewCancel:
 			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) status indicates packet can be cancelled", crlf)				
 			
 
-			if invokeBrowser("CH", adobeURL$) <> 0 then
+			if webInvokeBrowser("CH", adobeURL$) <> 0 then
 				nextScript()
 				goto nextIteration
 			endif
@@ -828,7 +832,7 @@ firstInterviewCancel:
 			
 
 			'-------------------- invoke browser window
-			if invokeBrowser("CH", adobeURL$) <> 0 then
+			if webInvokeBrowser("CH", adobeURL$) <> 0 then
 				nextScript()
 				goto nextIteration
 			endif
@@ -1168,7 +1172,7 @@ firstInterviewNCNS:
 			
 
 			'-------------------- invoke browser window
-			if invokeBrowser("CH", adobeURL$) <> 0 then
+			if webInvokeBrowser("CH", adobeURL$) <> 0 then
 				nextScript()
 				goto nextIteration
 			endif
@@ -1539,7 +1543,7 @@ firstInterviewNCNS:
 			
 
 			'-------------------- invoke browser window
-			if invokeBrowser("CH", adobeURL$) <> 0 then
+			if webInvokeBrowser("CH", adobeURL$) <> 0 then
 				nextScript()
 				goto nextIteration
 			endif
@@ -1910,7 +1914,7 @@ firstInterviewNCNS:
 
 			
 			'-------------------- invoke browser window
-			if invokeBrowser("CH", adobeURL$) <> 0 then
+			if webInvokeBrowser("CH", adobeURL$) <> 0 then
 				nextScript()
 				goto nextIteration
 			endif

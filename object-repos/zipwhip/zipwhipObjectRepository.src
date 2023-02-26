@@ -5,36 +5,63 @@
 ##
 #############################################################################################################################################################*/
 
+'======================================================================= url's =================================================================================
+urlZWConversations$ = "https://app.zipwhip.com/messaging"
+urlZWContacts$ = "https://app.zipwhip.com/contacts"
+
 '======================================================================= window definitions =====================================================================
 wndBrowser$ = "FIREFOX.EXE|MozillaWindowClass|"
-wndLogin$ = "FIREFOX.EXE|MozillaWindowClass|Zipwhip - Login — Mozilla Firefox"
-wndMainDan$ = "FIREFOX.EXE|MozillaWindowClass|Zipwhip | Daniel Nelson — Mozilla Firefox"
+wndZWLogin$ = "FIREFOX.EXE|MozillaWindowClass|Zipwhip - Login — Mozilla Firefox"
+wndZWMainDan$ = "FIREFOX.EXE|MozillaWindowClass|Zipwhip | Daniel Nelson — Mozilla Firefox"
 
 
 
 
 '======================================================================= page definitions =====================================================================
-pgLogin$ = "Zipwhip - Login"
-pgMainDan$ = "Zipwhip | Daniel Nelson"
+pgZWLogin$ = "Zipwhip - Login"
+pgZWMainDan$ = "Zipwhip | Daniel Nelson"
 
 
 
 
 '======================================================================= object definitions =====================================================================
 '-------------------- login page
-selSavedIdentity$ = "DIV[DATA-TESTID='EXISTING_IDENTITY']"
-lnkLoginNext$ = "DIV[OUTERTEXT='Next']"
-txtUsername$ = "INPUT TEXT[NAME='identity']"
-txtPassword$ = "INPUT PASSWORD[NAME='password']"
-btnLogin$ = "BUTTON[INNERTEXT='Log In']"
-lnkLoginLink$ = "DIV[OUTERTEXT='Log', INDEX=7]"
-
+selZWSavedIdentity$ = "DIV[DATA-TESTID='EXISTING_IDENTITY']"
+lnkZWLoginNext$ = "DIV[OUTERTEXT='Next']"
+inputZWUsername$ = "INPUT TEXT[NAME='identity']"
+inputZWPassword$ = "INPUT PASSWORD[NAME='password']"
+btnZWLogin$ = "BUTTON[INNERTEXT='Log In']"
+lnkZWLoginLink$ = "DIV[OUTERTEXT='Log', INDEX=7]"
 
 '-------------------- main page
-btnContacts$ = "BUTTON[CLASS='zk-button zk-button-transparent z', INDEX=3]"
-
-
+btnZWContacts$ = "BUTTON[CLASS='zk-button zk-button-transparent z', INDEX=3]"
 
 '-------------------- contacts page
-btnAddContact$ = "BUTTON[INNERTEXT='Add Contact']"
-titleContacts$ = "DIV[OUTERTEXT='Contacts',INDEX=8]"
+btnZWAddContact$ = "BUTTON[INNERTEXT='Add Contact']"	'value from original script "DIV[OUTERTEXT='Add']"
+hdrZWContacts$ = "DIV[OUTERTEXT='Contacts',INDEX=8]"
+
+'-------------------- add contact form
+inputZWFName$ = "INPUT TEXT[NAME='firstName']"
+inputZWLName$ = "INPUT TEXT[NAME='lastName']"
+inputZWPhone$ = "INPUT TEXT[NAME='phoneNumber']"
+inputZWNotes$ = "TEXTAREA[NAME='notes']"
+lnkZWMore$ = "DIV[OUTERTEXT='More']"
+inputZWEmail$ = "INPUT TEXT[NAME='email']"
+btnZWSaveContact$ = "DIV[OUTERTEXT='Save']"
+txtZWContactNm$ = "DIV[OUTERTEXT='" + applicantFName$ + " " + applicantLName$ + "',INDEX=7]"
+diaZWContactCard$ = "DIV[OUTERTEXT='Add ContactFirst',INDEX=7]"
+
+'-------------------- conversations page
+inputZWSearch$ = "INPUT TEXT[NAME='contactSearch']"
+rowZWContactCard$ = "DIV[OUTERTEXT='" + applicantFName$ + "', INDEX=2]"
+rowZWContactSrcResult$ = "DIV[OUTERTEXT='" + applicantFName$ + "',INDEX=2]"
+inputZWTxtMsg$ = "TEXTAREA[CLASS='zk-text-editor_input']"
+btnZWSend$ = "BUTTON[INNERTEXT='Send']"
+btnZWClock$ = "BUTTON[CLASS='zk-button zk-button-transparent zk-hover-icon s', INDEX=2]"
+btnZWDatePicker$ = "BUTTON[CLASS='SingleDatePickerInpu']"
+diaZWCalendar$ = "DIV[CLASS='DayPicker_transition']"
+inputZWDate$ = "INPUT TEXT[NAME='SEND_MESSAGE_PANEL_D']"
+btnZWSchedule$ = "BUTTON[INNERTEXT='Schedule']"
+
+
+

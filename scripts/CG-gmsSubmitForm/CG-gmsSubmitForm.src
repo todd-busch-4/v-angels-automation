@@ -29,14 +29,16 @@ include "C:\v-angels-automation\framework\CG-globalVariables\CG-globalVariables.
 include "C:\v-angels-automation\object-repos\gms\gmsObjectRepository.src" 
 
 
-currScript$ = "CG-gmsFormSubmit"
+currScript$ = "CG-gmsSubmitForm"
 
 
 #ignoreerrors = 1
 
 
 '-------------------- read in columns from employment inquiry doc
-loadEmploymentInquiryData()
+if LoadWorkflowData(currScript$) = 1 then
+	criticalStop()
+endif
 
 
 '#############################################################################################################################
@@ -66,11 +68,9 @@ repeat
 		curr_stage$ = arrCurrentStage$(i)
 
 
-		iOnboardCnt = iOnboardCnt + 1		'stage counter
-
-
 		if curr_stage$ = "On-board" then
 
+			iOnboardCnt = iOnboardCnt + 1		'stage counter
 			logStageMatch()
 
 			'-------------------- get data values for current record
@@ -83,20 +83,20 @@ repeat
 			'-------------------- format raw values to match app formatted values for a couple validation(s)
 			'------- add leading zeroes to single char day/month in company start date
 			startDateCompany$ = zeroPadDate$(startDateCompany$)
-			
+		            	
 			
 			'------- add dashes to ssn's that don't have them
 			applicantSSN$ = formatSSN$(applicantSSN$)
 
 
 			'-------------------- check status for value to trigger form submission
-			if gmsChkSubmitStatus() = 1 then
+			if gmsSubmitChkStatus() = 1 then
 				goto nextIteration
 			endif
 
 
 			'-------------------- invoke browser
-			if invokeBrowser("FF", gmsURL$) <> 0 then
+			if webInvokeBrowser("FF", gmsURL$) <> 0 then
 				nextScript()
 				goto nextIteration
 			endif
@@ -152,6 +152,8 @@ repeat
 
 
 			'-------------------------------------------------------------------------------------------------------------------------------- enter form details
+
+
 			'-------------------- enter work location
 			usepage(pgNewHireForm$)
 			clickhtmlelement(txtWorkLoc$)
@@ -159,7 +161,7 @@ repeat
 				goto nextIteration
 			endif
 			pause 2
-			if gmsErrorCheck$() = "1" then
+			if gmsSubmitErrorChk() = 1 then
 				goto nextIteration
 			endif
 			if webValidateText(txtWorkLoc$, "1", "entering work loc") <> 0 then
@@ -172,11 +174,10 @@ repeat
 			if webEnterText(txtSocial$, applicantSSN$, "entering ssn") <> 0 then
 				goto nextIteration
 			endif
-			errorCheck$ = gmsErrorCheck$()
-			if errorCheck$ = "rehire" then
+			if gmsSubmitErrorChk() = 2 then
 				goto rehireFlow
 			endif
-			if errorCheck$ = "1" then
+			if gmsSubmitErrorChk() = 1 then
 				goto nextIteration
 			endif
 			if webValidateText(txtSocial$, applicantSSN$, "entering ssn") <> 0 then
@@ -189,7 +190,7 @@ repeat
 			if webEnterText(txtFirstName$, applicantFName$, "entering first name") <> 0 then
 				goto nextIteration
 			endif
-			if gmsErrorCheck$() = "1" then
+			if gmsSubmitErrorChk() = 1 then
 				goto nextIteration
 			endif
 			if webValidateText(txtFirstName$, applicantFName$, "entering first name") <> 0 then
@@ -202,7 +203,7 @@ repeat
 			if webEnterText(txtLastName$, applicantLName$, "entering last name") <> 0 then
 				goto nextIteration
 			endif
-			if gmsErrorCheck$() = "1" then
+			if gmsSubmitErrorChk() = 1 then
 				goto nextIteration
 			endif
 			if webValidateText(txtLastName$, applicantLName$, "entering last name") <> 0 then
@@ -215,7 +216,7 @@ repeat
 			if webEnterText(txtEmail$, applicantEmail$, "entering email") <> 0 then
 				goto nextIteration
 			endif
-			if gmsErrorCheck$() = "1" then
+			if gmsSubmitErrorChk() = 1 then
 				goto nextIteration
 			endif
 			if webValidateText(txtEmail$, applicantEmail$, "entering email") <> 0 then
@@ -228,7 +229,7 @@ repeat
 			if webEnterText(dtCompanyStartDt$, startDateCompany$, "entering company start date") <> 0 then
 				goto nextIteration
 			endif
-			if gmsErrorCheck$() = "1" then
+			if gmsSubmitErrorChk() = 1 then
 				goto nextIteration
 			endif
 			if webValidateText(dtCompanyStartDt$, startDateCompany$, "entering company start date") <> 0 then
@@ -241,7 +242,7 @@ repeat
 			if webEnterText(txtPosition$, position$, "entering position") <> 0 then
 				goto nextIteration
 			endif
-			if gmsErrorCheck$() = "1" then
+			if gmsSubmitErrorChk() = 1 then
 				goto nextIteration
 			endif
 			if webValidateText(txtPosition$, position$, "entering position") <> 0 then
@@ -254,7 +255,7 @@ repeat
 			if webEnterText(txtEmployStatus$, employStatus$, "entering employment status") <> 0 then
 				goto nextIteration
 			endif
-			if gmsErrorCheck$() = "1" then
+			if gmsSubmitErrorChk() = 1 then
 				goto nextIteration
 			endif
 			if webValidateText(txtEmployStatus$, employStatus$, "entering employment status") <> 0 then
@@ -267,7 +268,7 @@ repeat
 			if webEnterText(txtEmployType$, employType$, "entering employment type") <> 0 then
 				goto nextIteration
 			endif
-			if gmsErrorCheck$() = "1" then
+			if gmsSubmitErrorChk() = 1 then
 				goto nextIteration
 			endif
 			if webValidateText(txtEmployType$, employType$, "entering employment type") <> 0 then
@@ -280,7 +281,7 @@ repeat
 			if webEnterText(txtBenefitGrp$, benefitGroup$, "entering benefit group") <> 0 then
 				goto nextIteration
 			endif
-			if gmsErrorCheck$() = "1" then
+			if gmsSubmitErrorChk() = 1 then
 				goto nextIteration
 			endif
 			if webValidateText(txtBenefitGrp$, benefitGroup$, "entering benefit group") <> 0 then
@@ -293,7 +294,7 @@ repeat
 			if webEnterText(txtPayGrp$, payGroup$, "entering pay group") <> 0 then
 				goto nextIteration
 			endif
-			if gmsErrorCheck$() = "1" then
+			if gmsSubmitErrorChk() = 1 then
 				goto nextIteration
 			endif
 			if webValidateText(txtPayGrp$, payGroup$, "entering pay group") <> 0 then
@@ -305,7 +306,7 @@ repeat
 			if webSelectItem(selPayMethod$, payMethod$, "selecting pay method") <> 0 then
 				goto nextIteration
 			endif
-			if gmsErrorCheck$() = "1" then
+			if gmsSubmitErrorChk() = 1 then
 				goto nextIteration
 			endif
 			if webValidateText(selPayMethod$, "H", "selecting pay method") <> 0 then
@@ -319,7 +320,7 @@ repeat
 			if webEnterText(txtPayRate$, payRate$, "entering pay rate") <> 0 then
 				goto nextIteration
 			endif
-			if gmsErrorCheck$() = "1" then
+			if gmsSubmitErrorChk() = 1 then
 				goto nextIteration
 			endif
 			pause 2
@@ -333,7 +334,7 @@ repeat
 			if webEnterText(txtStdHours$, stdHours$, "entering std hours") <> 0 then
 				goto nextIteration
 			endif
-			if gmsErrorCheck$() = "1" then
+			if gmsSubmitErrorChk() = 1 then
 				goto nextIteration
 			endif
 			if webValidateText(txtStdHours$, stdHours$, "entering std hours") <> 0 then
@@ -362,7 +363,7 @@ repeat
 
 
 rehireFlow:
-			errorCheck$ = ""
+			gmsSubbmitErrorChk$ = ""
 
 			'-------------------- hit enter to close popup
 			usewindow(wndNewHireForm$, 1)
@@ -400,7 +401,7 @@ rehireFlow:
 				goto nextIteration
 			endif
 			pause 1
-			if gmsNoRehireCheck() = 1 then
+			if gmsSubmitNoRehireChk() = 1 then
 				goto nextIteration
 			endif
 			if webValidateElement(lblLastNameLabel$, "last name label", "entering ssn") <> 1 then

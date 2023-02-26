@@ -5,77 +5,24 @@
 ##									duplication, increase script cleanliness/readability, and reduce maintenance efforts by providing a single
 ##									centralized location for changes
 ##
-##  contents:						invokeBrowser, zeroPadDate$, formatSSN$, checkForNullSSN, loadEmploymentInquiryRows, convertStateFromCode$
+##  contents:						zeroPadDate$, formatSSN$, checkForNullSSN, loadEmploymentInquiryRows, convertStateFromCode$
 ##
 #############################################################################################################################################################*/
 
-/*=============================================================================================================================================================
-== function name:           invokeBrowser
-==
-== developer:               todd busch
-==
-== purpose:                 attempts to start the specified browser and load the specified url. if an error is encountered it will retry the number of
-==							times defined in iRetry (default: 3). if number of retry attempts defined is exceeded it will log messages, close the
-==							browser, and return the error code
-==
-== input parms:            	str_app$:	browser code to invoke ("CH" = Chrome  "FF" = FireFox)
-==							str_url:	url to navigate to
-==
-== returns:                 int:	0 - on success
-==									error_code - on failure
-==
-== notes:                   none
-==
-=============================================================================================================================================================*/
-function invokeBrowser(str_app$, str_url$)
-	local iRetry, r, iAttempt
-
-	while iRetry <= 2
-		r = startbrowser(str_app$, str_url$, 3)
-		pause 3
-		iAttempt = iRetry + 1
-
-		if r = 0 then
-			iRetry = 3
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": start browser was successful", crlf)
-			invokeBrowser = 0
-			exitfunction
-		endif
-
-		if r <> 0 then
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error starting browser on attempt #: [" + str$(iAttempt) + "]", crlf)
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(r) + "), retrying", crlf)
-			hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-invoke_browser-" + str$(iAttempt) + ".bmp", 1, 1)
-			closebrowser()
-			pause 1
-			iRetry = iRetry + 1
-		endif
-	wend
-
-	if r <> 0 then
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": browser could not be invoked after [" + str$(iAttempt) + "] attempts", crlf)
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(r) + ") msg: " + #errormsg$, crlf)
-		closebrowser()
-		invokeBrowser = r
-	endif
-
-EndFunction
-
-
-/*=============================================================================================================================================================
-== function name:           zeroPadDate$
-==
-== developer:               todd busch
-==
-== purpose:                 adds a leading zero to single digit day and month parts of a short formatted date (m/d/yyyy)
-==
-== input parms:             dt_date$:	date to be formatted
-==
-== returns:                 string:		the converted date with leading zeros
-==
-== notes:                   n/a
-==
-=============================================================================================================================================================*/
+'=============================================================================================================================================================
+'== function name:           zeroPadDate$
+	'==
+	'== developer:               todd busch
+	'==
+	'== purpose:                 adds a leading zero to single digit day and month parts of a short formatted date (m/d/yyyy)
+	'==
+	'== input parms:             dt_date$:	date to be formatted
+	'==
+	'== returns:                 string:		the converted date with leading zeros
+	'==
+	'== notes:                   n/a
+	'==
+'=============================================================================================================================================================*/
 function zeroPadDate$(dt_date$)
 	local r
 
@@ -105,21 +52,20 @@ function zeroPadDate$(dt_date$)
 
 endfunction
 
-
-/*=============================================================================================================================================================
-== function name:           formatSSN$
-==
-== developer:               todd busch
-==
-== purpose:                 adds dashes to specified ssn if it does not have them
-==
-== input parms:            	str_ssn$:	the ssn to be formatted
-==
-== returns:                 string:		the formatted ssn with dashes
-==
-== notes:                   n/a
-==
-=============================================================================================================================================================*/
+'=============================================================================================================================================================
+'== function name:           formatSSN$
+	'==
+	'== developer:               todd busch
+	'==
+	'== purpose:                 adds dashes to specified ssn if it does not have them
+	'==
+	'== input parms:            	str_ssn$:	the ssn to be formatted
+	'==
+	'== returns:                 string:		the formatted ssn with dashes
+	'==
+	'== notes:                   n/a
+	'==
+'=============================================================================================================================================================*/
 function formatSSN$ (str_ssn$)
      local middle$, pre$, post$
    
@@ -138,29 +84,28 @@ function formatSSN$ (str_ssn$)
 
 endfunction
 
+'=============================================================================================================================================================
+'== function name:           chkNullDataElement
+	'==
+	'== developer:               todd busch
+	'==
+	'== purpose:                 checks value from employment inquiry ssn column for blank value
+	'==
+	'== returns:                 int:	0 - contained ssn
+	'==									1 - ssn was null
+	'==
+	'== notes:                   none
+	'==
+'=============================================================================================================================================================*/
+function chkNullDataElement(element$)
 
-/*=============================================================================================================================================================
-== function name:           checkForNullSSN
-==
-== developer:               todd busch
-==
-== purpose:                 checks value from employment inquiry ssn column for blank value
-==
-== returns:                 int:	0 - contained ssn
-==									1 - ssn was null
-==
-== notes:                   none
-==
-=============================================================================================================================================================*/
-function checkForNullSSN()
-
-	if applicantSSN$ = "" then
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ssn col did not contain a social for the current applicant", crlf)
+	if element$ = "" or element$ = "[]"then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + element$ + " col did not contain a value for the current row", crlf)
 		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
 		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
 		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - no ssn", crlf + crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - null " + element$, crlf + crlf)
 		checkForNullSSN = 1
 	else
 		checkForNullSSN = 0
@@ -168,21 +113,20 @@ function checkForNullSSN()
 
 endfunction
 
-
-/*=============================================================================================================================================================
-== function name:           convertStateFromCode$
-==
-== developer:               todd busch
-==
-== purpose:                 terseDescription
-==
-== input parms:            	paramName:	purpose
-==
-== returns:                 typeValue
-==
-== notes:                   pertinentinfo
-==
-=============================================================================================================================================================*/
+'=============================================================================================================================================================
+'== function name:           convertStateFromCode$
+	'==
+	'== developer:               todd busch
+	'==
+	'== purpose:                 terseDescription
+	'==
+	'== input parms:            	paramName:	purpose
+	'==
+	'== returns:                 typeValue
+	'==
+	'== notes:                   pertinentinfo
+	'==
+'=============================================================================================================================================================*/
 function convertStateFromCode$(state$)
 
 	if state$ = "OH" then

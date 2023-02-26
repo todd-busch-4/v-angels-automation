@@ -36,7 +36,7 @@ currScript$ = "CG-gmsTerminations"
 
 
 '-------------------- read in columns from employment inquiry doc
-if loadEmploymentInquiryData() = 1 then
+if LoadWorkflowData(currScript$) = 1 then
 	criticalStop()
 endif
 
@@ -64,14 +64,14 @@ repeat
         logEventFound()
 
 
-        '-------------------- get the stage for the current change event
+ '------------------------------------------------------------------------------------------------------------------------------ check stage column for triggers
+
+
+       '-------------------- get the stage for the current change event
 		curr_stage$ = arrCurrentStage$(i)
 
 
-'------------------------------------------------------------------------------------------------------------------------------ check stage column for triggers
-
-
-        if gmsChkTerminationStage = 0 then
+        if gmsTermsChkStage() = 0 then
             iStageCnt = iStageCnt + 1
             logStageMatch()
         else
@@ -83,11 +83,11 @@ repeat
         '-------------------- get data for current row
         gmsTermsGetData()
         logDataValues()        
-        termedLOADate$ = gmsFmtTermDate$()
+        termedLOADate$ = gmsTermsFmtDates$()
         
 
         '-------------------- check gms status column for qualifying values
-        if gmsChkTerminateStatus() = 1 then
+        if gmsTermsChkStatus() = 1 then
             goto nextIteration
         endif
 
@@ -96,7 +96,7 @@ repeat
  
  
         '-------------------- invoke browser
-        if invokeBrowser("FF", gmsURL$) = 1 then
+        if webInvokeBrowser("FF", gmsURL$) = 1 then
             nextScript()
             goto nextIteration
         endif

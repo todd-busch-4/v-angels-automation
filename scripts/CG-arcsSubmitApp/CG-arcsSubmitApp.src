@@ -34,7 +34,7 @@ currScript$ = "CG-arcsSubmitApp"
 
 
 '----------------------------------------------------------------------------------------------------------------------------------------------- read in columns from employment inquiry doc
-if loadEmploymentInquiryData() = 1 then
+if LoadWorkflowData(currScript$) = 1 then
 	criticalStop()
 endif
 

@@ -31,13 +31,24 @@ function adobeSendStatusChk(status$, name$)
     local status$, name$
     
     write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": checking packet status", crlf)
-    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": value of adobePcktStatus: " + adobePcktStatus$, crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": adobePcktStatus: " + adobePcktStatus$, crlf)
     if instr(adobePcktStatus$, status$) <> 0 then
-        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status indicates " + name$ + " packet has already been sent", crlf)
-        write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + name$ + " packet has been sent", crlf)
-        adobeSendStatusChk = 1
-        exitfunction
-    else
+        if status$ = "Pre 1st Pkt" then
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status indicates " + name$ + " packet has already been sent", crlf)
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": skipping to 1st int pkt", crlf)
+            write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + name$ + " packet has been sent; skipping to 1st int pkt", crlf)
+            adobeSendStatusChk = 1
+            exitfunction
+        else
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status indicates " + name$ + " packet has already been sent", crlf)
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+            write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + name$ + " packet has been sent; proceeding to next chg event", crlf + crlf)
+            adobeSendStatusChk = 1
+            exitfunction           
+        endif
+	endif
+
+    if instr(adobePcktStatus$, status$) = 0 then
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status indicates it is ok to send " + name$ + " packet", crlf)
         adobeSendStatusChk = 0
         exitfunction

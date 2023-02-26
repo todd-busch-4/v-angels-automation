@@ -1,0 +1,539 @@
+'###############################################################################################################################################
+'##
+'## author:                 todd busch
+'##
+'## description:            iterates wintask change event col in employment inquiry list.xlsx. Rows with a 'yes' that also have a 'stage' 
+'##							value of '1st Interview' and a null or no status in the 'Text Msgs' col trigger the workflow. A contact record
+'##							is created in zipwhip, an initial greeting msg is sent, and appt confirmation texts are scheduled for the day 
+'##							before and the morning of the 1st Appointment date
+'##
+'## run in:					firefox
+'##
+'## notes:                  day before confirm is skipped if the current day (today) IS the day before;
+'##							
+'###############################################################################################################################################
+
+'###############################################################################################################################################
+'##   													script prep																			  
+'###############################################################################################################################################
+include "C:\v-angels-automation\framework\CG-globalDimDeclarations\CG-globalDimDeclarations.src"
+include "C:\v-angels-automation\framework\CG-loadWorkflowData\CG-loadWorkflowData.src"
+include "C:\v-angels-automation\framework\CG-globalFunctions\CG-globalFunctions.src"
+include "C:\v-angels-automation\framework\CG-zwFunctions\CG-zwFunctions.src"
+include "c:\v-angels-automation\framework\CG-globalWinFunctions\CG-globalWinFunctions.src"
+include "c:\v-angels-automation\framework\CG-globalWebFunctions\CG-globalWebFunctions.src"
+include "c:\v-angels-automation\framework\CG-globalWebValidations\CG-globalWebValidations.src"
+include "C:\v-angels-automation\framework\CG-globalLogging\CG-globalLogging.src"
+include "C:\v-angels-automation\framework\CG-globalSubDefinitions\CG-globalSubDefinitions.src"
+include "C:\v-angels-automation\framework\CG-globalVariables\CG-globalVariables.src"
+include "C:\v-angels-automation\object-repos\zipwhip\zipwhipObjectRepository.src"
+
+
+currScript$ = "CG-zipwhipInitTxtMsgs"
+
+
+#ignoreerrors = 1					'turn off errors
+
+
+'-------------------------------------------------------------------------------------------------------------------------------- read in data from employment inquiry doc
+if LoadWorkflowData(currScript$) = 1 then
+	criticalStop()
+endif
+
+
+'###############################################################################################################################################
+'##   													script start																			  
+'###############################################################################################################################################
+
+
+logStartScript("zipwhip init msgs")
+
+
+'-------------------------------------------------------------------------------------------------------------------------------- begin iterating through change event column
+i = 0
+
+
+repeat
+
+
+	'-------------------- get change event status for current row
+	curr_status$ = arrChangeEvents$(i)
+
+
+	if curr_status$ = "Yes" then
+
+
+		iChangeCnt = iChangeCnt + 1
+		iExcelRow = i + 2
+		logEventFound()
+
+
+		'-------------------- get stage of current change event
+		curr_stage$ = arrCurrentStage$(i)
+
+
+		'------------------------------------------------------------------------------------------------------------------------ stage triggere - begin workflow admin 
+		if zwInitStageChk() = 0 then
+			iStageCnt = iStageCnt + 1
+			logStageMatch()
+		else
+			logStageBypass()
+			goto nextIteration
+		endif
+
+
+		'-------------------- get data values for current record from employment inquiry
+		zwInitGetData()
+		logDataValues()
+
+
+		'-------------------- check for scheduled appointment
+		if chkNullDataElement(applicant1stApp$) = 1 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- check for phone number
+		if chkNullDataElement(applicantPhone$) = 1 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- check for non-standard formatted phone number
+		zwNonStdPhoneFormatChk()
+
+
+		'-------------------- prep dates in app format
+		dtFirstApptDate$ = zwFmtFirstApptDate$(applicant1stApp$)
+		dtDayBefore$ = zwFmtDayPriorFirstAppt$(applicant1stApp$)
+		dtFirstApptTime$ = zwFmtFirstApptTime$(applicant1stApp$)
+
+
+		'-------------------- check txt messages status column
+		if zwInitStatusChk() = 1 then
+			goto nextIteration
+		endif
+
+
+		'------------------------------------------------------------------------------------------------------------------------ create contact record 
+
+
+		'-------------------- invoke browser
+		if webInvokeBrowser("FF", zipWhipURL$) = 1 then
+			nextScript()
+			goto nextIteration
+		endif
+		maximizewindow(wndBrowser$, 1)
+
+
+		'-------------------- verify browser state
+		if zwLoginChk() = 1 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- click 'contacts' icon
+		'usepage(wndZWMainDan$)
+		if webNavigate(urlZWContacts$, "contacts") <> 0 then
+			goto nextIteration
+		endif
+
+		'if webClickElement(btnZWContacts$, "clicking contacts") <> 0 then
+		'	goto nextIteration
+		'endif
+		pause 2
+		if iEnvironment = 1 then
+			if webWaitForText(wndZWMainDan$, "Contacts", "contacts hdr", 10, "clicking contacts", 574, 136, 51, 155) = 1 then
+				goto nextIteration
+			endif
+		endif
+		if iEnvironment = 2 then
+			if webWaitForText(wndZWMainDan$, "Contacts", "contacts hdr", 10, "clicking contacts", 438, 143, 71, 321) = 1 then
+				goto nextIteration
+			endif
+		endif
+
+
+		'-------------------- click 'add contact' button
+		if webClickElement(btnZWAddContact$, "clicking 'add contact'") <> 0 then
+			goto nextIteration
+		endif
+		pause 2
+		if iEnvironment = 1 then
+			if webWaitForText(wndZWMainDan$, "Add Contact", "add contact hdr", 10, "clicking 'add contact'", 770, 187, 42, 223) = 1 then
+				goto nextIteration
+			endif
+		endif
+		if iEnvironment = 2 then
+			if webWaitForText(wndZWMainDan$, "Add Contact", "add contact hdr", 10, "clicking 'add contact'", 717, 220, 53, 343) = 1 then
+				goto nextIteration
+			endif
+		endif
+
+
+		'-------------------- enter applicant first name
+		if webPasteText(inputZWFName$, applicantFName$, "entering first name") <> 0 then
+			goto nextIteration
+		endif
+		if webValidateText(inputZWFName$, applicantFName$, "entering first name") <> 0 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- enter applicant last name
+		if webPasteText(inputZWLName$, applicantLName$, "entering last name") <> 0 then
+			goto nextIteration
+		endif
+		if webValidateText(inputZWLName$, applicantLName$, "entering last name") <> 0 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- enter applicant phone number
+		if webPasteText(inputZWPhone$, applicantPhone$, "entering phone") <> 0 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- enter notes
+		if webPasteText(inputZWNotes$, "Created by WinTask.", "entering notes") <> 0 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- expand form to expose additional fields
+		if webClickElement(lnkZWMore$, "clicking 'more'") <> 0 then
+			goto nextIteration
+		endif
+		pause 2
+		if webValidateElement(inputZWEmail$, "email field", "expanding form") <> 1 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- enter applicant email
+		if webPasteText(inputZWEmail$, applicantEmail$, "entering email") <> 0 then
+			goto nextIteration
+		endif
+		if webValidateText(inputZWEmail$, applicantEmail$, "entering email") <> 0 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- click save                                                                                                           
+		if webClickElement(btnZWSaveContact$, "saving contact") <> 0 then
+			goto nextIteration
+		endif
+		pause 2
+		if zwAddContactErrorChk() = 1 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- close contact card
+		usewindow(wndZWMainDan$, 1)
+		winMouseLeftDblClick(515, 515, "close contact card")
+
+
+		'-------------------- end contact creation
+		logWorkflowStepSuccess("contact record created successfully")
+
+
+		'------------------------------------------------------------------------------------------------------------------------------ send initial text
+
+
+		'-------------------- nav to conversations
+		if webNavigate(urlZWConversations$, "conversations") <> 0 then
+			goto nextIteration
+		endif
+		pause 2
+
+
+		'-------------------- enter search criteria
+		if webPasteText(inputZWSearch$, applicantPhone$, "contact src") <> 0 then
+			goto nextIteration
+		endif
+		pause 2
+
+
+		'-------------------- select returned contact
+		winMouseLeftDblClick(100, 220, "selecting contact")
+		pause 2
+		if webValidateElement(inputZWTxtMsg$, "text message inputbox", "selecting contact") <> 1 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- format initial msg template
+		initMsg$ = zwFmtInitMsgTxt$(applicantFName$, firstAppDate$, firstAppTime$)
+
+
+		'-------------------- compose initial text
+		winMouseLeftDblClick(680, 950, "click msgbox")
+		pause 2
+		if webEnterText(inputZWTxtMsg$, initMsg$, "composing msg") <> 0 then
+			goto nextIteration
+		endif
+		pause 2
+		
+
+		'-------------------- send initial text
+		if webClickElement(btnZWSend$, "sending init txt msg") <> 0 then
+			goto nextIteration
+		else
+			logWorkflowStepSuccess("initial text sent successfully")
+		endif
+
+
+		'------------------------------------------------------------------------------------------------------------------------------ schedule day before confirm
+
+
+		'-------------------- check if day prior confirm txt is needed
+		if zwPriorDayChk() = 1 then
+			goto dayOfConfirm
+		endif
+
+
+		'-------------------- reload conversations page
+		if webNavigate(urlZWConversations$, "conversations") <> 0 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- enter search criteria
+		if webPasteText(inputZWSearch$, applicantPhone$, "contact src") <> 0 then
+			goto nextIteration
+		endif
+		pause 2
+
+
+		'-------------------- select returned contact
+		winMouseLeftDblClick(100, 220, "selecting contact")
+		pause 2
+		if webValidateElement(inputZWTxtMsg$, "text message inputbox", "selecting contact") <> 1 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- click 'clock' icon to schedule msg
+		if webClickElement(btnZWClock$, "clicking schedule button") <> 0 then
+			goto nextIteration
+		endif
+		pause 2
+		if webValidateElement(btnZWDatePicker$, "date picker control", "clicking schedule button") <> 1 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- click date picker control
+		if webClickElement(btnZWDatePicker$, "clicking date picker") <> 0 then
+			goto nextIteration
+		endif
+		pause 2
+		if webValidateElement(diaZWCalendar$, "calendar transition", "clicking date picker") <> 1 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- enter day prior to appt
+		if webPasteText(inputZWDate$, firstAppPriorDate$, "entering date") <> 0 then
+			goto nextIteration
+		endif
+		pause 2
+		if webPasteText(inputZWDate$, firstAppPriorDate$, "entering date") <> 0 then
+			goto nextIteration
+		endif
+		pause 2
+
+
+		'-------------------- select time picker control
+		usewindow(wndZWMainDan$, 1)
+		if iEnvironment = 1 then
+			if webLeftSingleClickOCRText("ET", 1116, 992, 105, 38, -40, 0, "clicking time picker") <> 0 then
+				goto nextIteration
+			endif
+		endif
+		if iEnvironment = 2 then
+			winMouseLeftDblClick(1168, 1012, "clicking time picker")
+		endif
+		pause 2
+
+
+		'-------------------- enter scheduled time
+		if winSendKeys(dayPriorAppHour$, "entering hour") <> 0 then
+			goto nextIteration
+		endif
+		pause 2
+		if winSendKeys(dayPriorAppMinutes$, "entering minute") <> 0 then
+			goto nextIteration
+		endif
+		pause 2
+		if winSendKeys(dayPriorDayNight$, "entering am/pm") <> 0 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- format day before confirm msg template
+		dayPriorMsg$ = zwFmtDayPriorMsgTxt$(applicantFName$, firstAppDate$, firstAppTime$)
+
+
+		'-------------------- enter msg text
+		winMouseLeftDblClick(680, 950, "click msgbox")
+		pause 2
+		if webEnterText(inputZWTxtMsg$, dayPriorMsg$, "composing msg") <> 0 then
+			goto nextIteration
+		endif
+		pause 2
+
+
+		'-------------------- click schedule
+		if webClickElement(btnZWSchedule$, "scheduling day before confirm msg") <> 0 then
+			goto nextIteration
+		else
+			logWorkflowStepSuccess("day before confirm scheduled successfully")
+		endif
+
+
+		'------------------------------------------------------------------------------------------------------------------------------ schedule day of confirm
+
+dayOfConfirm:
+		'-------------------- reload conversations page
+		if webNavigate(urlZWConversations$, "conversations") <> 0 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- enter search criteria
+		if webPasteText(inputZWSearch$, applicantPhone$, "contact src") <> 0 then
+			goto nextIteration
+		endif
+		pause 2
+
+
+		'-------------------- select returned contact
+		winMouseLeftDblClick(100, 220, "selecting contact")
+		pause 2
+		if webValidateElement(inputZWTxtMsg$, "text message inputbox", "selecting contact") <> 1 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- click 'clock' icon to schedule msg
+		if webClickElement(btnZWClock$, "clicking schedule button") <> 0 then
+			goto nextIteration
+		endif
+		pause 2
+		if webValidateElement(btnZWDatePicker$, "date picker control", "clicking schedule button") <> 1 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- click date picker control
+		if webClickElement(btnZWDatePicker$, "clicking date picker") <> 0 then
+			goto nextIteration
+		endif
+		pause 2
+		if webValidateElement(diaZWCalendar$, "calendar transition", "clicking date picker") <> 1 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- enter date of appt
+		if webPasteText(inputZWDate$, firstAppDate$, "entering date") <> 0 then
+			goto nextIteration
+		endif
+		pause 2
+		if webPasteText(inputZWDate$, firstAppDate$, "entering date") <> 0 then
+			goto nextIteration
+		endif
+		pause 2
+
+
+		'-------------------- select time picker control
+		usewindow(wndZWMainDan$, 1)
+		if iEnvironment = 1 then
+			if webLeftSingleClickOCRText("ET", 1116, 992, 105, 38, -40, 0, "clicking time picker") <> 0 then
+				goto nextIteration
+			endif
+		endif
+		if iEnvironment = 2 then
+			winMouseLeftDblClick(1168, 1012, "clicking time picker")
+		endif
+		pause 2
+
+
+		'-------------------- enter scheduled time
+		if winSendKeys(dayOfAppHour$, "entering hour") <> 0 then
+			goto nextIteration
+		endif
+		pause 2
+		if winSendKeys(dayOfAppMinutes$, "entering minute") <> 0 then
+			goto nextIteration
+		endif
+		pause 2
+		if winSendKeys(dayOfDayNight$, "entering am/pm") <> 0 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- format day of confirm msg template
+		dayOfApptMsg$ = zwFmtDayOfApptMsgTxt$(applicantFName$, firstAppTime$)
+
+
+		'-------------------- enter msg text
+		winMouseLeftDblClick(680, 950, "click msgbox")
+		pause 2
+		if webEnterText(inputZWTxtMsg$, dayOfApptMsg$, "composing msg") <> 0 then
+			goto nextIteration
+		endif
+		pause 2
+
+
+		'-------------------- click schedule
+		if webClickElement(btnZWSchedule$, "scheduling day before confirm msg") <> 0 then
+			goto nextIteration
+		else
+			logWorkflowSuccess("day of confirm scheduled successfully; workflow complete")
+		endif
+
+
+		iCompleted = iCompleted + 1
+		closebrowser()
+
+
+	endif	'/change event
+
+
+nextIteration:
+
+
+i = i + 1
+
+
+until i = 5000
+
+
+'##############################################################
+'##   			script end									 ##
+'##############################################################
+write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ", crlf) 
+write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf) 
+write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events detected:            " + str$(iChangeCnt), crlf)
+write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": events with '1st interview' stage: " + str$(iStageCnt), crlf)
+write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": records msgs sent for:             " + str$(iCompleted), crlf)
+write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf)
+write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change event rows detected: " + str$(iChangeCnt), crlf)
+write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 1st Interview events:       " + str$(iStageCnt), crlf)
+write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": records msgs sent for:      " + str$(iCompleted), crlf)
+write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
+write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
+write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
+write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
+
+
+
+
+
+
+
+

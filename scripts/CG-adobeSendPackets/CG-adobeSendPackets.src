@@ -16,7 +16,7 @@
 '###############################################################################################################################################
 
 '###############################################################################################################################################
-'##   													script prep																			  ##
+'##   													script prep																			  
 '###############################################################################################################################################
 include "C:\v-angels-automation\framework\CG-globalDimDeclarations\CG-globalDimDeclarations.src"
 include "C:\v-angels-automation\framework\CG-loadWorkflowData\CG-loadWorkflowData.src"
@@ -38,13 +38,13 @@ currScript$ = "CG-adobeSendPackets"
 
 
 '-------------------- read in columns from employment inquiry doc
-if loadEmploymentInquiryData() = 1 then
+if LoadWorkflowData(currScript$) = 1 then
 	criticalStop()
 endif
 
 
 '#############################################################################################################################
-'##   													script start								 						##
+'##   													script start								 						
 '#############################################################################################################################
 logStartScript("adobe send")
 
@@ -96,7 +96,7 @@ repeat
 
 			'-------------------------------------------------------------------------------------------------------------------------------- send pre 1st interview packet
 			'-------------------- invoke browser window
-			if invokeBrowser("CH", adobeURL$) <> 0 then
+			if webInvokeBrowser("CH", adobeURL$) <> 0 then
 				nextScript()
 				goto nextIteration
 			endif
@@ -297,14 +297,14 @@ repeat
 
 firstInterviewSend:
 			'-------------------- check for already sent packets
-			if adobeSendStatusChk("1st Int Pkt", "1st interview packet") = 1 then
+			if adobeSendStatusChk("1st Int Pkt", "1st int") = 1 then
 				goto nextIteration
 			endif
 
 
 			'-------------------------------------------------------------------------------------------------------------------------------- send 1st interview packet
 			'-------------------- invoke browser window
-			if invokeBrowser("CH", adobeURL$) <> 0 then
+			if webInvokeBrowser("CH", adobeURL$) <> 0 then
 				nextScript()
 				goto nextIteration
 			endif
@@ -537,7 +537,7 @@ firstInterviewSend:
 
 
 			'-------------------- invoke browser window
-			if invokeBrowser("CH", adobeURL$) <> 0 then
+			if webInvokeBrowser("CH", adobeURL$) <> 0 then
 				nextScript()
 				goto nextIteration
 			endif

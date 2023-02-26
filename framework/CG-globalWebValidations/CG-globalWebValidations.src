@@ -9,24 +9,23 @@
 ##
 #############################################################################################################################################################*/
 
-/*=============================================================================================================================================================
-== function name:           webValidateText
-==
-== developer:               todd busch
-==
-== purpose:                 gets the text property value from the specified html object and validates it matches expected w/error-handling & logging
-==
-== input parms:             object$:	descriptor of the html object validate
-==                          text$:      the expected text value
-==                          step$:		terse description of the action/step in the script (e.g. "clicking login")
-==
-== returns:                 int:    0 - on success   
-==                                  1 - on failure
-==
-== notes:                   none
-==
-=============================================================================================================================================================*/
-
+'=============================================================================================================================================================
+'== function name:           webValidateText
+    '==
+    '== developer:               todd busch
+    '==
+    '== purpose:                 gets the text property value from the specified html object and validates it matches expected w/error-handling & logging
+    '==
+    '== input parms:             object$:	descriptor of the html object validate
+    '==                          text$:      the expected text value
+    '==                          step$:		terse description of the action/step in the script (e.g. "clicking login")
+    '==
+    '== returns:                 int:    0 - on success   
+    '==                                  1 - on failure
+    '==
+    '== notes:                   none
+    '==
+'=============================================================================================================================================================*/
 function webValidateText(object$, text$, step$)
     local r, object$, text$, var$
 
@@ -43,7 +42,7 @@ function webValidateText(object$, text$, step$)
         if var$ <> text$ then
             write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + step$ + " validation failed", crlf)
             write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": actual value did not match expected", crlf)
-            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": expected: (" + text$ + ")  actual: (" + var$ + ")", crlf)
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": expected: [" + text$ + "]  actual: [" + var$ + "]", crlf)
             write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
             hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-" + step$ + ".bmp", 1, 1)
             write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
@@ -64,25 +63,23 @@ function webValidateText(object$, text$, step$)
 
 endfunction
 
-
-/*=============================================================================================================================================================
-== function name:           webValidateElement
-==
-== developer:               todd busch
-==
-== purpose:                 validates the existence of the specified html object on the current page w/error-handling & logging
-==
-== input parms:             objectDesc$:	descriptor of the html object to verify
-==                          objectName$:    name/title of the object
-==                          step$:		    terse description of the action/step in the script (e.g. "clicking login")
-==
-== returns:                 int:    1 - if object found   
-==                                  error_code - on failure or object not found
-==
-== notes:                   none
-==
-=============================================================================================================================================================*/
-
+'=============================================================================================================================================================
+'== function name:           webValidateElement
+    '==
+    '== developer:               todd busch
+    '==
+    '== purpose:                 validates the existence of the specified html object on the current page w/error-handling & logging
+    '==
+    '== input parms:             objectDesc$:	descriptor of the html object to verify
+    '==                          objectName$:    name/title of the object
+    '==                          step$:		    terse description of the action/step in the script (e.g. "clicking login")
+    '==
+    '== returns:                 int:    1 - if object found   
+    '==                                  error_code - on failure or object not found
+    '==
+    '== notes:                   none
+    '==
+'=============================================================================================================================================================*/
 function webValidateElement(objectDesc$, objectName$, step$)
     local r
 
@@ -109,24 +106,22 @@ function webValidateElement(objectDesc$, objectName$, step$)
 
 endfunction
 
-
-/*=============================================================================================================================================================
-== function name:           webValidateCurrPage
-==
-== developer:               todd busch
-==
-== purpose:                 validates that the current page matches the expected page w/error-handling & logging
-==
-== input parms:             pageName$:  name of the expected page
-==                          step$:		terse description of the action/step in the script (e.g. "clicking login")
-==
-== returns:                 int:    0 - on match/success    
-==                                  1 - on failure/no match
-==
-== notes:                   none
-==
-=============================================================================================================================================================*/
-
+'=============================================================================================================================================================
+'== function name:           webValidateCurrPage
+    '==
+    '== developer:               todd busch
+    '==
+    '== purpose:                 validates that the current page matches the expected page w/error-handling & logging
+    '==
+    '== input parms:             pageName$:  name of the expected page
+    '==                          step$:		terse description of the action/step in the script (e.g. "clicking login")
+    '==
+    '== returns:                 int:    0 - on match/success    
+    '==                                  1 - on failure/no match
+    '==
+    '== notes:                   none
+    '==
+'=============================================================================================================================================================*/
 function webValidateCurrPage(pageName$, step$)
 
 	if currentpage$() <> pageName$ then
@@ -149,29 +144,28 @@ function webValidateCurrPage(pageName$, step$)
 
 endfunction
 
-
-/*=============================================================================================================================================================
-== function name:           webWaitForText
-==
-== developer:               todd busch
-==
-== purpose:                 uses ocrengine and waits the specified time for the specified text to appear in the specified area
-==
-== input parms:             window$:    name of window to look for text
-==                          text$:      the text to look for
-==                          waitTime:   the amount of time to wait for text to appear
-==							area1:		x coordinate to the topleft point of the area to look in
-==							area2:		y coordinate to the topleft point of the area to look in
-==							area3:		height of the area to look in
-==							area4:		width of the area to look in
-==
-== returns:                 int:    0 - on success
-==                                  1 - on failure
-==
-== notes:                   in the event of a failure to find the text a call is made to adobeInvalidEmailChk function to 
-==                          determine if the failure was a result of an invalid email
-==
-=============================================================================================================================================================*/
+'=============================================================================================================================================================
+'== function name:           webWaitForText
+    '==
+    '== developer:               todd busch
+    '==
+    '== purpose:                 uses ocrengine and waits the specified time for the specified text to appear in the specified area
+    '==
+    '== input parms:             window$:    name of window to look for text
+    '==                          text$:      the text to look for
+    '==                          waitTime:   the amount of time to wait for text to appear
+    '==							area1:		x coordinate to the topleft point of the area to look in
+    '==							area2:		y coordinate to the topleft point of the area to look in
+    '==							area3:		height of the area to look in
+    '==							area4:		width of the area to look in
+    '==
+    '== returns:                 int:    0 - on success
+    '==                                  1 - on failure
+    '==
+    '== notes:                   in the event of a failure to find the text a call is made to adobeInvalidEmailChk function to 
+    '==                          determine if the failure was a result of an invalid email
+    '==
+'=============================================================================================================================================================*/
 function webWaitForText(window$, text$, textName$, waitTime, step$, area1, area2, area3, area4)
     local r
 

@@ -1,81 +1,33 @@
-/*#############################################################################################################################################################
-##  filename:						cg-globalLogging
-##
-##  purpose:						library of logging functions for use in caregiver workflow script development in order to minimize code
-##									duplication, increase script cleanliness/readability, and reduce maintenance efforts by providing a single
-##									centralized location for changes
-##
-##  contents:						logWorkflowStepSuccess, logWorkflowSuccess, logStartScript, logStageMatch, logEventFound, logDataValues
-##
-#############################################################################################################################################################*/
+''#############################################################################################################################################################
+'##  filename:						cg-globalLogging
+'##
+'##  purpose:						library of logging functions for use in caregiver workflow script development in order to minimize code
+'##									duplication, increase script cleanliness/readability, and reduce maintenance efforts by providing a single
+'##									centralized location for changes
+'##
+'##  contents:						logStartScript, logEventFound, logStageMatch, logStageBypass, logDataValues, logWorkflowSuccess, logWorkflowStepSuccess
+'##
+'#############################################################################################################################################################*/
 
-/*=============================================================================================================================================================
-== function name:           logWorkflowStepSuccess
-==
-== developer:               todd busch
-==
-== purpose:                 writes lines to the log files using specified text that one portion of the workflow was successful 
-==
-== input parms:            	text$:	text to use as part of the log statement
-==
-== returns:                 int:	0 for success
-==
-== notes:                   n/a
-==
-=============================================================================================================================================================*/
-function logWorkflowStepSuccess(text$)
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + text$, crlf)
-	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ":  " + text$, crlf)
-	write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-	write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-	write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + text$, crlf + crlf)
-	logWorkflowSuccess = 0
-endfunction
-
-
-/*=============================================================================================================================================================
-== function name:           logWorkflowSuccess
-==
-== developer:               todd busch
-==
-== purpose:                 writes lines to the log files using specified text that entire workflow was successful 
-==
-== input parms:            	text$:	text to use as part of the log
-==
-== returns:                 int:	0 for success
-==
-== notes:                   n/a
-==
-=============================================================================================================================================================*/
-function logWorkflowSuccess(text$)
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + text$, crlf + crlf)
-	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ":  " + text$, crlf + crlf)
-	write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-	write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-	write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + text$, crlf + crlf)
-	logWorkflowSuccess = 0
-endfunction
-
-
-/*=============================================================================================================================================================
-== function name:           logStartScript
-==
-== developer:               todd busch
-==
-== purpose:                 writes lines to the log files with scan starting info
-==
-== input parms:            	workflow$:	name of the workflow (e.g. adobe send)
-==
-== returns:                 int:	0 for success
-==
-== notes:                   n/a
-==
-=============================================================================================================================================================*/
+'=============================================================================================================================================================
+'==function name:           logStartScript
+	'==
+	'==developer:               todd busch
+	'==
+	'==purpose:                 writes lines to the log files with scan starting info
+	'==
+	'==input parms:            	workflow$:	name of the workflow (e.g. adobe send)
+	'==
+	'==returns:                 int:	0 for success
+	'==
+	'==notes:                   n/a
+	'==
+'=============================================================================================================================================================*/
 function logStartScript(workflow$)
 	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": starting scan for " + workflow$ + " change events", crlf)
-	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": starting scan of (" + str$(cnt) + ") rows for " + workflow$ + " change events", crlf)
-	write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": starting scan of (" + str$(cnt) + ") rows for " + workflow$ + " change events", crlf)
-	write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": starting scan of (" + str$(cnt) + ") rows for " + workflow$ + " change events", crlf + crlf)
+	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": starting scan of [" + str$(cnt) + "] rows for " + workflow$ + " change events", crlf)
+	write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": starting scan of [" + str$(cnt) + "] rows for " + workflow$ + " change events", crlf)
+	write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": starting scan of [" + str$(cnt) + "] rows for " + workflow$ + " change events", crlf + crlf)
 	if iEnvironment = 1 then
 		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": using settings for environment 1", crlf)
 		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": --------------------------------------------------------", crlf)
@@ -87,21 +39,39 @@ function logStartScript(workflow$)
 	logStartScript = 0
 endfunction
 
+'=============================================================================================================================================================
+'==function name:           logEventFound
+	'==
+	'==developer:               todd busch
+	'==
+	'==purpose:                 writes lines to debug log that change event was found
+	'==
+	'==input parms:            	none
+	'==
+	'==returns:                 int:	0 for success
+	'==
+	'==notes:                   n/a
+	'==
+'=============================================================================================================================================================*/
+function logEventFound()
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change event found at row: [" + str$(iExcelRow) + "]", crlf)
+	logEventFound = 0
+endfunction
 
-/*=============================================================================================================================================================
-== function name:           logStageMatch
-==
-== developer:               todd busch
-==
-== purpose:                 writes lines to the log files that stage triggered workflow
-==
-== input parms:            	none
-==
-== returns:                 int:	0 for success
-==
-== notes:                   n/a
-==
-=============================================================================================================================================================*/
+'=============================================================================================================================================================
+'==function name:           logStageMatch
+	'==
+	'==developer:               todd busch
+	'==
+	'==purpose:                 writes lines to the log files that stage triggered workflow
+	'==
+	'==input parms:            	none
+	'==
+	'==returns:                 int:	0 for success
+	'==
+	'==notes:                   n/a
+	'==
+'=============================================================================================================================================================*/
 function logStageMatch()
 	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage: [" + curr_stage$ + "] for change event triggers workflow", crlf)
 	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change event for stage: [" + curr_stage$ + "] at row: [" + str$(iExcelRow) + "] triggered workflow", crlf)
@@ -109,61 +79,87 @@ function logStageMatch()
 	logStageMatch = 0
 endfunction
 
-/*=============================================================================================================================================================
-== function name:           logStageBypass
-==
-== developer:               todd busch
-==
-== purpose:                 terseDescription
-==
-== input parms:            	paramName:	purpose
-==
-== returns:                 typeValue
-==
-== notes:                   pertinentinfo
-==
-=============================================================================================================================================================*/
+'=============================================================================================================================================================
+'==function name:           logStageBypass
+	'==
+	'==developer:               todd busch
+	'==
+	'==purpose:                 terseDescription
+	'==
+	'==input parms:            	paramName:	purpose
+	'==
+	'==returns:                 typeValue
+	'==
+	'==notes:                   pertinentinfo
+	'==
+'=============================================================================================================================================================*/
 function logStageBypass()
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage for change event at row: (" + str$(iExcelRow) + ") did not trigger workflow", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage for change event at row: [" + str$(iExcelRow) + "] did not trigger workflow", crlf)
 	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 endfunction
 
-/*=============================================================================================================================================================
-== function name:           logEventFound
-==
-== developer:               todd busch
-==
-== purpose:                 writes lines to debug log that change event was found
-==
-== input parms:            	none
-==
-== returns:                 int:	0 for success
-==
-== notes:                   n/a
-==
-=============================================================================================================================================================*/
-function logEventFound()
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change event found at row: [" + str$(iExcelRow) + "]", crlf)
-	logEventFound = 0
-endfunction
-
-
-/*=============================================================================================================================================================
-== function name:           logDataValues
-==
-== developer:               todd busch
-==
-== purpose:                 writes lines to log files with row info from employment inquiry doc
-==
-== input parms:            	none
-==
-== returns:                 int:	0 for success
-==
-== notes:                   n/a
-==
-=============================================================================================================================================================*/
+'=============================================================================================================================================================
+'==function name:           logDataValues
+	'==
+	'==developer:               todd busch
+	'==
+	'==purpose:                 writes lines to log files with row info from employment inquiry doc
+	'==
+	'==input parms:            	none
+	'==
+	'==returns:                 int:	0 for success
+	'==
+	'==notes:                   n/a
+	'==
+'=============================================================================================================================================================*/
 function logDataValues()
 	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
 	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": starting workflow for: " + applicantFName$ + " " + applicantLName$ + " record id: " + "(" + applicantID$ + ")", crlf)
+	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": starting workflow for: " + applicantFName$ + " " + applicantLName$ + " record id: " + "[" + applicantID$ + "]", crlf)
+endfunction
+
+'=============================================================================================================================================================
+'== function name:          logWorkflowStepSuccess
+	'==
+	'== developer:              todd busch
+	'==
+	'== purpose:                writes lines to the log files using specified text that one portion of the workflow was successful 
+	'==
+	'== input parms:            text$:	text to use as part of the log statement
+	'==
+	'== returns:                int:	0 for success
+	'==
+	'== notes:                  n/a
+	'==
+'=============================================================================================================================================================*/
+function logWorkflowStepSuccess(text$)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + text$, crlf)
+	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ":  " + text$, crlf)
+	write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+	write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+	write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + text$, crlf + crlf)
+	logWorkflowSuccess = 0
+endfunction
+
+'=============================================================================================================================================================
+'== function name:          logWorkflowSuccess
+	'==
+	'== developer:              todd busch
+	'==
+	'== purpose:                writes lines to the log files using specified text that entire workflow was successful 
+	'==
+	'== input parms:            text$:	text to use as part of the log
+	'==
+	'== returns:                int:	0 for success
+	'==
+	'== notes:                  n/a
+	'==
+'=============================================================================================================================================================*/
+function logWorkflowSuccess(text$)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + text$, crlf + crlf)
+	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ":  " + text$, crlf + crlf)
+	write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+	write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+	write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + text$, crlf + crlf)
+	logWorkflowSuccess = 0
 endfunction

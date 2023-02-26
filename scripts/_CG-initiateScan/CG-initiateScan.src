@@ -147,7 +147,7 @@ write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": latest ver
 '#############################################################################################################################
 run(scriptsPath$ + "CG-adobeSendPackets\CG-adobeSendPackets.rob")
 run(scriptsPath$ + "CG-adobeCancelPackets\CG-adobeCancelPackets.rob")
-run(scriptsPath$ + "CG-zipWhipSendScheduleInittxt\CG-zipWhipSendScheduleInittxt.rob")
+run(scriptsPath$ + "CG-zipwhipInitTxtMsgs\CG-zipwhipInitTxtMsgs.rob")
 run(scriptsPath$ + "CG-gmsFormSubmit\CG-gmsFormSubmit.rob")
 run(scriptsPath$ + "CG-gmsTerminations\CG-gmsTerminations.rob")
 

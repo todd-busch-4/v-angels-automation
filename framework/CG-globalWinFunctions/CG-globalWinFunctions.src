@@ -9,22 +9,22 @@
 ##
 #############################################################################################################################################################*/
 
-/*=============================================================================================================================================================
-== function name:           winSendKeys
-==
-== developer:               todd busch
-==
-== purpose:                 emulates using the keyboard to type the keys in the specified key list
-==
-== input parms:            	key_list$:	the keys to be typed
-==                          step$:		terse description of the action/step in the script (e.g. "closing popup")
-==
-== returns:                 int:	0 - on success		
-==									error_code - on failure
-==
-== notes:                   be sure the last context set was to a window to receive the typed keys
-==
-=============================================================================================================================================================*/
+'/*=============================================================================================================================================================
+'== function name:           winSendKeys
+	'==
+	'== developer:               todd busch
+	'==
+	'== purpose:                 emulates using the keyboard to type the keys in the specified key list
+	'==
+	'== input parms:            	key_list$:	the keys to be typed
+	'==                          step$:		terse description of the action/step in the script (e.g. "closing popup")
+	'==
+	'== returns:                 int:	0 - on success		
+	'==									error_code - on failure
+	'==
+	'== notes:                   be sure the last context set was to a window to receive the typed keys
+	'==
+'=============================================================================================================================================================*/
 function winSendKeys(key_list$, step$)
 	local r
 
@@ -51,27 +51,27 @@ function winSendKeys(key_list$, step$)
 
 endfunction
 
-
-/*=============================================================================================================================================================
-== function name:           winMouseLeftDblClick
-==
-== developer:               todd busch
-==
-== purpose:                 conducts a double-click of left mouse button on coordinates specified
-==
-== input parms:            	x:		x coordinate		
-==							y:		y coordinate
-==							step$:	terse description of the action/step in the script (e.g. "closing popup")
-==
-== returns:                 none
-==
-== notes:                   none
-==
-=============================================================================================================================================================*/
+'/*=============================================================================================================================================================
+'== function name:           winMouseLeftDblClick
+	'==
+	'== developer:               todd busch
+	'==
+	'== purpose:                 conducts a double-click of left mouse button on coordinates specified
+	'==
+	'== input parms:            	x:		x coordinate		
+	'==							y:		y coordinate
+	'==							step$:	terse description of the action/step in the script (e.g. "closing popup")
+	'==
+	'== returns:                 none
+	'==
+	'== notes:                   none
+	'==
+'=============================================================================================================================================================*/
 function winMouseLeftDblClick(x, y, step$)
 
 	clickmouse(left, double, x, y, absolute)
 	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + step$ + " was successful", crlf)
+	winMouseLeftDblClick = 0
 	exitfunction
 
 endfunction

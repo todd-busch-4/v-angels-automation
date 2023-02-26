@@ -9,23 +9,75 @@
 ##
 #############################################################################################################################################################*/
 
-/*=============================================================================================================================================================
-== function name:           webEnterText
-==
-== developer:               todd busch
-==
-== purpose:                 enters specified text into the specified html element with error-handling/logging
-==
-== input parms:            	object$:	descriptor of the html object to receive text
-==							text$:		the text to enter into the object
-==							step$:		terse description of the action/step in the script (e.g. "clicking login")
-==
-== returns:                 int:	0 - on success	  
-==									error_code - on failure
-==
-== notes:                   none
-==
-=============================================================================================================================================================*/
+'=============================================================================================================================================================
+'== function name:          webInvokeBrowser
+	'==
+	'== developer:              todd busch
+	'==
+	'== purpose:				attempts to start the specified browser and load the specified url. if an error is encountered it will retry the number of
+	'==							times defined in iRetry (default: 3). if number of retry attempts defined is exceeded it will log messages, close the
+	'==							browser, and return the error code
+	'==
+	'== input parms:            str_app$:	browser code to invoke ("CH" = Chrome  "FF" = FireFox)
+	'==							str_url:	url to navigate to
+	'==
+	'== returns:                int:	0 - on success
+	'==							error_code - on failure
+	'==
+	'== notes:                  none
+	'==
+'=============================================================================================================================================================*/
+function webInvokeBrowser(str_app$, str_url$)
+	local iRetry, r, iAttempt
+
+	while iRetry <= 2
+		r = startbrowser(str_app$, str_url$, 3)
+		pause 3
+		iAttempt = iRetry + 1
+
+		if r = 0 then
+			iRetry = 3
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": start browser was successful", crlf)
+			webInvokeBrowser = 0
+			exitfunction
+		endif
+
+		if r <> 0 then
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error starting browser on attempt #: [" + str$(iAttempt) + "]", crlf)
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(r) + "), retrying", crlf)
+			hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-invoke_browser-" + str$(iAttempt) + ".bmp", 1, 1)
+			closebrowser()
+			pause 1
+			iRetry = iRetry + 1
+		endif
+	wend
+
+	if r <> 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": browser could not be invoked after [" + str$(iAttempt) + "] attempts", crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(r) + ") msg: " + #errormsg$, crlf)
+		closebrowser()
+		webInvokeBrowser = r
+	endif
+
+EndFunction
+
+'=============================================================================================================================================================
+'== function name:           webEnterText
+	'==
+	'== developer:               todd busch
+	'==
+	'== purpose:                 enters specified text into the specified html element with error-handling/logging
+	'==
+	'== input parms:            	object$:	descriptor of the html object to receive text
+	'==							text$:		the text to enter into the object
+	'==							step$:		terse description of the action/step in the script (e.g. "clicking login")
+	'==
+	'== returns:                 int:	0 - on success	  
+	'==									error_code - on failure
+	'==
+	'== notes:                   none
+	'==
+'=============================================================================================================================================================*/
 function webEnterText(object$, text$, step$)
 	local r
 
@@ -51,24 +103,23 @@ function webEnterText(object$, text$, step$)
 
 EndFunction
 
-
-/*=============================================================================================================================================================
-== function name:           webPasteText
-==
-== developer:               todd busch
-==
-== purpose:                 pastes specified text into the specified html object wrapped with error-handling/logging
-==
-== input parms:            	object$:	descriptor of the html object to receive text
-==							text$:		the text to enter into the object
-==							step$:		terse description of the action/step in the script (e.g. "clicking login")
-==
-== returns:                 int:	0 - on success	  
-==									error_code - on failure
-==
-== notes:                   pertinentinfo
-==
-=============================================================================================================================================================*/
+'=============================================================================================================================================================
+'== function name:           webPasteText
+	'==
+	'== developer:               todd busch
+	'==
+	'== purpose:                 pastes specified text into the specified html object wrapped with error-handling/logging
+	'==
+	'== input parms:            	object$:	descriptor of the html object to receive text
+	'==							text$:		the text to enter into the object
+	'==							step$:		terse description of the action/step in the script (e.g. "clicking login")
+	'==
+	'== returns:                 int:	0 - on success	  
+	'==									error_code - on failure
+	'==
+	'== notes:                   pertinentinfo
+	'==
+'=============================================================================================================================================================*/
 function webPasteText(object$, text$, step$)
 	local r
 
@@ -94,23 +145,22 @@ function webPasteText(object$, text$, step$)
 
 endfunction
 
-
-/*=============================================================================================================================================================
-== function name:           webClickElement
-==
-== developer:               todd busch
-==
-== purpose:                 perform a single left mouse click on the specified html element with error-handling/logging
-==
-== input parms:             object$:	descriptor of the html object to click
-==							step$:		terse description of the action/step in the script (e.g. "clicking login")
-==
-== returns:                 int: 	0 - on success	  
-==									error_code - on failure
-==
-== notes:                   none
-==
-=============================================================================================================================================================*/
+'=============================================================================================================================================================
+'== function name:           webClickElement
+	'==
+	'== developer:               todd busch
+	'==
+	'== purpose:                 perform a single left mouse click on the specified html element with error-handling/logging
+	'==
+	'== input parms:             object$:	descriptor of the html object to click
+	'==							step$:		terse description of the action/step in the script (e.g. "clicking login")
+	'==
+	'== returns:                 int: 	0 - on success	  
+	'==									error_code - on failure
+	'==
+	'== notes:                   none
+	'==
+'=============================================================================================================================================================*/
 function webClickElement(object$, step$)
 	local r
 
@@ -136,24 +186,23 @@ function webClickElement(object$, step$)
 
 endfunction
 
-
-/*=============================================================================================================================================================
-== function name:           webSelectItem
-==
-== developer:               todd busch
-==
-== purpose:                 selects specified item from the specified html combobox/dropdown or other multi-value object with error-handling/logging
-==
-== input parms:             object$:	descriptor of the html object
-==							item$:		the item/value to select
-==							step$:		terse description of the action/step in the script (e.g. "clicking login")
-==
-== returns:                 int:	0 - on success
-==									error_code - on failure
-==
-== notes:                   none
-==
-=============================================================================================================================================================*/
+'=============================================================================================================================================================
+'== function name:           webSelectItem
+	'==
+	'== developer:               todd busch
+	'==
+	'== purpose:                 selects specified item from the specified html combobox/dropdown or other multi-value object with error-handling/logging
+	'==
+	'== input parms:             object$:	descriptor of the html object
+	'==							item$:		the item/value to select
+	'==							step$:		terse description of the action/step in the script (e.g. "clicking login")
+	'==
+	'== returns:                 int:	0 - on success
+	'==									error_code - on failure
+	'==
+	'== notes:                   none
+	'==
+'=============================================================================================================================================================*/
 
 function webSelectItem(object$, item$, step$)
 	local r
@@ -180,29 +229,28 @@ function webSelectItem(object$, item$, step$)
 
 endfunction
 
-
-/*=============================================================================================================================================================
-== function name:           webLeftSingleClickOCRText
-==
-== developer:               todd busch
-==
-== purpose:                 conducts a left button single click on the specified text found in the location (area) specified
-==
-== input parms:            	text$:		the text to look for
-==							area1:		x coordinate to the topleft point of the area to look in
-==							area2:		y coordinate to the topleft point of the area to look in
-==							area3:		height of the area to look in
-==							area4:		width of the area to look in
-==							offset1:	x coordinate specifying an offset distance from the middl#End Region
-==							offset2:	y coordinate specifying an offset distance from the middl#End Region
-==							step$:		terse description of the action/step in the script (e.g. "clicking login")
-==
-== returns:                 int:	0 - on success
-==									error_code - on failure
-==
-== notes:                   none
-==
-=============================================================================================================================================================*/
+'=============================================================================================================================================================
+'== function name:           webLeftSingleClickOCRText
+	'==
+	'== developer:               todd busch
+	'==
+	'== purpose:                 conducts a left button single click on the specified text found in the location (area) specified
+	'==
+	'== input parms:            	text$:		the text to look for
+	'==							area1:		x coordinate to the topleft point of the area to look in
+	'==							area2:		y coordinate to the topleft point of the area to look in
+	'==							area3:		height of the area to look in
+	'==							area4:		width of the area to look in
+	'==							offset1:	x coordinate specifying an offset distance from the middl#End Region
+	'==							offset2:	y coordinate specifying an offset distance from the middl#End Region
+	'==							step$:		terse description of the action/step in the script (e.g. "clicking login")
+	'==
+	'== returns:                 int:	0 - on success
+	'==									error_code - on failure
+	'==
+	'== notes:                   none
+	'==
+'=============================================================================================================================================================*/
 function webLeftSingleClickOCRText(text$, area1, area2, area3, area4, offset1, offset2, step$)
 	local r
 
@@ -230,22 +278,21 @@ function webLeftSingleClickOCRText(text$, area1, area2, area3, area4, offset1, o
 
 endfunction
 
-
-/*=============================================================================================================================================================
-== function name:           webNavigate
-==
-== developer:               todd busch
-==
-== purpose:                 the wintask navigate function wrapped with error-handling/logging
-==
-== input parms:            	url$:		the url of the page to navigate to
-==							page$:		name of the page for logging purposes
-==
-== returns:                 typeValue
-==
-== notes:                   pertinentinfo
-==
-=============================================================================================================================================================*/
+'=============================================================================================================================================================
+'== function name:           webNavigate
+	'==
+	'== developer:               todd busch
+	'==
+	'== purpose:                 the wintask navigate function wrapped with error-handling/logging
+	'==
+	'== input parms:            	url$:		the url of the page to navigate to
+	'==							page$:		name of the page for logging purposes
+	'==
+	'== returns:                 typeValue
+	'==
+	'== notes:                   pertinentinfo
+	'==
+'=============================================================================================================================================================*/
 function webNavigate(url$, page$)
 	local r
 

@@ -1,0 +1,61 @@
+#ignoreerrors = 1
+
+res = kill("C:\v-angels-automation\scripts\_CG-initiateScan\_CG-initiateScan.rob")
+res = kill("C:\v-angels-automation\scripts\_CG-initiateScan\_CG-initiateScan.lst")
+
+res = kill("C:\v-angels-automation\scripts\CG-adobeCancelPackets\CG-adobeCancelPackets.rob")
+res = kill("C:\v-angels-automation\scripts\CG-adobeCancelPackets\CG-adobeCancelPackets.lst")
+
+res = kill("C:\v-angels-automation\scripts\CG-adobeSendPackets\CG-adobeSendPackets.rob")
+res = kill("C:\v-angels-automation\scripts\CG-adobeSendPackets\CG-adobeSendPackets.lst")
+
+res = kill("C:\v-angels-automation\scripts\CG-arcsSubmitApp\CG-arcsSubmitApp.rob")
+res = kill("C:\v-angels-automation\scripts\CG-arcsSubmitApp\CG-arcsSubmitApp.lst")
+
+res = kill("C:\v-angels-automation\scripts\CG-gmsSubmitForm\CG-gmsSubmitForm.rob")
+res = kill("C:\v-angels-automation\scripts\CG-gmsSubmitForm\CG-gmsSubmitForm.lst")
+
+res = kill("C:\v-angels-automation\scripts\CG-gmsTerminations\CG-gmsTerminations.rob")
+res = kill("C:\v-angels-automation\scripts\CG-gmsTerminations\CG-gmsTerminations.lst")
+
+res = kill("C:\v-angels-automation\scripts\CG-zipwhipInitTxtMsgs\CG-zipwhipInitTxtMsgs.rob")
+res = kill("C:\v-angels-automation\scripts\CG-zipwhipInitTxtMsgs\CG-zipwhipInitTxtMsgs.lst")
+
+res = kill("C:\v-angels-automation\framework\CG-adobeFunctions\CG-adobeFunctions.rob")
+res = kill("C:\v-angels-automation\framework\CG-adobeFunctions\CG-adobeFunctions.lst")
+
+res = kill("C:\v-angels-automation\framework\CG-arcsFunctions\CG-arcsFunctions.rob")
+res = kill("C:\v-angels-automation\framework\CG-arcsFunctions\CG-arcsFunctions.lst")
+
+res = kill("C:\v-angels-automation\framework\CG-globalDimDeclarations\CG-globalDimDeclarations.rob")
+res = kill("C:\v-angels-automation\framework\CG-globalDimDeclarations\CG-globalDimDeclarations.lst")
+
+res = kill("C:\v-angels-automation\framework\CG-globalFunctions\CG-globalFunctions.rob")
+res = kill("C:\v-angels-automation\framework\CG-globalFunctions\CG-globalFunctions.lst")
+
+res = kill("C:\v-angels-automation\framework\CG-globalLogging\CG-globalLogging.rob")
+res = kill("C:\v-angels-automation\framework\CG-globalLogging\CG-globalLogging.lst")
+
+res = kill("C:\v-angels-automation\framework\CG-globalSubDefinitions\CG-globalSubDefinitions.rob")
+res = kill("C:\v-angels-automation\framework\CG-globalSubDefinitions\CG-globalSubDefinitions.lst")
+
+res = kill("C:\v-angels-automation\framework\CG-globalVariables\CG-globalVariables.rob")
+res = kill("C:\v-angels-automation\framework\CG-globalVariables\CG-globalVariables.lst")
+
+res = kill("C:\v-angels-automation\framework\CG-globalWebFunctions\CG-globalWebFunctions.rob")
+res = kill("C:\v-angels-automation\framework\CG-globalWebFunctions\CG-globalWebFunctions.lst")
+
+res = kill("C:\v-angels-automation\framework\CG-globalWebValidations\CG-globalWebValidations.rob")
+res = kill("C:\v-angels-automation\framework\CG-globalWebValidations\CG-globalWebValidations.lst")
+
+res = kill("C:\v-angels-automation\framework\CG-globalWinFunctions\CG-globalWinFunctions.rob")
+res = kill("C:\v-angels-automation\framework\CG-globalWinFunctions\CG-globalWinFunctions.lst")
+
+res = kill("C:\v-angels-automation\framework\CG-gmsFunctions\CG-gmsFunctions.rob")
+res = kill("C:\v-angels-automation\framework\CG-gmsFunctions\CG-gmsFunctions.lst")
+
+res = kill("C:\v-angels-automation\framework\CG-loadWorkflowData\CG-loadWorkflowData.rob")
+res = kill("C:\v-angels-automation\framework\CG-loadWorkflowData\CG-loadWorkflowData.lst")
+
+res = kill("C:\v-angels-automation\framework\CG-zwFunctions\CG-zwFunctions.rob")
+res = kill("C:\v-angels-automation\framework\CG-zwFunctions\CG-zwFunctions.lst")

@@ -1,0 +1,293 @@
+'
+
+function zwInitStageChk()
+
+    if curr_stage$ = "1st Interview" then
+        zwInitStageChk = 0
+        exitfunction
+    else
+        zwInitStageChk = 1
+        exitfunction
+    endif
+
+endfunction
+
+function zwInitGetData()
+
+    applicantID$ = arrApplicantID$(i)
+    applicantFName$ = arrApplicantFName$(i)
+    applicantLName$ = arrApplicantLName$(i)
+    applicantEmail$ = arrApplicantEmail$(i)
+    applicantPhone$ = arrApplicantPhone$(i)
+    applicant1stApp$ = arrApplicant1stApp$(i)
+    textmsgStatus$ = arrTextmsgStatus$(i)
+    currentStage$ = arrCurrentStage$ (i)
+    applicantFullName$ = applicantFName$ + " " + applicantLName$
+
+    zwInitGetData = 0
+
+endfunction
+
+function zwNonStdPhoneFormatChk()
+    local r
+
+    r = instr(applicantPhone$, "[tel:")
+    if r <> 0 then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant phone is in non-standard format: '" + applicantPhone$ + "'", crlf)
+        applicantPhone$ = Left$(applicantPhone$, r - 1)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": phone has been reformatted: '" + applicantPhone$ + "'", crlf)
+        zwNonStdPhoneFormatChk = 0
+        exitfunction
+    endif
+
+endfunction
+
+function zwFmtFirstApptDate$(dtDate$)
+    local r, p, firstAppDateOnly$, firstAppMonth$, firstAppDay$, firstAppYr$
+
+    '-------------------- dissect first app date
+    '------- month
+    'original format 1/20/2023  10:30:00 AM
+    r = instrrev(dtDate$, "/")							'find second "/" in string                                 
+    r = r + 4											'add 4 for year to find end of date                         
+    firstAppDateOnly$ = left$(dtDate$, r)				'extract just date                                          
+    firstAppDateOnly$ = rtrim$(firstAppDateOnly$)		'trim whitespace caused by single digit month/day values    
+    firstAppMonth$ = left$(dtDate$, 2)			        'extract just month                                         
+    if instr(firstAppMonth$,"/") <> 0 then				'zero pad if single digit                                  
+        firstAppMonth$ = left$(firstAppMonth$, 1) 
+        firstAppMonth$ = "0" + firstAppMonth$
+    endif
+
+    '------- day
+    p = instr(dtDate$, "/")					            'find starting point to extract day
+    firstAppDay$ = mid$(dtDate$, p + 1, 2)		        'extract just day
+    if instr(firstAppDay$,"/") <> 0 then				'zero pad if single digit
+        firstAppDay$ = left$(firstAppDay$, 1) 
+        firstAppDay$ = "0" + firstAppDay$
+    endif
+
+    '------- year
+	firstAppYr$ = right$(firstAppDateOnly$, 4)			'extract just year
+
+    firstAppDate$ = firstAppMonth$ + "/" + firstAppDay$ + "/" + firstAppYr$
+    zwFmtFirstApptDate$ = firstAppMonth$ + "/" + firstAppDay$ + "/" + firstAppYr$
+
+endfunction
+
+function zwFmtDayPriorFirstAppt$(dtDate$)
+    local r, p, l, firstAppDateOnly$, firstAppMonth$, firstAppDay$, firstAppYr$, firstAppPriorDay
+
+    '-------------------- dissect first app date
+    '------- month
+    'original format 1/20/2023  10:30:00 AM
+    r = instrrev(dtDate$, "/")							'find second "/" in string                                 
+    r = r + 4											'add 4 for year to find end of date                         
+    firstAppDateOnly$ = left$(dtDate$, r)				'extract just date                                          
+    firstAppDateOnly$ = rtrim$(firstAppDateOnly$)		'trim whitespace caused by single digit month/day values    
+    firstAppMonth$ = left$(dtDate$, 2)			        'extract just month                                         
+    if instr(firstAppMonth$,"/") <> 0 then				'zero pad if single digit                                  
+        firstAppMonth$ = left$(firstAppMonth$, 1) 
+        firstAppMonth$ = "0" + firstAppMonth$
+    endif
+
+    '------- day
+    p = instr(dtDate$, "/")					            'find starting point to extract day
+    firstAppDay$ = mid$(dtDate$, p + 1, 2)		        'extract just day
+    if instr(firstAppDay$,"/") <> 0 then				'zero pad if single digit
+        firstAppDay$ = left$(firstAppDay$, 1) 
+        firstAppDay$ = "0" + firstAppDay$
+    endif
+
+    '------- year
+	firstAppYr$ = right$(firstAppDateOnly$, 4)			'extract just year
+
+    '------- day prior
+    firstAppPriorDay = Val(firstAppDay$) - 1			'subtract day from appt day
+
+    firstAppPriorDay$ = str$(firstAppPriorDay)			'convert to string value
+
+    l = len(firstAppPriorDay$)							'zero pad if single digit
+    if l < 2 then
+        firstAppPriorDay$ = "0" + firstAppPriorDay$
+    endif
+
+    firstAppPriorDate$ = firstAppMonth$ + "/" + firstAppPriorDay$ + "/" + firstAppYr$
+    zwFmtDayPriorFirstAppt$ = firstAppMonth$ + "/" + firstAppPriorDay$ + "/" + firstAppYr$
+
+endfunction
+
+function zwFmtFirstApptTime$(dtDate$)
+    local firstAppLongTime$, dayNightDes$, firstAppTimeNoSecs$, firstAppHour$, firstAppMinutes$
+
+    firstAppLongTime$ = right$(dtDate$, 11)			'extract just time (w/am-pm)
+
+    dayNightDes$ = right$(firstAppLongTime$, 2)					'extract am/pm designator
+
+    firstAppTimeNoSecs$ = left$(firstAppLongTime$, 5)			'extract time minus secs
+
+    firstAppTimeNoSecs$ = ltrim$(firstAppTimeNoSecs$)			'trim whitespace caused by single hour values
+
+    firstAppHour$ = left$(firstAppTimeNoSecs$, 2)				'extract just hour
+
+    if instr(firstAppHour$,":") <> 0 then						'zero pad if single digit
+        firstAppHour$ = left$(firstAppHour$, 1) 
+        firstAppHour$ = "0" + firstAppHour$
+    endif
+
+    firstAppMinutes$ = right$(firstAppTimeNoSecs$, 2)			'extract just minutes
+
+    firstAppTime$ = firstAppTimeNoSecs$ + dayNightDes$
+    zwFmtFirstApptTime$ = firstAppTimeNoSecs$ + dayNightDes$
+endfunction
+
+function zwInitStatusChk()
+
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": checking status of text msg column", crlf)
+
+    if textmsgStatus$ <> "" then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status field was not null", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+        write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status field not null, proceeding to next change event", crlf + crlf)
+        zwInitStatusChk = 1
+        exitfunction
+    else
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status was null; continuing workflow", crlf)
+        zwInitStatusChk = 0
+        exitfunction
+    endif
+
+endfunction
+
+function zwLoginChk()
+    local r, x
+
+    r = existw(wndZWLogin$, 1)
+
+    if r = 1 then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": account was not logged in", crlf)
+        
+        'check for object indicating a 'remembered user' has been pre-filled
+        usepage(pgZWLogin$)
+        x = existhtmlelement(selZWSavedIdentity$)
+
+        'log in steps for remembered user
+        if x = 1 then
+            usepage(pgZWLogin$)
+            clickhtmlelement(lnkZWLoginNext$)
+            writehtml(inputZWPassword$, zipWhipPassword$)
+            clickhtmlelement(btnZWLogin$)
+        endif
+
+        'log in steps for empty user
+        if x  = 0 then
+            usepage(pgZWLogin$)
+            writehtml(inputZWUsername$, zipWhipUsername$)
+            clickhtmlelement(lnkZWLoginNext$)
+            writehtml(inputZWPassword$, zipWhipPassword$)
+            clickhtmlelement(lnkZWLoginLink$)
+        endif
+
+        '------- validation
+        res$ = currentpage$()
+        if res$ <> pgZWMainDan$ then
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": issue logging in. did not load expected page", crlf)
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": expected: [" + pgZWMainDan$ + "] actual: [" + res$ + "]", crlf)
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+            hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-login_error.bmp", 1, 1)
+            write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+            write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+            write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+            write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - logging in", crlf + crlf)
+            closebrowser()
+            zwLoginChk = 1
+            exitfunction
+        else
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": login was successful", crlf)
+            zwLoginChk = 0
+            exitfunction
+        endif
+    endif
+
+    if r = 0 then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": browser invoked; account already logged in", crlf)
+        zwLoginChk = 0
+        exitfunction
+    endif
+
+endfunction
+
+function zwAddContactErrorChk()
+    local r, n
+
+    r = existhtmlelement("DIV[OUTERTEXT='" + applicantFName$ + " " + applicantLName$ + "',INDEX=7]")
+    if r <> 1 then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": save contact failed. expected element (contact card) not found.", crlf)
+        n = capturehtml(diaZWContactCard$, captured_string$)
+        if n = 0 then
+            result_string$ = extractbetween$(captured_string$, "Number", excluded, "Company", excluded)
+            if result_string$ = "Invalid Phone Number" then
+                write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": phone number is invalid", crlf)
+                write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+                write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": phone number is invalid; proceeding to next change event", crlf + crlf)
+                write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+                write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+                write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: invalid phone number", crlf + crlf)
+                closebrowser()
+                zwAddContactErrorChk = 1
+                exitfunction
+            endif
+            if result_string$ = "Contact already exists" then
+                write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": contact already exists", crlf)
+                write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+                write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": contact already exists; proceeding to next change event", crlf + crlf)
+                write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+                write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+                write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: duplicate contact", crlf + crlf)
+                closebrowser()
+                zwAddContactErrorChk = 1
+                exitfunction
+            endif
+        endif
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+        hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_save_contact.bmp", 1, 1)
+        write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
+        write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+        write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+        write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - save contact", crlf + crlf)	
+        closebrowser()
+        zwAddContactErrorChk = 1
+        exitfunction
+    endif
+
+    if res = 1 then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": contact saved successfully", crlf)
+        write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": contact saved successfully", crlf)
+    endif
+
+endfunction
+
+function zwFmtInitMsgTxt$(fname$, appt_day$, appt_time$)
+    local fname$, appt_day$, appt_time$
+    zwFmtInitMsgTxt$ = "Hello " + fname$ + ",<Enter>Thank you for applying to Visiting Angels. We have scheduled an interview time for you on " + appt_day$ + " at " +  appt_time$ + ". You will be receiving two emails with interview packets (Pre 1st Interview and 1st Interview). Please click the 'Review and Sign' link and provide the information requested. If you do not have internet access to get online and finish the documentation, we can provide you access to a computer in our office (you will need to know your email password). Please bring your photo ID, social security card, and proof of auto insurance. We look forward to seeing you soon!<Enter>"
+endfunction
+
+function zwFmtDayPriorMsgTxt$(fname$, appt_day$, appt_time$)
+    local fname$, appt_day$, appt_time$
+    zwFmtDayPriorMsgTxt$ = "Hello " + fname$ + ",<Enter>You are scheduled for an interview at Visiting Angels Grove City tomorrow " + appt_day$ + " at " +  appt_time$ + ". You should have received emails with Adobe documents to be filled out and signed electronically. It would be extremely helpful in streamlining your interview if you could complete those prior to your arrival. Also, if you have not already done so, please fill out our online application at https://generations.idb-sys.com/OnlineApplication.aspx?guid=ccfff3c9-c5ab-4bea-aeb5-9f8001115743 . Thank you and we look forward to seeing you!"
+endfunction
+
+function zwFmtDayOfApptMsgTxt$(fname$, appt_time$)
+    local fname$, appt_time$
+    zwFmtDayOfApptMsgTxt$ = "Good morning " + fname$ + ", this is Visiting Angels reminding you of your interview today at " + appt_time$ + ". Please reply to confirm as our office runs on confirmed appointments only.<Enter>Please text '1' to confirm, '2' to reschedule, or '3' to cancel.<Enter>Thank you and we look forward to seeing you."
+endfunction
+
+function zwPriorDayChk()
+
+    if day$() >= firstAppPriorDay$ then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": day before appt is today or before; skipping schedule prior day confirm text", crlf)
+        write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": day before appt is today or before; skipping schedule prior day confirm text", crlf)
+        zwPriorDayChk = 1
+        exitfunction
+    endif
+
+endfunction
