@@ -1,0 +1,45 @@
+Dim tablearr$(50)
+/*#############################################################################################################################################################
+##  filename:						cg-gmsFunctions
+##
+##  purpose:						library of functions for use in gmsAddLegal script development in order to minimize code duplication,
+##									increase script cleanliness/readability, and reduce maintenance efforts by providing a single centralized
+##									location for changes
+##
+##  contents:						
+##
+#############################################################################################################################################################*/
+'=============================================================================================================================================================
+'== function name:              gmsAddLegalGetNextIndex
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                calculates what the next sequential index number in the html descriptor of deduction row will be by getting the source for
+    '==                         the table column with the deduction codes, placing in an array, and then iterating through the array to count the existing
+    '==                         deduction codes
+    '==
+    '== input parms:            paramName:
+    '==
+    '== returns:                int:    the index number of the next added row
+    '==
+    '== notes:                  none
+    '==
+'=============================================================================================================================================================*/
+function gmsAddLegalGetNextIndex()
+    local r, n
+
+    r = capturetablehtml("table[content='>']", "r1c4:r20c4", tablearr$())
+
+    n = 0
+
+    repeat
+	
+        var$ = tablearr$(n)
+
+        n = n + 1
+
+    until var$ = ""
+   
+    gmsAddLegalGetNextIndex = n
+	
+endfunction

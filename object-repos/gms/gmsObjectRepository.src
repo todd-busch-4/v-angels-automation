@@ -6,66 +6,62 @@
 #############################################################################################################################################################*/
 
 '======================================================================= window definitions =====================================================================
-wndEnhancedDashboard$ = "FIREFOX.EXE|MozillaWindowClass|Group Management Services - Enhanced Dashboard — Mozilla Firefox"
-wndNewHireForm$ = "FIREFOX.EXE|MozillaWindowClass|Group Management Services - New Hire — Mozilla Firefox"
-wndRehireForm$ = "FIREFOX.EXE|MozillaWindowClass|Group Management Services - Rehire — Mozilla Firefox"
-wndTerminationForm$ = "FIREFOX.EXE|MozillaWindowClass|Group Management Services - Employee Termination — Mozilla Firefox"
-wndWindowsDesktop$ = "EXPLORER.EXE|SysListView32|FolderView"
-
+wndGMSWindowsDesktop$ = "EXPLORER.EXE|SysListView32|FolderView"
+wndGMSEnhancedDashboard$ = "FIREFOX.EXE|MozillaWindowClass|Group Management Services - Enhanced Dashboard — Mozilla Firefox"
+wndGMSNewHireForm$ = "FIREFOX.EXE|MozillaWindowClass|Group Management Services - New Hire — Mozilla Firefox"
+wndGMSRehireForm$ = "FIREFOX.EXE|MozillaWindowClass|Group Management Services - Rehire — Mozilla Firefox"
+wndGMSTerminationForm$ = "FIREFOX.EXE|MozillaWindowClass|Group Management Services - Employee Termination — Mozilla Firefox"
 
 '======================================================================= page definitions =====================================================================
 pgGMSLogin$ = "Group Management Services - Login"
-pgCompanySrc$ = "Group Management Services - Search All Companies"
-pgEnhancedDashboard$ = "Group Management Services - Enhanced Dashboard"
-pgNewHireForm$ = "Group Management Services - New Hire"
-pgRehireForm$ = "Group Management Services - Rehire"
-pgEmployeeTerminations$ = "Group Management Services - Employee Termination"
-
+pgGMSCompanySrc$ = "Group Management Services - Search All Companies"
+pgGMSEnhancedDashboard$ = "Group Management Services - Enhanced Dashboard"
+pgGMSNewHireForm$ = "Group Management Services - New Hire"
+pgGMSRehireForm$ = "Group Management Services - Rehire"
+pgGMSEmployeeTerminations$ = "Group Management Services - Employee Termination"
+pgGMSRecurringDeductions$ = "Group Management Services - Recurring Deductions"
 
 '======================================================================= object definitions =====================================================================
 '-------------------- log in page
-txtUsername$ = "INPUT TEXT[NAME='HrpyWorkWUser']"
-txtPassword$ = "INPUT PASSWORD[NAME='HrpyWorkWPassword']"
-btnLogin$ = "BUTTON[INNERTEXT='Sign in']"
-bmpLogo$ = "IMG[SRC='https://gms.prismhr.']"
-
+inputGMSUsername$ = "INPUT TEXT[NAME='HrpyWorkWUser']"
+inputGMSPassword$ = "INPUT PASSWORD[NAME='HrpyWorkWPassword']"
+btnGMSLogin$ = "BUTTON[INNERTEXT='Sign in']"
+bmpGMSLogo$ = "IMG[SRC='https://gms.prismhr.']"
 
 '-------------------- enhanced dashboard
-lnkNewHire$ = "TD[OUTERTEXT='New']"
-lnkRehire$ = "TD[OUTERTEXT='Rehire']"
+lnkGMSNewHire$ = "TD[OUTERTEXT='New']"
+lnkGMSRehire$ = "TD[OUTERTEXT='Rehire']"
 lnkGMSEmployeeTerm$ = "TD[OUTERTEXT='Employee']"
-
+lnkGMSRecurDeducts$ = "TD[OUTERTEXT='Recurring']"
 
 '-------------------- new hire form
-txtWorkLoc$ = "INPUT TEXT[NAME='EmployeeActionFormsL']"
-txtSocial$ = "INPUT TEXT[NAME='EmployeeActionFormsW']"
-txtFirstName$ = "INPUT TEXT[NAME='EmployeeActionFormsF']"
-txtLastName$ = "INPUT TEXT[NAME='EmployeeActionFormsLa']"
-txtEmail$ = "INPUT TEXT[NAME='EmployeeActionFormsE']"
-dtCompanyStartDt$ = "INPUT TEXT[NAME='EmployeeActionFormsH']"
-txtPosition$ = "INPUT TEXT[NAME='EmployeeActionFormsJ']"
-txtEmployStatus$ = "INPUT TEXT[NAME='EmployeeActionFormsStatu']"
-txtEmployType$ = "INPUT TEXT[NAME='EmployeeActionFormsTy']"
-txtBenefitGrp$ = "INPUT TEXT[NAME='EmployeeActionFormsBen']"
-txtPayGrp$ = "INPUT TEXT[NAME='EmployeeActionFormsPay']"
-selPayMethod$ = "SELECT[NAME='EmployeeActionFormsPay']"
-txtPayRate$ = "INPUT TEXT[NAME='EmployeeActionFormsPayR']"
-txtStdHours$ = "INPUT TEXT[NAME='EmployeeActionFormsStdP']"
-btnSave$ = "BUTTON[INNERTEXT='Save']"
-btnDone$ = "BUTTON[INNERTEXT='Done']"
-
+inputGMSWorkLoc$ = "INPUT TEXT[NAME='EmployeeActionFormsL']"
+inputGMSSocial$ = "INPUT TEXT[NAME='EmployeeActionFormsW']"
+inputGMSFirstName$ = "INPUT TEXT[NAME='EmployeeActionFormsF']"
+inputGMSLastName$ = "INPUT TEXT[NAME='EmployeeActionFormsLa']"
+inputGMSEmail$ = "INPUT TEXT[NAME='EmployeeActionFormsE']"
+dtGMSCompanyStartDt$ = "INPUT TEXT[NAME='EmployeeActionFormsH']"
+inputGMSPosition$ = "INPUT TEXT[NAME='EmployeeActionFormsJ']"
+inputGMSEmployStatus$ = "INPUT TEXT[NAME='EmployeeActionFormsStatu']"
+inputGMSEmployType$ = "INPUT TEXT[NAME='EmployeeActionFormsTy']"
+inputGMSBenefitGrp$ = "INPUT TEXT[NAME='EmployeeActionFormsBen']"
+inputGMSPayGrp$ = "INPUT TEXT[NAME='EmployeeActionFormsPay']"
+selGMSPayMethod$ = "SELECT[NAME='EmployeeActionFormsPay']"
+inputGMSPayRate$ = "INPUT TEXT[NAME='EmployeeActionFormsPayR']"
+inputGMSStdHours$ = "INPUT TEXT[NAME='EmployeeActionFormsStdP']"
+btnGMSSave$ = "BUTTON[INNERTEXT='Save']"
+btnGMSDone$ = "BUTTON[INNERTEXT='Done']"
 
 '-------------------- rehire form
-txtRHSocial$ = "INPUT TEXT[NAME='HrpyWorkWGlobalSearch1']"
-selRehireStatus$ = "SELECT[NAME='EmployeeActionFormsR']"
-selRehireType$ = "SELECT[NAME='EmployeeActionFormsRehireT']"
-dtRehireDate$ = "INPUT TEXT[NAME='EmployeeActionFormsR']"
-txtEmployeeID$ = "SPAN[ID='label36v1']"
-selRehireCode$ = "SELECT[NAME='EmployeeActionFormsRea']"
-txtRHPayRate$ = "INPUT TEXT[NAME='EmployeeActionFormsRhPayR']"
-lblLastNameLabel$ = "SPAN[OUTERTEXT='" + applicantLNameCaps$ + "',ID='label40v1']"
+inputGMSRHSocial$ = "INPUT TEXT[NAME='HrpyWorkWGlobalSearch1']"
+selGMSRehireStatus$ = "SELECT[NAME='EmployeeActionFormsR']"
+selGMSRehireType$ = "SELECT[NAME='EmployeeActionFormsRehireT']"
+dtGMSRehireDate$ = "INPUT TEXT[NAME='EmployeeActionFormsR']"
+inputGMSEmployeeID$ = "SPAN[ID='label36v1']"
+selGMSRehireCode$ = "SELECT[NAME='EmployeeActionFormsRea']"
+inputGMSRHPayRate$ = "INPUT TEXT[NAME='EmployeeActionFormsRhPayR']"
+lblGMSLastNameLabel$ = "SPAN[OUTERTEXT='" + applicantLNameCaps$ + "',ID='label40v1']"
 'save button has same descriptor as on new hire page
-
 
 '-------------------- terminations form
 inputGMSEmployeeSrc$ = "INPUT TEXT[NAME='HrpyWorkWGlobalSearch1']"
@@ -77,6 +73,15 @@ selGMSReasonCode$ = "SELECT[NAME='EmployeeActionFormsR']"
 dtGMSTerminationDate$ = "INPUT TEXT[NAME='EmployeeActionFormsT']"
 selGMSRehireDesignation$ = "SELECT[NAME='EmployeeActionFormsReh']"
 btnGMSTerminationSave$ = "BUTTON[INNERTEXT='Save']"
-lblReassignPendAppr$ = "SPAN[OUTERTEXT='Reassign']"
+lblGMSReassignPendAppr$ = "SPAN[OUTERTEXT='Reassign']"
 
+'-------------------- recurring deductions
+txtGMSRecurDedPgTitle$ = "SPAN[OUTERTEXT='Recurring']"
+inputGMSDeductsSrc$ = "INPUT TEXT[NAME='HrpyWorkWGlobalSearch1']"
+btnGMSAddDeduct$ = "TD[OUTERTEXT='+']"
+inputGMSDeductCode$ = "INPUT TEXT[NAME='EmployeeDedDeductCod',INDEX="								'must include index # and closing bracker as part of function call (e.g. inputGMSDeductCode$ + "2]")
+inputGMSDeductAmt$ = "INPUT TEXT[NAME='EmployeeDedAmount',INDEX="									'must include index # and closing bracket
+inputGMSDeductPeriod$ = "INPUT TEXT[NAME='EmployeeDedPeriods',INDEX="								'must include index # and closing bracket
+btnGMSDeductSave$ = "BUTTON[INNERTEXT='Save']"
 
+'303, 257	coords for + icon

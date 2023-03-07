@@ -257,7 +257,12 @@ repeat
 
 
 		'-------------------- select returned contact
-		winMouseLeftDblClick(100, 220, "selecting contact")
+		if iEnvironment = 1 then
+			winMouseLeftDblClick(100, 220, "selecting contact")
+		endif
+		if iEnvironment = 2 then
+			winMouseLeftDblClick(110, 250, "selecting contact")
+		endif
 		pause 2
 		if webValidateElement(inputZWTxtMsg$, "text message inputbox", "selecting contact") <> 1 then
 			goto nextIteration
@@ -278,11 +283,18 @@ repeat
 		
 
 		'-------------------- send initial text
-		if webClickElement(btnZWSend$, "sending init txt msg") <> 0 then
-			goto nextIteration
-		else
-			logWorkflowStepSuccess("initial text sent successfully")
+		if iEnvironment = 1 then
+			if webClickElement(btnZWSend$, "sending init txt msg") <> 0 then
+				goto nextIteration
+			endif
 		endif
+		if iEnvironment = 2 then
+			clickmouse(left, down, 1385, 1015, absolute)
+			clickmouse(left, up, 1385, 1015, absolute)
+		endif
+
+		logWorkflowStepSuccess("initial text sent successfully")
+		
 
 
 		'------------------------------------------------------------------------------------------------------------------------------ schedule day before confirm
@@ -308,7 +320,12 @@ repeat
 
 
 		'-------------------- select returned contact
-		winMouseLeftDblClick(100, 220, "selecting contact")
+		if iEnvironment = 1 then
+			winMouseLeftDblClick(100, 220, "selecting contact")
+		endif
+		if iEnvironment = 2 then
+			winMouseLeftDblClick(110, 250, "selecting contact")
+		endif
 		pause 2
 		if webValidateElement(inputZWTxtMsg$, "text message inputbox", "selecting contact") <> 1 then
 			goto nextIteration
@@ -387,11 +404,17 @@ repeat
 
 
 		'-------------------- click schedule
-		if webClickElement(btnZWSchedule$, "scheduling day before confirm msg") <> 0 then
-			goto nextIteration
-		else
-			logWorkflowStepSuccess("day before confirm scheduled successfully")
+		if iEnvironment = 1 then
+			if webClickElement(btnZWSend$, "scheduling day before confirm msg") <> 0 then
+				goto nextIteration
+			endif
 		endif
+		if iEnvironment = 2 then
+			clickmouse(left, down, 1385, 1015, absolute)
+			clickmouse(left, up, 1385, 1015, absolute)
+		endif
+
+		logWorkflowStepSuccess("day before confirm scheduled successfully")
 
 
 		'------------------------------------------------------------------------------------------------------------------------------ schedule day of confirm
@@ -411,7 +434,12 @@ dayOfConfirm:
 
 
 		'-------------------- select returned contact
-		winMouseLeftDblClick(100, 220, "selecting contact")
+		if iEnvironment = 1 then
+			winMouseLeftDblClick(100, 220, "selecting contact")
+		endif
+		if iEnvironment = 2 then
+			winMouseLeftDblClick(110, 250, "selecting contact")
+		endif
 		pause 2
 		if webValidateElement(inputZWTxtMsg$, "text message inputbox", "selecting contact") <> 1 then
 			goto nextIteration
@@ -490,11 +518,17 @@ dayOfConfirm:
 
 
 		'-------------------- click schedule
-		if webClickElement(btnZWSchedule$, "scheduling day before confirm msg") <> 0 then
-			goto nextIteration
-		else
-			logWorkflowSuccess("day of confirm scheduled successfully; workflow complete")
+		if iEnvironment = 1 then
+			if webClickElement(btnZWSend$, "scheduling day of confirm msg") <> 0 then
+				goto nextIteration
+			endif
 		endif
+		if iEnvironment = 2 then
+			clickmouse(left, down, 1385, 1015, absolute)
+			clickmouse(left, up, 1385, 1015, absolute)
+		endif
+
+		logWorkflowSuccess("day of confirm scheduled successfully; workflow complete")
 
 
 		iCompleted = iCompleted + 1

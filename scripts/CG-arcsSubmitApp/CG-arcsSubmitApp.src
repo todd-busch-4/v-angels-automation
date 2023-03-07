@@ -94,7 +94,7 @@ repeat
 
 '----------------------------------------------------------------------------------------------------------------------------------------------- log in
 			'-------------------- invoke browser
-			if invokeBrowser("CH", arcsURL$) = 1 then
+			if webInvokeBrowser("CH", arcsURL$) = 1 then
 				nextScript()
 				goto nextIteration
 			endif

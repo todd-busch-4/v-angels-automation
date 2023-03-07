@@ -64,20 +64,20 @@ function webValidateText(object$, text$, step$)
 endfunction
 
 '=============================================================================================================================================================
-'== function name:           webValidateElement
+'== function name:              webValidateElement
     '==
-    '== developer:               todd busch
+    '== developer:              todd busch
     '==
-    '== purpose:                 validates the existence of the specified html object on the current page w/error-handling & logging
+    '== purpose:                validates the existence of the specified html object on the current page w/error-handling & logging
     '==
-    '== input parms:             objectDesc$:	descriptor of the html object to verify
-    '==                          objectName$:    name/title of the object
-    '==                          step$:		    terse description of the action/step in the script (e.g. "clicking login")
+    '== input parms:            objectDesc$:	descriptor of the html object to verify
+    '==                         objectName$:    name/title of the object
+    '==                         step$:		    terse description of the action/step in the script (e.g. "clicking login")
     '==
-    '== returns:                 int:    1 - if object found   
-    '==                                  error_code - on failure or object not found
+    '== returns:                int:    1 - if object found   
+    '==                                 error_code - on failure or object not found
     '==
-    '== notes:                   none
+    '== notes:                  none
     '==
 '=============================================================================================================================================================*/
 function webValidateElement(objectDesc$, objectName$, step$)
@@ -188,5 +188,46 @@ function webWaitForText(window$, text$, textName$, waitTime, step$, area1, area2
 
     write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + step$ + " validation was successful", crlf)
     webWaitForText = 0
+
+endfunction
+
+'=============================================================================================================================================================
+'== function name:              webValidateNotNull
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                validates the value of the specified html edit object is not null/blank
+    '==
+    '== input parms:            objectDesc$:	descriptor of the html object to verify
+    '==                         step$:		    terse description of the action/step in the script (e.g. "clicking login")
+    '==
+    '== returns:                int:    0 - success/not null
+    '==                                 1 - failure/null
+    '==
+    '== notes:                  none
+    '==
+'=============================================================================================================================================================*/
+function webValidateNotNull(object$, step$)
+    local r, retVal$
+
+        r = gethtmledittext(object$, retVal$)
+
+        if retVal$ = "" then
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + step$ + " validation failed", crlf)
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": expected value but got null", crlf)
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+            hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-" + step$ + ".bmp", 1, 1)
+            write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+            write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+            write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+            write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - expected value was null" + step$, crlf + crlf)
+            closebrowser()
+            webValidateNotNull = 1
+        endif
+
+        if retVal$ <> "" then
+           	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + step$ + " validation was successful", crlf)
+            webValidateNotNull = 0
+       endif
 
 endfunction
