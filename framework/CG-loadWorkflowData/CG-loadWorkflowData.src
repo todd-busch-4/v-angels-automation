@@ -152,7 +152,7 @@ function LoadWorkflowData(script$)
 	endif
 
 '--------------------------------------------------------------------------------------------- load gmsTerminations elements
-	if script$ = "CG-gmsSubmitForm" then
+	if script$ = "CG-gmsTerminations" then
 		'-------------------- gms status
 		r = readexcel (employmentInquiryPath$, employmentInquiryGMSCol$, arrGMSStatus$())
 		if instr(str$(r), "-") <> 0 then
@@ -351,7 +351,27 @@ function LoadWorkflowData(script$)
 		endif
 	endif
 
+'--------------------------------------------------------------------------------------------- load gmsAddLegalFee elements
+	if script$ = "CG-gmsAddLegalFee" then
+		'-------------------- legal shield
+		r = readexcel (employmentInquiryPath$, employmentInquiryLegalShieldCol$, arrLegalShield$())
+		if r <> 5000 then
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading legal shield column.  error_code: " +   str$(r), crlf)
+			write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (legal shield)", crlf)
+			LoadWorkflowData = 1
+			exitfunction
+		endif
+		'-------------------- gms status
+		r = readexcel (employmentInquiryPath$, employmentInquiryGMSCol$, arrGMSStatus$())
+		if r <> 5000 then
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading gms status column.  error_code: " +   str$(r), crlf)
+			write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (gms status)", crlf)
+			LoadWorkflowData = 1
+			exitfunction
+		endif
+	endif
 
+	
 	LoadWorkflowData = 0
 
 

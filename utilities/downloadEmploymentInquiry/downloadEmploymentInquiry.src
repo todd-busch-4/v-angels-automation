@@ -35,10 +35,6 @@ UsePage("CareGiver Portal - WinTask Data - All Documents")
 res = ClickHTMLElement("SPAN[OUTERTEXT='Download',INDEX=2]")
 
 
-'-------------------- click save
-UseWindow("CHROME.EXE|#32770|Save As", 4)
-res = Click(Button, "&Save")
-
 pause 3		'allow doc to complete download
 
 '-------------------- copy to package directory

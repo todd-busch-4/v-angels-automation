@@ -95,23 +95,6 @@ endif
 if res = 0 then
 	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicked download link", crlf)
 endif
-pause 2
-
-'-------------------- click save
-usewindow("CHROME.EXE|#32770|Save As", 4)
-res = click(button, "&Save")
-'------- error handling
-if res <> 0 then
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error clicking save button", crlf)
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-	hardcopy(screenshotsPath$ + currScript$ + "-click_save_.bmp", 1, 1)
-	closebrowser()
-	criticalStop()
-endif
-'------- debug logging
-if res = 0 then
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicked save", crlf)
-endif
 
 
 '-------------------- allow doc to complete download
@@ -150,6 +133,7 @@ run(scriptsPath$ + "CG-adobeCancelPackets\CG-adobeCancelPackets.rob")
 run(scriptsPath$ + "CG-zipwhipInitTxtMsgs\CG-zipwhipInitTxtMsgs.rob")
 run(scriptsPath$ + "CG-gmsFormSubmit\CG-gmsFormSubmit.rob")
 run(scriptsPath$ + "CG-gmsTerminations\CG-gmsTerminations.rob")
+run(scriptsPath$ + "CG-gmsAddLegalFunctions\CG-gmsAddLegalFunctions.rob")
 
 
 '#############################################################################################################################

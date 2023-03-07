@@ -1,0 +1,242 @@
+'###############################################################################################################################################
+'## author:                 todd busch
+'##
+'## date:                   03/03/2023
+'##
+'## description:            terseDescription
+'##
+'## run in:                 firefox
+'##
+'## notes:                  none
+'##
+'###############################################################################################################################################
+include "C:\v-angels-automation\framework\CG-globalDimDeclarations\CG-globalDimDeclarations.src"
+include "C:\v-angels-automation\framework\CG-gmsAddLegalFunctions\CG-gmsAddLegalFunctions.src"
+include "C:\v-angels-automation\framework\CG-loadWorkflowData\CG-loadWorkflowData.src"
+include "C:\v-angels-automation\framework\CG-globalFunctions\CG-globalFunctions.src"
+include "C:\v-angels-automation\framework\CG-gmsFunctions\CG-gmsFunctions.src"
+include "c:\v-angels-automation\framework\CG-globalWinFunctions\CG-globalWinFunctions.src"
+include "c:\v-angels-automation\framework\CG-globalWebFunctions\CG-globalWebFunctions.src"
+include "c:\v-angels-automation\framework\CG-globalWebValidations\CG-globalWebValidations.src"
+include "C:\v-angels-automation\framework\CG-globalLogging\CG-globalLogging.src"
+include "C:\v-angels-automation\framework\CG-globalSubDefinitions\CG-globalSubDefinitions.src"
+include "C:\v-angels-automation\framework\CG-globalVariables\CG-globalVariables.src"
+Include "C:\v-angels-automation\object-repos\gms\gmsObjectRepository.src"
+
+
+currScript$ = "CG-gmsAddLegalFee"
+
+
+#ignoreerrors = 1
+
+
+'-------------------- read in columns from employment inquiry doc
+if LoadWorkflowData(currScript$) = 1 then
+	criticalStop()
+endif
+
+
+'###############################################################################################################################################
+'##                                                     script start
+'###############################################################################################################################################
+logStartScript("gms add recurring deduction")
+
+
+'------------------------------------------------------------------------------------------------------------------------------ begin iterating through change event column
+i = 0
+
+
+repeat
+
+
+	'-------------------- get change status of current row
+	curr_status$ = arrChangeEvents$(i)
+
+
+    if curr_status$ = "Yes" then
+        iEventCnt = iEventCnt + 1
+        iExcelRow = i + 2
+        logEventFound()
+
+ '------------------------------------------------------------------------------------------------------------------------------ stage check
+
+       '-------------------- get the stage for the current change event
+		curr_stage$ = arrCurrentStage$(i)
+
+
+        if gmsAddLegalStageChk() = 0 then
+            iStageCnt = iStageCnt + 1
+            logStageMatch()
+        else
+            logStageBypass()
+            goto nextIteration
+        endif
+
+
+        '-------------------- get data for current row
+        gmsAddLegalGetData()
+        logDataValues()
+
+'------------------------------------------------------------------------------------------------------------------------------ status check
+
+        if gmsAddLegalStatusChk() = 1 then
+            goto nextIteration
+        endif
+
+'------------------------------------------------------------------------------------------------------------------------------ log in
+
+        '-------------------- invoke browser
+        if webInvokeBrowser("FF", gmsURL$) = 1 then
+            nextScript()
+            goto nextIteration
+        endif
+
+
+        '-------------------- enter username
+        usepage(pgGMSLogin$)
+        if webEnterText(inputGMSUsername$, gmsUsername$, "entering username") <> 0 then
+            goto nextIteration
+        endif
+        if webValidateText(inputGMSUsername$, gmsUsername$, "entering username") <> 0 then
+            goto nextIteration
+        endif
+
+
+        '-------------------- enter password
+        usepage(pgGMSLogin$)
+        if webEnterText(inputGMSPassword$, gmsPassword$, "entering password") <> 0 then
+            goto nextIteration
+        endif
+        if webValidateText(inputGMSPassword$, gmsPassword$, "entering password") <> 0 then
+            goto nextIteration
+        endif
+
+
+        '-------------------- click 'sign in' button
+        if webClickElement(btnGMSLogin$, "clicking login button") <> 0 then
+            goto nextIteration
+        endif
+        pause 5
+        if webValidateElement(bmpGMSLogo$, "gms logo", "clicking login button") <> 1 then
+            goto nextIteration
+        endif
+
+
+        '-------------------- ensure correct company is active
+        if gmsCompanyChk = 1 then
+            goto nextIteration
+        endif
+
+'------------------------------------------------------------------------------------------------------------------------------ employee search
+
+        '-------------------- nav to recurring deductions
+        if webClickElement(lnkGMSRecurDeducts$, "clicking recur deducts link") <> 0 then
+            goto nextIteration
+        endif
+        pause 2
+        if webValidateCurrPage(pgGMSRecurringDeductions$, "clicking recur deducts link") <> 0 then
+            goto nextIteration
+        endif
+
+
+        '-------------------- enter search criteria
+        if webEnterText(inputGMSDeductsSrc$, applicantFName$ + " " + applicantLName$, "entering search criteria") <> 0 then
+            goto nextIteration
+        endif
+        pause 3
+        if webValidateElement(rowGMSSrcResults$, "search result row", "entering search criteria") <> 1 then
+            goto nextIteration
+        endif
+
+
+        '-------------------- select employee
+        if webClickElement(rowGMSSrcResults$, "selecting employee") <> 0 then
+            goto nextIteration
+        endif
+        res = clickhtmlelement (rowGMSSrcResults$)
+        pause 2
+        if webValidateNotNull(inputGMSDeductsSrc$, "selecting employee") = 1 then
+            goto nextIteration
+        endif
+
+        '-------------------- get index of next row added
+        rowIndex = gmsAddLegalGetNextIndex()
+
+'------------------------------------------------------------------------------------------------------------------------------ enter deduction
+
+        '-------------------- click add deduction unless its first deduction
+        if rowIndex <> 1 then
+            if webClickElement(btnGMSAddDeduct$, "click add deduction") <> 0 then
+                goto nextIteration
+            endif
+        endif
+
+        
+        '-------------------- enter deduction code
+        if webPasteText(inputGMSDeductCode$ + str$(rowindex) + "]", legalDeductCode$, "enter deduction code") <> 0 then
+            goto nextIteration
+        endif
+        pause 1
+        if webValidateText(inputGMSDeductCode$ + str$(rowIndex) + "]", legalDeductCode$, "enter deduction code") <> 0 then
+            goto nextIteration
+        endif
+
+
+        '-------------------- enter deduction amount
+        if webClickElement(inputGMSDeductAmt$ + str$(rowIndex) + "]", "click deduction amt") <> 0 then
+            goto nextIteration
+        endif
+        pause 1
+        if webPasteText(inputGMSDeductAmt$ + str$(rowIndex) + "]", legalDeductAmt$, "enter deduction amt") <> 0 then
+            goto nextIteration
+        endif
+        pause 1
+        if webValidateText(inputGMSDeductAmt$ + str$(rowIndex) + "]", legalDeductAmt$, "enter deduction amt") <> 0 then
+            goto nextIteration
+        endif
+
+
+        '-------------------- enter deduction period
+        if webClickElement(inputGMSDeductPeriod$ + str$(rowIndex) + "]", "click deduction period") <> 0 then
+            goto nextIteration
+        endif
+        pause 1   
+        if webPasteText(inputGMSDeductPeriod$ + str$(rowIndex) + "]", legalDeductPeriod$, "enter deduction period") <> 0 then
+            goto nextIteration
+        endif
+        pause 1   
+        if webValidateText(inputGMSDeductPeriod$ + str$(rowIndex) + "]", legalDeductPeriod$, "enter deduction period") <> 0 then
+            goto nextIteration
+        endif
+
+
+        '-------------------- save the deduction
+        if webClickElement(btnGMSDeductSave$, "clicking save") <> 0 then
+            goto nextIteration
+        endif
+        pause 1
+        if webValidateText(inputGMSDeductsSrc$, "", "clicking save") <> 0 then
+            goto nextIteration
+        else
+            logWorkflowSuccess("recurring deduction was saved successfully")
+            closebrowser()
+            iCompleted = iCompleted + 1
+        endif
+
+
+	endif	'/change event
+
+
+nextiteration:
+
+
+i = i + 1
+
+
+until i = 5000 	'iterate through all rows in array
+
+
+'###############################################################################################################################################
+'##                                                     script end
+'###############################################################################################################################################
+gmsAddLegalLogStats()

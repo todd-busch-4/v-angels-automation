@@ -95,6 +95,7 @@ employmentInquiryPriorStateCol$ = "AS2:AS5001" 	    									'mapping for prior 
 employmentInquiryYrFromCol$ = "AT2:AT5001" 	    									    'mapping for year from column
 employmentInquiryYrToCol$ = "AU2:AU5001" 	    									    'mapping for year to column
 employmentinquiryTermedLOADateCol$ = "Z2:Z5001"                                         'mapping for termed/LOA date
+employmentInquiryLegalShieldCol$ = "P2:P5001"                                           'mapping for legal shield enrolled column
 
 
 '-------------------- workflow data
@@ -112,6 +113,9 @@ gmsRehireStatus$ = "ACTIVE"
 gmsReasonCode$ = "REHIRE"
 gmsPayRate$ = "10.10"
 startDateCompany$ = datetodate$("d", 7, date$())											'7 days from current date
+legalDeductCode$ = "LEGAL"
+legalDeductAmt$ = "8.75"
+legalDeductPeriod$ = "123"
 
 '-------------------- misc.
 basicLogHdr$ = currDate$ + "-"
