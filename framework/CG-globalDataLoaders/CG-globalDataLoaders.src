@@ -1,0 +1,133 @@
+'###############################################################################################################################################################
+'##  filename:                      cg-adobeDataLoaders
+'##
+'##  purpose:                       functions that get the values of the data elements used in the script for the current row
+'##
+'##  contents:                      list
+'##
+'###############################################################################################################################################################
+
+'=============================================================================================================================================================
+'== function name:              adobeCancelGetData
+    '==
+    '== developer:              todd busch
+    '==
+    '== notes:                  none
+    '==
+'=============================================================================================================================================================*/
+function adobeCancelGetData()
+
+    applicantID$ = arrApplicantID$(i)
+    applicantFName$ = arrApplicantFName$(i)
+    applicantLName$ = arrApplicantLName$(i)
+    adobePcktStatus$ = arrAdobePcktStatus$(i)
+
+    adobeCancelGetData = 0
+endfunction
+
+'=============================================================================================================================================================
+'== function name:              adobeSendGetData
+    '==
+    '== developer:              todd busch
+    '==
+    '== notes:                  none
+    '==
+'=============================================================================================================================================================*/
+function adobeSendGetData()
+    applicantID$ = arrApplicantID$(i)
+    applicantFName$ = arrApplicantFName$(i)
+    applicantLName$ = arrApplicantLName$(i)
+    applicantEmail$ = arrApplicantEmail$(i)
+    adobePcktStatus$ = arrAdobePcktStatus$(i)
+    if adobePcktStatus$ = "" then
+        adobePcktStatus$ = "Null"
+    endif
+
+    adobeSendGetData = 0
+endfunction
+
+'=============================================================================================================================================================
+'== function name:          	gmsSubmitGetData
+	'==
+	'== developer:              todd busch
+	'==
+	'== purpose:                get data from data arrays for the current row being processed
+	'==
+	'== input parms:            none
+	'==
+	'== returns:                int:	0 - success
+	'==
+	'== notes:                  none
+	'==
+'=============================================================================================================================================================*/
+function gmsSubmitGetData()
+	applicantID$ = arrApplicantID$(i)
+	applicantFName$ = arrApplicantFName$(i)
+	applicantLName$ = arrApplicantLName$(i)
+	gmsStatus$ = arrGMSStatus$(i)
+	applicantEmail$ = arrApplicantEmail$(i)
+	applicantSSN$ = arrApplicantSSN$(i)
+	if applicantSSN$ = "" then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": SSN was blank for current row", crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": blank ssn; proceeding to next change event", crlf + crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employee: " + applicantFName$ + " " + applicantLName$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: gmsSubmitGetData - no ssn", crlf + crlf)
+		gmsSubmitGetData = 1
+		exitfunction
+	endif
+	applicantLNameCaps$ = ucase$(applicantLName$)
+endfunction
+
+'=============================================================================================================================================================
+'== function name:       	   gmsTermsGetData
+	'==
+	'== developer:              todd busch
+	'==
+	'== purpose:                get data for the current row from data arrays
+	'==
+	'== input parms:            none
+	'==
+	'== returns:                int:	0 - for success
+	'==
+	'== notes:                  none
+	'==
+'=============================================================================================================================================================*/
+function gmsTermsGetData()
+
+	applicantID$ = arrApplicantID$(i)
+	applicantFName$ = arrApplicantFName$(i)
+	applicantLName$ = arrApplicantLName$(i)
+	gmsStatus$ = arrGMSStatus$(i)
+	applicantSSN$ = arrApplicantSSN$(i)
+	termedLOADate$ = arrTermedLOADate$(i)
+
+	gmsTermsGetData = 0
+
+endfunction
+
+'=============================================================================================================================================================
+'== function name:				gmsAddLegalGetData
+	'==
+	'== developer:              todd busch
+	'==
+	'== purpose:                get value of data elements used by script for current row
+	'==
+	'== input parms:            none
+	'==
+	'== returns:                int:	0 - success
+	'==
+	'== notes:                  none
+	'==
+'=============================================================================================================================================================*/
+function gmsAddLegalGetData()
+	applicantID$ = arrApplicantID$(i)
+	applicantFName$ = arrApplicantFName$(i)
+	applicantLName$ = arrApplicantLName$(i)
+	gmsStatus$ = arrGMSStatus$(i)
+	gmsLegalShield$ = arrLegalShield$(i)
+
+	gmsAddLegalGetData = 0
+endfunction
+

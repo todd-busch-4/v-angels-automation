@@ -1,8 +1,6 @@
 '###############################################################################################################################################
 '## author:                 todd busch
 '##
-'## date:                   02/17/2023
-'##
 '## description:            scans the change event column in employment inquiry list.xlsx spreadsheet in package downloads folder; it will 
 '##							send the appropriate packets (pre and 1st int or 2nd int) for rows flagged 'yes' that have a 1st or 2nd  
 '##							interview stage and do not have any reference to those packets in the adobe status column (e.g. [1st int pkt sent]) 
@@ -18,6 +16,7 @@
 '###############################################################################################################################################
 include "C:\v-angels-automation\framework\CG-globalDimDeclarations\CG-globalDimDeclarations.src"
 include "C:\v-angels-automation\framework\CG-loadWorkflowData\CG-loadWorkflowData.src"
+include "C:\v-angels-automation\framework\CG-globalDataLoaders\CG-globalDataLoaders.src"
 include "C:\v-angels-automation\framework\CG-globalFunctions\CG-globalFunctions.src"
 include "C:\v-angels-automation\framework\CG-gmsFunctions\CG-gmsFunctions.src"
 include "c:\v-angels-automation\framework\CG-globalWinFunctions\CG-globalWinFunctions.src"
@@ -41,13 +40,13 @@ if LoadWorkflowData(currScript$) = 1 then
 endif
 
 
-'#############################################################################################################################
-'##   													script start								 						
-'#############################################################################################################################
+'###############################################################################################################################################
+'##   													script start																			  
+'###############################################################################################################################################
 logStartScript("gms terminations")
 
-
 '------------------------------------------------------------------------------------------------------------------------------ begin iterating through change event column
+
 i = 0
 
 
@@ -59,13 +58,11 @@ repeat
 
 
     if curr_status$ = "Yes" then
-        iEventCnt = iEventCnt + 1	'change event counter
-        iExcelRow = i + 2			'add 1 for header row and 1 for zero indexed arrays
+        iEventCnt = iEventCnt + 1
+        iExcelRow = i + 2
         logEventFound()
 
-
- '------------------------------------------------------------------------------------------------------------------------------ check stage column for triggers
-
+'------------------------------------------------------------------------------------------------------------------------------ stage check
 
        '-------------------- get the stage for the current change event
 		curr_stage$ = arrCurrentStage$(i)
@@ -85,15 +82,14 @@ repeat
         logDataValues()        
         termedLOADate$ = gmsTermsFmtDates$()
         
+'------------------------------------------------------------------------------------------------------------------------------ status check
 
         '-------------------- check gms status column for qualifying values
         if gmsTermsChkStatus() = 1 then
             goto nextIteration
         endif
 
-
  '------------------------------------------------------------------------------------------------------------------------------ log in
- 
  
         '-------------------- invoke browser
         if webInvokeBrowser("FF", gmsURL$) = 1 then
@@ -104,30 +100,30 @@ repeat
 
         '-------------------- enter username
         usepage(pgGMSLogin$)
-        if webEnterText(txtUsername$, gmsUsername$, "entering username") <> 0 then
+        if webEnterText(inputGMSUsername$, gmsUsername$, "entering username") <> 0 then
             goto nextIteration
         endif
-        if webValidateText(txtUsername$, gmsUsername$, "entering username") <> 0 then
+        if webValidateText(inputGMSUsername$, gmsUsername$, "entering username") <> 0 then
             goto nextIteration
         endif
 
 
         '-------------------- enter password
         usepage(pgGMSLogin$)
-        if webEnterText(txtPassword$, gmsPassword$, "entering password") <> 0 then
+        if webEnterText(inputGMSPassword$, gmsPassword$, "entering password") <> 0 then
             goto nextIteration
         endif
-        if webValidateText(txtPassword$, gmsPassword$, "entering password") <> 0 then
+        if webValidateText(inputGMSPassword$, gmsPassword$, "entering password") <> 0 then
             goto nextIteration
         endif
 
 
         '-------------------- click 'sign in' button
-        if webClickElement(btnLogin$, "clicking login button") <> 0 then
+        if webClickElement(btnGMSLogin$, "clicking login button") <> 0 then
             goto nextIteration
         endif
         pause 5
-        if webValidateElement(bmpLogo$, "gms logo", "clicking login button") <> 1 then
+        if webValidateElement(bmpGMSLogo$, "gms logo", "clicking login button") <> 1 then
             goto nextIteration
         endif
 
@@ -137,16 +133,14 @@ repeat
             goto nextiteration
         endif
 
-
 '------------------------------------------------------------------------------------------------------------------------------ employee search
-
 
         '-------------------- nav to employee terminations
         if webClickElement(lnkGMSEmployeeTerm$, "clicking employee terminations link") <> 0 then
             goto nextIteration
         endif
         pause 2
-        if webValidateCurrPage(pgEmployeeTerminations$, "clicking employee terminations link") <> 0 then
+        if webValidateCurrPage(pgGMSEmployeeTerminations$, "clicking employee terminations link") <> 0 then
             goto nextIteration
         endif
 
@@ -173,9 +167,7 @@ repeat
             goto nextIteration
         endif
 
-
 '------------------------------------------------------------------------------------------------------------------------------ complete termination form
-
 
         '-------------------- select termination status code
         if webSelectItem(selGMSTermStatusCode$, "TERMINATED", "selecting term status code") <> 0 then
@@ -197,11 +189,11 @@ repeat
 
 retryEnterTermDate:
         '-------------------- enter termination date
-        usepage(pgEmployeeTerminations$)
+        usepage(pgGMSEmployeeTerminations$)
         if webEnterText(dtGMSTerminationDate$, termedLOADate$, "entering termed/loa date") <> 0 then
             goto nextIteration
         endif
-        clickhtmlelement(lblReassignPendAppr$)
+        clickhtmlelement(lblGMSReassignPendAppr$)
         pause 1
         if gmsTermsEarlyDateChk() = 1 then
             goto retryEnterTermDate
@@ -228,6 +220,7 @@ retryEnterTermDate:
             endif
         endif
 
+'------------------------------------------------------------------------------------------------------------------------------ save form
 
         '-------------------- click save
         if webClickElement(btnGMSTerminationSave$, "saving termination") <> 0 then
@@ -247,7 +240,7 @@ retryEnterTermDate:
         iProcessed = iProcessed + 1
 
 
-    endif   '/curr-status$ = yes
+    endif
 
 
 nextiteration:

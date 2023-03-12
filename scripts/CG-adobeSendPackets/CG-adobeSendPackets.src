@@ -1,8 +1,6 @@
 '###############################################################################################################################################
 '## author:                 todd busch
 '##
-'## date:                   12/05/2022
-'##
 '## description:            scans the change event column in employment inquiry list.xlsx spreadsheet in package downloads folder; it will 
 '##							send the appropriate packets (pre and 1st int or 2nd int) for rows flagged 'yes' that have a 1st or 2nd  
 '##							interview stage and do not have any reference to those packets in the adobe status column (e.g. [1st int pkt sent]) 
@@ -20,6 +18,7 @@
 '###############################################################################################################################################
 include "C:\v-angels-automation\framework\CG-globalDimDeclarations\CG-globalDimDeclarations.src"
 include "C:\v-angels-automation\framework\CG-loadWorkflowData\CG-loadWorkflowData.src"
+include "C:\v-angels-automation\framework\CG-globalDataLoaders\CG-globalDataLoaders.src"
 include "C:\v-angels-automation\framework\CG-globalFunctions\CG-globalFunctions.src"
 include "C:\v-angels-automation\framework\CG-adobeFunctions\CG-adobeFunctions.src"
 include "c:\v-angels-automation\framework\CG-globalWinFunctions\CG-globalWinFunctions.src"
@@ -43,13 +42,13 @@ if LoadWorkflowData(currScript$) = 1 then
 endif
 
 
-'#############################################################################################################################
-'##   													script start								 						
-'#############################################################################################################################
+'###############################################################################################################################################
+'##   													script start																			  
+'###############################################################################################################################################
 logStartScript("adobe send")
 
-
 '------------------------------------------------------------------------------------------------------------------------------ begin iterating through change event column
+
 i = 0
 
 
@@ -61,32 +60,27 @@ repeat
 
 
 	if curr_status$ = "Yes" then
-		iEventCnt = iEventCnt + 1	'change event counter
-		iExcelRow = i + 2			'add 1 for header row and 1 for zero indexed arrays
+		iEventCnt = iEventCnt + 1
+		iExcelRow = i + 2
 		logEventFound()
 
+'------------------------------------------------------------------------------------------------------------------------------  1st interview stage chk
 
 		'-------------------- get the stage for the current change event
 		curr_stage$ = arrCurrentStage$(i)
 
 
-'------------------------------------------------------------------------------------------------------------------------------------------- 1st interview stage
 		if curr_stage$ = "1st Interview" then
 			iFirstCnt = iFirstCnt + 1		'stage counter
 			logStageMatch()
 
 
 			'-------------------- get data values for current record from employment inquiry
-			applicantID$ = arrApplicantID$(i)
-			applicantFName$ = arrApplicantFName$(i)
-			applicantLName$ = arrApplicantLName$(i)
-			applicantEmail$ = arrApplicantEmail$(i)
-			adobePcktStatus$ = arrAdobePcktStatus$(i)
-			if adobePcktStatus$ = "" then
-				adobePcktStatus$ = "Null"
-			endif
+			adobeSendGetData()
 			logDataValues()
 
+
+'------------------------------------------------------------------------------------------------------------------------------  pre 1st pkt status chk
 
 			'-------------------- check for already sent packets
 			if adobeSendStatusChk("Pre 1st Pkt", "pre 1st") = 1 then
@@ -94,7 +88,8 @@ repeat
 			endif
 
 
-			'-------------------------------------------------------------------------------------------------------------------------------- send pre 1st interview packet
+'------------------------------------------------------------------------------------------------------------------------------  send pre 1st pkt
+
 			'-------------------- invoke browser window
 			if webInvokeBrowser("CH", adobeURL$) <> 0 then
 				nextScript()
@@ -110,95 +105,94 @@ repeat
 
 
 			'-------------------- click 'tools' link in upper-left of main frame
-			usepage(pgHomePage$)
-			if webClickElement(lnkTools$, "clicking tools") <> 0 then
+			usepage(pgAdobeHomePage$)
+			if webClickElement(lnkAdobeTools$, "clicking tools") <> 0 then
 				goto nextIteration
 			endif
 			pause 3					
-			if webWaitForText(wndHomePage$, "Request e-signatures", "req e-sig link", 10, "clicking tools", 529, 374, 189, 281) = 1 then
+			if webWaitForText(wndAdobeHomePage$, "Request e-signatures", "req e-sig link", 10, "clicking tools", 529, 374, 189, 281) = 1 then
 				goto nextIteration
 			endif
-
 
 
 			'-------------------- click 'request signatures' box in tools carousel menu
-			usepage(pgHomePage$)
-			if webClickElement(lnkReqSigs$, "clicking req sigs") <> 0 then
+			usepage(pgAdobeHomePage$)
+			if webClickElement(lnkAdobeReqSigs$, "clicking req sigs") <> 0 then
 				goto nextIteration
 			endif
 			pause 2
-			usepage(pgHomePage$)
-			if webValidateElement(diaFileSelect$, "file sel popup", "clicking req sigs") <> 1 then
+			usepage(pgAdobeHomePage$)
+			if webValidateElement(diaAdobeFileSelect$, "file sel popup", "clicking req sigs") <> 1 then
 				goto nextIteration
 			endif
 
 
 			'-------------------- click 'documents' in top menu of request signatures popup
-			usepage(pgHomePage$)
-			if webClickElement(lnkDocuments$, "clicking documents") <> 0 then
+			usepage(pgAdobeHomePage$)
+			if webClickElement(lnkAdobeDocs$, "clicking documents") <> 0 then
 				goto nextIteration
 			endif
 			pause 2
-			if webWaitForText(wndHomePage$, "Automated", "folder name", 10, "clicking documents", 611, 437, 337, 714) = 1 then
+			if webWaitForText(wndAdobeHomePage$, "Automated", "folder name", 10, "clicking documents", 611, 437, 337, 714) = 1 then
 				goto nextIteration
 			endif
 
 
 			'-------------------- click 'automated' folder
-			usepage(pgHomePage$)
-			if webClickElement(lnkAutomated$, "clicking automated folder") <> 0 then
+			usepage(pgAdobeHomePage$)
+			if webClickElement(lnkAdobeAutomated$, "clicking automated folder") <> 0 then
 				goto nextIteration
 			endif
 			pause 2
 			if iEnvironment = 1 then
-				if webWaitForText(wndHomePage$, "Employee Forms", "folder name", 10, "clicking automated folder", 611, 437, 337, 714) = 1 then
+				if webWaitForText(wndAdobeHomePage$, "Employee Forms", "folder name", 10, "clicking automated folder", 611, 437, 337, 714) = 1 then
 					goto nextIteration
 				endif
 			endif
 			if iEnvironment = 2 then
-				if webWaitForText(wndHomePage$, "Employee Forms", "folder name", 10, "clicking automated folder", 605, 583, 71, 523) = 1 then
+				if webWaitForText(wndAdobeHomePage$, "Employee Forms", "folder name", 10, "clicking automated folder", 605, 583, 71, 523) = 1 then
 					goto nextIteration
 				endif
 			endif
 
 
 			'-------------------- click 'employee forms' folder
-			usepage(pgHomePage$)
-			if webClickElement(lnkEmployeeForms$, "clicking employee forms folder") <> 0 then
+			usepage(pgAdobeHomePage$)
+			if webClickElement(lnkAdobeEmployeeForms$, "clicking employee forms folder") <> 0 then
 				goto nextIteration
 			endif
 			pause 2
-			if webWaitForText(wndHomePage$, "Applicant to New Hire", "folder name", 10, "clicking emp forms folder", 611, 437, 337, 714) = 1 then
+			if webWaitForText(wndAdobeHomePage$, "Applicant to New Hire", "folder name", 10, "clicking emp forms folder", 611, 437, 337, 714) = 1 then
 				goto nextIteration
 			endif
 
 
 			'-------------------- click 'applicant to new hire forms' folder
-			usewindow(wndHomePage$, 1)
+			usewindow(wndAdobeHomePage$, 1)
 			winMouseLeftDblClick(780, 630, "clicking app to new hire folder")
 
 
 			'-------------------- click 'pre 1st interview packet.pdf'
-			usepage(pgHomePage$)
-			if webClickElement(lnkPre1stPkt$, "sel pre 1st pkt") <> 0 then
+			usepage(pgAdobeHomePage$)
+			if webClickElement(lnkAdobePre1stPkt$, "sel pre 1st pkt") <> 0 then
 				goto nextIteration
 			endif
 			pause 2
 
 
 			'-------------------- click 'continue' button
-			usepage(pgHomePage$)
-			if webClickElement(btnContinue$, "clicking continue") <> 0 then
+			usepage(pgAdobeHomePage$)
+			if webClickElement(btnAdobeContinue$, "clicking continue") <> 0 then
 				goto nextIteration
 			endif
 			pause 2
-			if webWaitForText(wndHomePage$, "Get documents signed", "header", 10, "clicking continue", 497, 178, 105, 679) = 1 then
+			if webWaitForText(wndAdobeHomePage$, "Get documents signed", "header", 10, "clicking continue", 497, 178, 105, 679) = 1 then
 				goto nextIteration
 			endif
 
 
 			'-------------------- set focus to applicant email field
-			usewindow(wndHomePage$, 1)
+			usewindow(wndAdobeHomePage$, 1)
 			if iEnvironment = 1 then
 				if webLeftSingleClickOCRText("Enter recipient email", 655, 358, 165, 21, 0, 0, "setting focus to appl email") <> 0 then
 					goto nextIteration
@@ -219,7 +213,7 @@ repeat
 
 
 			'-------------------- set focus to corporate email field
-			usewindow(wndESign$, 1)
+			usewindow(wndAdobeESign$, 1)
 			if iEnvironment = 1 then
 				if webLeftSingleClickOCRText("Enter recipient email", 645, 407, 166, 29, 0, 0, "setting focus to corp email") <> 0 then
 					goto nextIteration
@@ -239,7 +233,7 @@ repeat
 
 
 			'-------------------- add applicant name to message box
- 			usewindow(wndHomePage$, 1)
+ 			usewindow(wndAdobeHomePage$, 1)
 			ret = useocrengine(3)
 			if iEnvironment = 1 then
 				if webLeftSingleClickOCRText("PRE", 529, 575, 177, 32, -85, 0, "adding applicant name to msgbox") <> 0 then
@@ -257,7 +251,7 @@ repeat
 
 
 			'-------------------- click 'next' button
-			usewindow(wndESign$, 1)
+			usewindow(wndAdobeESign$, 1)
 			if iEnvironment = 1 then
 				if webLeftSingleClickOCRText("ocd", 496, 935, 149, 80, 0, 0, "clicking next") <> 0 then
 					goto nextIteration
@@ -267,13 +261,13 @@ repeat
 				winMouseLeftDblClick(565, 945, "clicking next")
 			endif
 			pause 2
-			if webWaitForText(wndHomePage$, "CONFIDENTIALITY OF PROTECTED", "doc title", 30, "clicking next", 526, 313, 151, 685) = 1 then
+			if webWaitForText(wndAdobeHomePage$, "CONFIDENTIALITY OF PROTECTED", "doc title", 30, "clicking next", 526, 313, 151, 685) = 1 then
 				goto nextIteration
 			endif
 
 
 			'-------------------- click 'send' button
-			usewindow(wndESign$, 1)
+			usewindow(wndAdobeESign$, 1)
 			if iEnvironment = 1 then
 				if webLeftSingleClickOCRText("D>", 1779, 933, 139, 76, 0, 0, "clicking send") <> 0 then
 					goto nextIteration
@@ -283,7 +277,7 @@ repeat
 				clickmouse(left, double, 1850, 970, absolute)
 			endif
 			pause 2
-			if webWaitForText(wndHomePage$, applicantFName$, "applicant name", 20, "clicking send", 568, 270, 148, 832) = 1 then
+			if webWaitForText(wndAdobeHomePage$, applicantFName$, "applicant name", 20, "clicking send", 568, 270, 148, 832) = 1 then
 				goto nextIteration
 			endif
 
@@ -292,17 +286,19 @@ repeat
 			logWorkflowStepSuccess("pre first interview packet sent ssuccessfully")
 
 
-			closebrowser()		'use browser invoke retry for next packet send in case of 400 errors navigating back to home
+			closebrowser()
 
+'------------------------------------------------------------------------------------------------------------------------------ 1st int pkt status chk
 
 firstInterviewSend:
+
 			'-------------------- check for already sent packets
 			if adobeSendStatusChk("1st Int Pkt", "1st int") = 1 then
 				goto nextIteration
 			endif
 
+'------------------------------------------------------------------------------------------------------------------------------ send 1st int pkt
 
-			'-------------------------------------------------------------------------------------------------------------------------------- send 1st interview packet
 			'-------------------- invoke browser window
 			if webInvokeBrowser("CH", adobeURL$) <> 0 then
 				nextScript()
@@ -318,79 +314,79 @@ firstInterviewSend:
 
 
 			'-------------------- click 'tools' link in upper-left of main frame
-			usepage(pgHomePage$)
-			if webClickElement(lnkTools$, "clicking tools") <> 0 then
+			usepage(pgAdobeHomePage$)
+			if webClickElement(lnkAdobeTools$, "clicking tools") <> 0 then
 				goto nextIteration
 			endif
 			pause 3					
-			if webWaitForText(wndHomePage$, "Request e-signatures", "req e-sig link", 10, "clicking tools", 529, 374, 189, 281) = 1 then
+			if webWaitForText(wndAdobeHomePage$, "Request e-signatures", "req e-sig link", 10, "clicking tools", 529, 374, 189, 281) = 1 then
 				goto nextIteration
 			endif
 
 
 			'-------------------- click 'request signatures' box in tools carousel menu
-			usepage(pgHomePage$)
-			if webClickElement(lnkReqSigs$, "clicking req sigs") <> 0 then
+			usepage(pgAdobeHomePage$)
+			if webClickElement(lnkAdobeReqSigs$, "clicking req sigs") <> 0 then
 				goto nextIteration
 			endif
 			pause 2
-			usepage(pgHomePage$)
-			if webValidateElement(diaFileSelect$, "file sel popup", "clicking req sigs") <> 1 then
+			usepage(pgAdobeHomePage$)
+			if webValidateElement(diaAdobeFileSelect$, "file sel popup", "clicking req sigs") <> 1 then
 				goto nextIteration
 			endif
 
 
 			'-------------------- click 'documents' in top menu of request signatures popup
-			usepage(pgHomePage$)
-			if webClickElement(lnkDocuments$, "clicking documents") <> 0 then
+			usepage(pgAdobeHomePage$)
+			if webClickElement(lnkAdobeDocs$, "clicking documents") <> 0 then
 				goto nextIteration
 			endif
 			pause 2
-			if webWaitForText(wndHomePage$, "Automated", "folder name", 10, "clicking documents", 611, 437, 337, 714) = 1 then
+			if webWaitForText(wndAdobeHomePage$, "Automated", "folder name", 10, "clicking documents", 611, 437, 337, 714) = 1 then
 				goto nextIteration
 			endif
 
 
 			'-------------------- click 'automated' folder
-			usepage(pgHomePage$)
-			if webClickElement(lnkAutomated$, "clicking automated folder") <> 0 then
+			usepage(pgAdobeHomePage$)
+			if webClickElement(lnkAdobeAutomated$, "clicking automated folder") <> 0 then
 				goto nextIteration
 			endif
 			pause 2
 			if iEnvironment = 1 then
-				if webWaitForText(wndHomePage$, "Employee Forms", "folder name", 10, "clicking automated folder", 611, 437, 337, 714) = 1 then
+				if webWaitForText(wndAdobeHomePage$, "Employee Forms", "folder name", 10, "clicking automated folder", 611, 437, 337, 714) = 1 then
 					goto nextIteration
 				endif
 			endif
 			if iEnvironment = 2 then
-				if webWaitForText(wndHomePage$, "Employee Forms", "folder name", 10, "clicking automated folder", 605, 583, 71, 523) = 1 then
+				if webWaitForText(wndAdobeHomePage$, "Employee Forms", "folder name", 10, "clicking automated folder", 605, 583, 71, 523) = 1 then
 					goto nextIteration
 				endif
 			endif
 
 
 			'-------------------- click 'employee forms' folder
-			usepage(pgHomePage$)
-			if webClickElement(lnkEmployeeForms$, "clicking employee forms folder") <> 0 then
+			usepage(pgAdobeHomePage$)
+			if webClickElement(lnkAdobeEmployeeForms$, "clicking employee forms folder") <> 0 then
 				goto nextIteration
 			endif
 			pause 2
-			if webWaitForText(wndHomePage$, "Applicant to New Hire", "folder name", 10, "clicking emp forms folder", 611, 437, 337, 714) = 1 then
+			if webWaitForText(wndAdobeHomePage$, "Applicant to New Hire", "folder name", 10, "clicking emp forms folder", 611, 437, 337, 714) = 1 then
 				goto nextIteration
 			endif
 
 
 			'-------------------- click 'applicant to new hire forms' folder
-			usewindow(wndHomePage$, 1)
+			usewindow(wndAdobeHomePage$, 1)
 			winMouseLeftDblClick(780, 630, "clicking new hire forms")
 			pause 5
 
 
 			'-------------------- click '1st interview packet.pdf' via webClick functiomf
-			res = webClickElement(lnk1stIntPkt$, "selecting 1st int pkt")
+			res = webClickElement(lnkAdobe1stIntPkt$, "selecting 1st int pkt")
 			if res <> 0 then
 				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": select pkt via fx failed; trying click ocr text", crlf)
-				usewindow(wndHomePage$, 1)
+				usewindow(wndAdobeHomePage$, 1)
 				if webLeftSingleClickOCRText("1st Interview Packet pdf", 716, 448, 217, 26, 0, 0, "selecting 1st int pkt") <> 0 then
 					goto nextIteration
 				endif
@@ -398,18 +394,18 @@ firstInterviewSend:
 
 
 			'-------------------- click 'continue' button
-			usepage(pgHomePage$)
-			if webClickElement(btnContinue$, "clicking continue") <> 0 then
+			usepage(pgAdobeHomePage$)
+			if webClickElement(btnAdobeContinue$, "clicking continue") <> 0 then
 				goto nextIteration
 			endif
 			pause 2
-			if webWaitForText(wndHomePage$, "Get documents signed", "header", 10, "clicking continue", 497, 178, 105, 679) = 1 then
+			if webWaitForText(wndAdobeHomePage$, "Get documents signed", "header", 10, "clicking continue", 497, 178, 105, 679) = 1 then
 				goto nextIteration
 			endif
 
 
 			'-------------------- set focus to applicant email field
-			usewindow(wndHomePage$, 1)
+			usewindow(wndAdobeHomePage$, 1)
 			if iEnvironment = 1 then
 				if webLeftSingleClickOCRText("Enter recipient email", 655, 358, 165, 21, 0, 0, "setting focus to appl email") <> 0 then
 					goto nextIteration
@@ -430,7 +426,7 @@ firstInterviewSend:
 
 
 			'-------------------- set focus to corporate email field
-			usewindow(wndESign$, 1)
+			usewindow(wndAdobeESign$, 1)
 			if iEnvironment = 1 then
 				if webLeftSingleClickOCRText("Enter recipient email", 645, 407, 166, 29, 0, 0, "setting focus to corp email") <> 0 then
 					goto nextIteration
@@ -450,7 +446,7 @@ firstInterviewSend:
 
 
 			'-------------------- add applicant name to message box
- 			usewindow(wndHomePage$, 1)
+ 			usewindow(wndAdobeHomePage$, 1)
 			ret = useocrengine(3)
 			if iEnvironment = 1 then
 				if webLeftSingleClickOCRText("Ist Interview", 537, 572, 171, 33, -85, 0, "adding applicant name to msgbox") <> 0 then
@@ -468,7 +464,7 @@ firstInterviewSend:
 
 
 			'-------------------- click 'next' button
-			usewindow(wndESign$, 1)
+			usewindow(wndAdobeESign$, 1)
 			if iEnvironment = 1 then
 				if webLeftSingleClickOCRText("ocd", 496, 935, 149, 80, 0, 0, "clicking next") <> 0 then
 					goto nextIteration
@@ -478,13 +474,13 @@ firstInterviewSend:
 				winMouseLeftDblClick(565, 945, "clicking next")
 			endif
 			pause 2
-			if webWaitForText(wndHomePage$, "Skills Assessment", "doc title", 30, "clicking next", 526, 313, 151, 685) = 1 then
+			if webWaitForText(wndAdobeHomePage$, "Skills Assessment", "doc title", 30, "clicking next", 526, 313, 151, 685) = 1 then
 				goto nextIteration
 			endif
 
 
 			'-------------------- click 'send' button
-			usewindow(wndESign$, 1)
+			usewindow(wndAdobeESign$, 1)
 			if iEnvironment = 1 then
 				if webLeftSingleClickOCRText("D>", 1779, 933, 139, 76, 0, 0, "clicking send") <> 0 then
 					goto nextIteration
@@ -494,7 +490,7 @@ firstInterviewSend:
 				clickmouse(left, double, 1850, 970, absolute)
 			endif
 			pause 2
-			if webWaitForText(wndHomePage$, applicantFName$, "applicant name", 20, "clicking send", 568, 270, 148, 832) = 1 then
+			if webWaitForText(wndAdobeHomePage$, applicantFName$, "applicant name", 20, "clicking send", 568, 270, 148, 832) = 1 then
 				goto nextIteration
 			endif
 
@@ -510,7 +506,7 @@ firstInterviewSend:
 
 		endif	'end of 1st interview
 
-'------------------------------------------------------------------------------------------------------------------------------------------- 2nd interview stage
+'------------------------------------------------------------------------------------------------------------------------------  2nd interview stage chk
 
 		if curr_stage$ = "2nd Interview" then
 
@@ -519,22 +515,17 @@ firstInterviewSend:
 
 
 			'-------------------- get data values for current record from employment inquiry
-			applicantID$ = arrApplicantID$(i)
-			applicantFName$ = arrApplicantFName$(i)
-			applicantLName$ = arrApplicantLName$(i)
-			applicantEmail$ = arrApplicantEmail$(i)
-			adobePcktStatus$ = arrAdobePcktStatus$(i)
-			if adobePcktStatus$ = "" then
-				adobePcktStatus$ = "Null"
-			endif
+			adobeSendGetData()
 			logDataValues()
 
+'------------------------------------------------------------------------------------------------------------------------------ 2nd int status chk
 
 			'-------------------- check for already sent packets
 			if adobeSendStatusChk("2nd Int Pkt", "2nd int") = 1 then
 				goto firstInterviewSend
 			endif
 
+'------------------------------------------------------------------------------------------------------------------------------ send 2nd int pkt
 
 			'-------------------- invoke browser window
 			if webInvokeBrowser("CH", adobeURL$) <> 0 then
@@ -550,72 +541,71 @@ firstInterviewSend:
 			endif
 
 
-			'-------------------------------------------------------------------------------------------------------------------------------- send 2nd interview packet
 			'-------------------- click 'tools' link in upper-left of main frame
-			usepage(pgHomePage$)
-			if webClickElement(lnkTools$, "clicking tools") <> 0 then
+			usepage(pgAdobeHomePage$)
+			if webClickElement(lnkAdobeTools$, "clicking tools") <> 0 then
 				goto nextIteration
 			endif
 			pause 3					
-			if webWaitForText(wndHomePage$, "Request e-signatures", "req e-sig link", 10, "clicking tools", 529, 374, 189, 281) = 1 then
+			if webWaitForText(wndAdobeHomePage$, "Request e-signatures", "req e-sig link", 10, "clicking tools", 529, 374, 189, 281) = 1 then
 				goto nextIteration
 			endif
 
 
 			'-------------------- click 'request signatures' box in tools carousel menu
-			usepage(pgHomePage$)
-			if webClickElement(lnkReqSigs$, "clicking req sigs") <> 0 then
+			usepage(pgAdobeHomePage$)
+			if webClickElement(lnkAdobeReqSigs$, "clicking req sigs") <> 0 then
 				goto nextIteration
 			endif
 			pause 2
-			usepage(pgHomePage$)
-			if webValidateElement(diaFileSelect$, "file sel popup", "clicking req sigs") <> 1 then
+			usepage(pgAdobeHomePage$)
+			if webValidateElement(diaAdobeFileSelect$, "file sel popup", "clicking req sigs") <> 1 then
 				goto nextIteration
 			endif
 
 
 			'-------------------- click 'documents' in top menu of request signatures popup
-			usepage(pgHomePage$)
-			if webClickElement(lnkDocuments$, "clicking documents") <> 0 then
+			usepage(pgAdobeHomePage$)
+			if webClickElement(lnkAdobeDocs$, "clicking documents") <> 0 then
 				goto nextIteration
 			endif
 			pause 2
-			if webWaitForText(wndHomePage$, "Automated", "folder name", 10, "clicking documents", 611, 437, 337, 714) = 1 then
+			if webWaitForText(wndAdobeHomePage$, "Automated", "folder name", 10, "clicking documents", 611, 437, 337, 714) = 1 then
 				goto nextIteration
 			endif
 
 
 			'-------------------- click 'automated' folder
-			usepage(pgHomePage$)
-			if webClickElement(lnkAutomated$, "clicking automated folder") <> 0 then
+			usepage(pgAdobeHomePage$)
+			if webClickElement(lnkAdobeAutomated$, "clicking automated folder") <> 0 then
 				goto nextIteration
 			endif
 			pause 2
 			if iEnvironment = 1 then
-				if webWaitForText(wndHomePage$, "Employee Forms", "folder name", 10, "clicking automated folder", 611, 437, 337, 714) = 1 then
+				if webWaitForText(wndAdobeHomePage$, "Employee Forms", "folder name", 10, "clicking automated folder", 611, 437, 337, 714) = 1 then
 					goto nextIteration
 				endif
 			endif
 			if iEnvironment = 2 then
-				if webWaitForText(wndHomePage$, "Employee Forms", "folder name", 10, "clicking automated folder", 605, 583, 71, 523) = 1 then
+				if webWaitForText(wndAdobeHomePage$, "Employee Forms", "folder name", 10, "clicking automated folder", 605, 583, 71, 523) = 1 then
 					goto nextIteration
 				endif
 			endif
 
 
 			'-------------------- click 'employee forms' folder
-			usepage(pgHomePage$)
-			if webClickElement(lnkEmployeeForms$, "clicking employee forms folder") <> 0 then
+			usepage(pgAdobeHomePage$)
+			if webClickElement(lnkAdobeEmployeeForms$, "clicking employee forms folder") <> 0 then
 				goto nextIteration
 			endif
 			pause 2
-			if webWaitForText(wndHomePage$, "Applicant to New Hire", "folder name", 10, "clicking emp forms folder", 611, 437, 337, 714) = 1 then
+			if webWaitForText(wndAdobeHomePage$, "Applicant to New Hire", "folder name", 10, "clicking emp forms folder", 611, 437, 337, 714) = 1 then
 				goto nextIteration
 			endif
 			
 
 			'-------------------- click 'applicant to new hire forms' folder
-			usewindow(wndHomePage$, 1)
+			usewindow(wndAdobeHomePage$, 1)
 			winMouseLeftDblClick(780, 630, "clicking app to new hire folder")
 
 
@@ -626,18 +616,18 @@ firstInterviewSend:
 
 
 			'-------------------- click 'continue' button
-			usepage(pgHomePage$)
-			if webClickElement(btnContinue$, "clicking continue") <> 0 then
+			usepage(pgAdobeHomePage$)
+			if webClickElement(btnAdobeContinue$, "clicking continue") <> 0 then
 				goto nextIteration
 			endif
 			pause 2
-			if webWaitForText(wndHomePage$, "Get documents signed", "header", 10, "clicking continue", 497, 178, 105, 679) = 1 then
+			if webWaitForText(wndAdobeHomePage$, "Get documents signed", "header", 10, "clicking continue", 497, 178, 105, 679) = 1 then
 				goto nextIteration
 			endif
 
 
 			'-------------------- set focus to applicant email field
-			usewindow(wndHomePage$, 1)
+			usewindow(wndAdobeHomePage$, 1)
 			if iEnvironment = 1 then
 				if webLeftSingleClickOCRText("Enter recipient email", 655, 358, 165, 21, 0, 0, "setting focus to appl email") <> 0 then
 					goto nextIteration
@@ -658,7 +648,7 @@ firstInterviewSend:
 
 
 			'-------------------- set focus to corporate email field
-			usewindow(wndESign$, 1)
+			usewindow(wndAdobeESign$, 1)
 			if iEnvironment = 1 then
 				if webLeftSingleClickOCRText("Enter recipient email", 645, 407, 166, 29, 0, 0, "setting focus to corp email") <> 0 then
 					goto nextIteration
@@ -678,7 +668,7 @@ firstInterviewSend:
 
 
 			'-------------------- add applicant name to message box
- 			usewindow(wndHomePage$, 1)
+ 			usewindow(wndAdobeHomePage$, 1)
 			ret = useocrengine(3)
 			if iEnvironment = 1 then
 				if webLeftSingleClickOCRText("2nd", 529, 575, 177, 32, -85, 0, "adding applicant name to msgbox") <> 0 then
@@ -696,7 +686,7 @@ firstInterviewSend:
 
 
 			'-------------------- click 'next' button
-			usewindow(wndESign$, 1)
+			usewindow(wndAdobeESign$, 1)
 			if iEnvironment = 1 then
 				if webLeftSingleClickOCRText("ocd", 496, 935, 149, 80, 0, 0, "clicking next") <> 0 then
 					goto nextIteration
@@ -706,13 +696,13 @@ firstInterviewSend:
 				winMouseLeftDblClick(565, 945, "clicking next")
 			endif
 			pause 2
-			if webWaitForText(wndHomePage$, "Interviewee Name", "doc title", 30, "clicking next", 452, 359, 182, 814) = 1 then
+			if webWaitForText(wndAdobeHomePage$, "Interviewee Name", "doc title", 30, "clicking next", 452, 359, 182, 814) = 1 then
 				goto nextIteration
 			endif
 
 
 			'-------------------- click 'send' button
-			usewindow(wndESign$, 1)
+			usewindow(wndAdobeESign$, 1)
 			if iEnvironment = 1 then
 				if webLeftSingleClickOCRText("D>", 1779, 933, 139, 76, 0, 0, "clicking send") <> 0 then
 					goto nextIteration
@@ -722,7 +712,7 @@ firstInterviewSend:
 				clickmouse(left, double, 1850, 970, absolute)
 			endif
 			pause 2
-			if webWaitForText(wndHomePage$, applicantFName$, "applicant name", 20, "clicking send", 568, 270, 148, 832) = 1 then
+			if webWaitForText(wndAdobeHomePage$, applicantFName$, "applicant name", 20, "clicking send", 568, 270, 148, 832) = 1 then
 				goto nextIteration
 			endif
 
@@ -733,7 +723,7 @@ firstInterviewSend:
 			iSecondCompl = iSecondCompl + 1		'counter for records packets sent
 
 
-			usepage(pgHomePage$)
+			usepage(pgAdobeHomePage$)
 			closebrowser()
 
 
@@ -761,20 +751,4 @@ until i = 5000	'iterate through all rows in array
 '#############################################################################################################################
 '##   												end	script										 						
 '#############################################################################################################################
-write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf)
-write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events detected:                    " + str$(iEventCnt), crlf)
-write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events with '1st interview' stage:  " + str$(iFirstCnt), crlf)
-write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 1st interview packets sent:                " + str$(iFirstCompl), crlf)
-write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events with '2nd interview' stage:  " + str$(iSecondCnt), crlf)
-write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 2nd interview packets sent:                " + str$(iSecondCompl), crlf)
-write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf)
-write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change event rows detected:                " + str$(iEventCnt), crlf)
-write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": events with '1st interview' stage:         " + str$(iFirstCnt), crlf)
-write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 1st interview packets sent:                " + str$(iFirstCompl), crlf)
-write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events with '2nd interview' stage:  " + str$(iSecondCnt), crlf)
-write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 2nd interview packets sent:                " + str$(iSecondCompl), crlf)
-write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
-write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
-write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
-write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
-
+adobeSendLogStats()

@@ -6,50 +6,42 @@
 #############################################################################################################################################################*/
 
 '======================================================================= window definitions =====================================================================
-wndHomePage$ = "CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome"
-wndESign$ = "CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat E-Sign - Google Chrome"
-
-
+wndAdobeHomePage$ = "CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome"
+wndAdobeESign$ = "CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat E-Sign - Google Chrome"
+wndAdobeDocView$ = "CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Documents - Google Chrome"
 
 '======================================================================= page definitions =====================================================================
-pgLogin$ = "Adobe ID"
-pgHomePage$ = "Adobe Acrobat Home"
-
-
+pgAdobeLogin$ = "Adobe ID"
+pgAdobeHomePage$ = "Adobe Acrobat Home"
 
 
 '======================================================================= object definitions =====================================================================
+'-------------------- global
+btnAdobeContinue$ = "SPAN[OUTERTEXT='Continue']"
+
 '-------------------- login page
-txtUsername$ = "INPUT EMAIL[NAME='username']"
-txtPassword$ = "INPUT TEXT[NAME='password']"
-btnContinue$ = "SPAN[OUTERTEXT='Continue']"
+inputAdobeUsername$ = "INPUT EMAIL[NAME='username']"
+inputAdobePassword$ = "INPUT TEXT[NAME='password']"
 
 '-------------------- home page
-lnkTools$ = "SPAN[OUTERTEXT='Tools']"
-lnkReqSigs$ = "DIV[OUTERTEXT='Request', INDEX=3]"
-diaFileSelect$ = "DIV[OUTERTEXT='Request e-signaturesRecentDocumentsMy', INDEX=2]"
-btnSearch$ = "BUTTON[CLASS='spectrum-Tool Search']"
-divPre1stPktRow$ = "DIV[OUTERTEXT='" + applicantFName$ + " " + applicantLName$ + " PRE', INDEX=8]"
-lblNoResultsMsg$ = "DIV[OUTERTEXT='No', INDEX=8]"
-lblPacketTitle$ = "DIV[OUTERTEXT='" + applicantFName$ + " " + applicantLName$ + " PRE', INDEX=6]"
-lblPacketStatus$ = "SPAN[OUTERTEXT='Canceled']"
+lnkAdobeTools$ = "SPAN[OUTERTEXT='Tools']"
+lnkAdobeReqSigs$ = "DIV[OUTERTEXT='Request', INDEX=3]"
+diaAdobeFileSelect$ = "DIV[OUTERTEXT='Request e-signaturesRecentDocumentsMy', INDEX=2]"
+btnAdobeSearch$ = "BUTTON[CLASS='spectrum-Tool Search']"
+txtAdobeNoResults$ = "DIV[OUTERTEXT='No', INDEX=8]"
 
 '-------------------- file select popup dialogbox
-lnkDocuments$ = "SPAN[OUTERTEXT='Documents', INDEX=3]"
-lnkAutomated$ = "DIV[OUTERTEXT='Auto', INDEX=9]"
-lnkEmployeeForms$ = "DIV[CONTENT='EmployeEmployee']"
-lnkPre1stPkt$ = "DIV[CONTENT='PRE 1st IntervPRE']"
-btnContinue$ = "BUTTON[INNERTEXT='Continue']"
-lnk1stIntPkt$ = "DIV[OUTERTEXT='1st', INDEX=8]"
-
-'-------------------- e-sign page
-
+lnkAdobeDocs$ = "SPAN[OUTERTEXT='Documents', INDEX=3]"
+lnkAdobeAutomated$ = "DIV[OUTERTEXT='Auto', INDEX=9]"
+lnkAdobeEmployeeForms$ = "DIV[CONTENT='EmployeEmployee']"
+lnkAdobePre1stPkt$ = "DIV[CONTENT='PRE 1st IntervPRE']"
+lnkAdobe1stIntPkt$ = "DIV[OUTERTEXT='1st', INDEX=8]"
 
 '-------------------- document view - right verticle panel
-btnCancel$ = "BUTTON[INNERTEXT='Cancel']"
+lblAdobeStatus$ = "SPAN[OUTERTEXT='Status']"
+btnAdobeCancel$ = "BUTTON[INNERTEXT='Cancel']"
+txtAdobePktStatus$ = "SPAN[OUTERTEXT='Canceled']"
 
 '-------------------- cancel popup dialogbox
-diaCancelPktPopup$ = "TEXTAREA[CLASS='spectrum-Textfield s']"
-
-'======================================================================= data definitions =====================================================================
-dataPre1stPktSrcString$ = "<Doublequote>" + applicantFName$ + " " + applicantLName$ + " PRE<Doublequote><enter>"
+diaAdobeCancelPktPopup$ = "TEXTAREA[CLASS='spectrum-Textfield s']"
+btnAdobeCancelAgreement$ = "BUTTON[INNERTEXT='Cancel Agreement']"

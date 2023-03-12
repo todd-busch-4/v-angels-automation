@@ -1,36 +1,32 @@
-'#############################################################################################################################
+'###############################################################################################################################################
 '## author:                 todd busch
 '##
-'## date:                   12/05/2022
-'##
-'## description:            iterates wintask change even col in employment inquiry list.xlsx in package downloads folder,
-'##							if row is flagged with 'yes' and stage is set to 1st or 2nd interview cancelled or ncns it
-'##							cancels appropriate packets
+'## description:            iterates wintask change even col in employment inquiry list.xlsx in package downloads folder, if row is flagged 
+'##							with 'yes' and stage is set to 1st or 2nd interview cancelled or ncns it cancels appropriate packets
 '##
 '## run in:					chrome
 '##
-'## notes:                  1st interview cancelled, 1st interview ncns, 2nd interview cancelled, and 2nd interview ncns
-'##							are handled as 4 separate workflows since there are distinctions required to search for and
-'##							select packets and text added
-'##							script checks adobe column for each agreement for 'complete' or 'cancelled' status and bypasses
-'##							if found. 1st interview stages check pre 1st packet first then move to 1st int packet.
-'##							2nd interview stages currently do not check status of 1st interview packets (listed as enhancement
-'##							enhancement that needs prioritized follwing main script development)
-'##
-'#############################################################################################################################
+'## notes:                  it checks the status of each packet individually so in the case of 1st interview, if one or the other has already
+'##							been sent it will send the one that hasn't. It will not send a packet that has ANY reference to it in the adobe
+'##							status column, regardless of what the actual status is (sent, viewed, cancelled, etc.)
+'##							
+'###############################################################################################################################################
 
-'#############################################################################################################################
-'##   													script prep									 						##
-'#############################################################################################################################
+'###############################################################################################################################################
+'##   													script prep																			  
+'###############################################################################################################################################
 include "C:\v-angels-automation\framework\CG-globalDimDeclarations\CG-globalDimDeclarations.src"
 include "C:\v-angels-automation\framework\CG-loadWorkflowData\CG-loadWorkflowData.src"
+include "C:\v-angels-automation\framework\CG-globalDataLoaders\CG-globalDataLoaders.src"
 include "C:\v-angels-automation\framework\CG-globalFunctions\CG-globalFunctions.src"
+include "C:\v-angels-automation\framework\CG-adobeFunctions\CG-adobeFunctions.src"
 include "c:\v-angels-automation\framework\CG-globalWinFunctions\CG-globalWinFunctions.src"
 include "c:\v-angels-automation\framework\CG-globalWebFunctions\CG-globalWebFunctions.src"
 include "c:\v-angels-automation\framework\CG-globalWebValidations\CG-globalWebValidations.src"
 include "C:\v-angels-automation\framework\CG-globalLogging\CG-globalLogging.src"
 include "C:\v-angels-automation\framework\CG-globalSubDefinitions\CG-globalSubDefinitions.src"
 include "C:\v-angels-automation\framework\CG-globalVariables\CG-globalVariables.src"
+include "C:\v-angels-automation\object-repos\adobe\adobeObjectRepository.src"
 
 
 currScript$ = "CG-adobeCancelPackets"
@@ -39,28 +35,16 @@ currScript$ = "CG-adobeCancelPackets"
 #ignoreerrors = 1
 
 
-'-------------------------------------------------------------------------------------------------------------------------------- read in columns from employment inquiry doc
+'-------------------- read in columns from employment inquiry doc
 if LoadWorkflowData(currScript$) = 1 then
 	criticalStop()
 endif
 
 
-'#############################################################################################################################
-'##   													script start								 						##
-'#############################################################################################################################
-
-write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": starting scan for adobe cancel change events", crlf)
-write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": starting scan of (" + str$(cnt) + ") rows for adobe cancel change events", crlf)
-write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": starting scan of (" + str$(cnt) + ") rows for adobe cancel change events", crlf)
-write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": starting scan of (" + str$(cnt) + ") rows for adobe cancel change events", crlf)
-if iEnvironment = 1 then
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": using settings for environment 1", crlf)
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": --------------------------------------------------------", crlf)
-endif
-if iEnvironment = 2 then
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": using settings for environment 2", crlf)
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": --------------------------------------------------------", crlf)
-endif
+'###############################################################################################################################################
+'##   													script start																			  
+'###############################################################################################################################################
+logStartScript("adobe cancel")
 
 
 '-------------------------------------------------------------------------------------------------------------------------------- begin iterating through change event column
@@ -74,2181 +58,322 @@ repeat
 	curr_status$ = arrChangeEvents$(i)
 
 
-	    if curr_status$ = "Yes" then
-		iEventCnt = iEventCnt + 1						'change event counter
-		iExcelRow = i + 2								'add 1 for header and 1 for zero indexed arrays
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change event found at row: [" + str$(iExcelRow) + "]", crlf)
+	if curr_status$ = "Yes" then
+		iEventCnt = iEventCnt + 1
+		iExcelRow = i + 2
+		logEventFound()
 
+'-------------------------------------------------------------------------------------------------------------------------------- stage check
 
 		'-------------------- get stage of current change event
 		curr_stage$ = arrCurrentStage$(i)
-		if curr_stage$ = "1st interview Cancelled" then
 
 
-		'------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ stage: 1st interview cancelled 
-			iFirstCancelCnt = iFirstCancelCnt + 1		'stage counter
-
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage for change event is '1st interview cancelled' triggering workflow", crlf)
-			write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change event for stage: '1st interview cancelled' at row: [" + str$(iExcelRow) + "] triggered workflow", crlf)
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": getting data from employment inquiry for current row", crlf)
-
-
-			'-------------------- get data values for current record from employment inquiry
-			applicantID$ = arrApplicantID$(i)
-			applicantFName$ = arrApplicantFName$(i)
-			applicantLName$ = arrApplicantLName$(i)
-			adobePcktStatus$ = arrAdobePcktStatus$(i)
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-			write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": starting workflow for: " + applicantFName$ + " " + applicantLName$ + " record id: " + "[" + applicantID$ + "]", crlf)
+		if adobeCancelStageChk() = 0 then
+			iStageCnt = iStageCnt + 1
+			logStageMatch()
+		else
+			logStageBypass()
+			goto nextIteration
+		endif
 
 
-			'----------------------------------------------------------------------------------------------------------------------- cancel pre 1st interview		
-			'-------------------- check packet status isn't complete or already cancelled
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) checking status oF pre 1st interview packet", crlf)
-			if instr(adobePcktStatus$, "Pre 1st Pkt Complete") <> 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) pre 1st packet has 'complete' status and can't be cancelled", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) skipping to 1st interview packet", crlf)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": pre 1st packet has 'complete' status and can't be cancelled", crlf)
-				goto firstInterviewCancel
-			endif
-			if instr(adobePcktStatus$, "Pre 1st Pkt Canceled") <> 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) pre 1st packet has already been cancelled", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) skipping to 1st interview packet", crlf)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": pre 1st packet has already been cancelled", crlf)
-				goto firstInterviewCancel
-			endif
-				
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) status indicates packet can be cancelled", crlf)				
-			
+		'-------------------- get data values for current record from employment inquiry
+		adobeCancelGetData()
+		logDataValues()
 
-			'-------------------- invoke browser window
-			if webInvokeBrowser("CH", adobeURL$) <> 0 then
-				nextScript()
-				goto nextIteration
-			endif
+'-------------------------------------------------------------------------------------------------------------------------------- pre 1st pkt start workflow
+
+		'-------------------- check packet status
+		if adobeCancelStatusChk("pre 1st") = 1 then
+			goto firstInterviewCancel
+		endif
+		
+
+		'-------------------- invoke browser window
+		if webInvokeBrowser("CH", adobeURL$) <> 0 then
+			nextScript()
+			goto nextIteration
+		endif
 
 
-			'-------------------- check for login page
-			if existhtmlelement("INPUT EMAIL[NAME='username', ID='EmailPage-EmailField']") = 1 then	
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) adobe acct was not signed in", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) logging in", crlf)
-				usepage("Adobe ID")
-				writehtml("INPUT EMAIL[NAME='username']", adobeUsername$)
-				writehtml("INPUT TEXT[NAME='password']", adobePassword$)
-				clickhtmlelement("SPAN[OUTERTEXT='Continue']")
-				pause 3
-				if currentpage$() <> "Adobe Acrobat Home" then
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) error logging in. browser not loaded to expected page", crlf)
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) expected: (Adobe Acrobat Home)  actual: (" + currentpage$() + ")", crlf)
-					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre-cancel_login_error.bmp", 1, 1)
-					closebrowser()
-					nextScript()
-					goto nextIteration
-				else
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) browser invoked and log in successfull", crlf)
-				endif
-			endif
+		'-------------------- log in if not already
+		if adobeLogIn() = 1 then
+			nextScript()
+			goto nextIteration
+		endif
+
+'------------------------------------------------------------------------------------------------------------------------------ pre 1st pkt search
+
+		'-------------------- click search icon
+		if adobeClickSearchIcon() <> 0 then
+			goto nextIteration
+		endif
+		
+
+		'-------------------- enter search criteria
+		usewindow(wndAdobeHomePage$, 1)
+		srcString$ = adobeCancelCompileSrcStr$("PRE")
+		if winSendKeys(srcString$, "packet search") <> 0 then
+			goto firstInterviewCancel
+		endif
+		pause 5
+		if adobeNoResultsErrorChk("pre 1st") = 1 then
+			goto firstInterviewCancel
+		endif
 
 
-			'-------------------- click search icon
-			while iRetry <= 2
-				usepage("Adobe Acrobat Home")
-				res = clickhtmlelement("BUTTON[CLASS='spectrum-Tool Search']")
-				pause 2
-				iAttempt = iRetry + 1
-
-				if res <> 0 then
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) error clicking search icon on attempt: [" + str$(iAttempt) + "]", crlf)
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) error_code: (" + str$(res) + "); retrying", crlf)
-					iRetry = iRetry + 1
-					pause 2
-				endif
-
-				if res = 0 then
-					iRetry = 3
-				endif
-			wend
-			'------- error handling
-			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) search icon could not be clicked after: [" + str$(iAttempt) + "] attempts", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) error_code: (" + str$(res) + "); msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre-cancel_click_search.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) workflow failed; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - (pre-cancel) clicking search icon", crlf + crlf)
-				iRetry = 0
-				closebrowser()
-				goto nextIteration
-			endif
-			'------- debug logging
-			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) clicked search icon", crlf)
-			endif
+		'-------------------- select packet
+		clickmouse(left, down, 745, 300, absolute)
+		clickmouse(left, up, 745, 300, absolute)
+		pause 3
+		if webValidateElement(lblAdobeStatus$, "status field label", "select packet") <> 1 then
+			goto firstInterviewCancel
+		endif
 
 
-			iRetry = 0
+		'-------------------- make sure packet not already cancelled
+		if adobeChkPktForCancelStatus("pre 1st") = 1 then
+			goto firstInterviewCancel
+		endif
+
+'------------------------------------------------------------------------------------------------------------------------------ pre 1st pkt start cancel
+
+		'-------------------- click cancel
+		if adobeClickCancel("pre 1st") = 1 then
+			goto firstInterviewCancel
+		endif
+		if webValidateElement(diaAdobeCancelPktPopup$, "cancel popup dialogbox", "clicking cancel btn") <> 1 then
+			goto firstInterviewCancel
+		endif
+
+		
+		'-------------------- enter cancel text
+		reason$ = adobeCancelGetReason$()
+		if webPasteText(diaAdobeCancelPktPopup$, reason$, "enter cancel reason") <> 0 then
+			goto nextIteration
+		endif
+		pause 2
 
 
-			'-------------------- enter search criteria
-			usewindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
-			res = sendkeys("<Doublequote>" + applicantFName$ + " " + applicantLName$ + " PRE<Doublequote><enter>")
-			pause 5
-			'------- error handling
-			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) error entering search criteria", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre-cancel_enter_search_criteria.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) workflow failed; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - (pre-cancel) enter search criteria", crlf + crlf)
-				closebrowser()
-				goto nextIteration
-			endif
-			'------- validation
-			usepage("Adobe Acrobat Home")
-			res = existhtmlelement("DIV[OUTERTEXT='" + applicantFName$ + " " + applicantLName$ + " PRE', INDEX=8]")
-			if res = 0 then
-				ret = existhtmlelement("DIV[OUTERTEXT='No', INDEX=8]")
-				if ret = 1 then
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) search returned no results", crlf)
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) skipping to 1st interview packet", crlf)
-					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre-cancel_no_search_results.bmp", 1, 1)
-					write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) search for pre 1st interview packet returned no results", crlf)
-					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error; (pre-cancel) 0 search results", crlf + crlf)
-					closebrowser()
-					goto firstInterviewCancel
-				else
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) packet search validation failed", crlf)
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) expected element (packet row) was not found on page", crlf)
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) skipping to 1st interview packet", crlf)
-					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre-cancel_search_error.bmp", 1, 1)
-					write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) packet search failed", crlf)
-					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - (pre-cancel) packet search", crlf + crlf)
-					closebrowser()
-					goto firstInterviewCancel
-				endif
-			endif
-			'------- debug logging
-			if res = 1 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) entered criteria and searched", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) search returned packet", crlf)
-			endif
+		'-------------------- check notify via email checkbox
+		ret = useocrengine(3)
+		usewindow(wndAdobeDocView$, 1)
+		if webLeftSingleClickOCRText("Notify recipients", 781, 591, 236, 38, 0, 0, "click notify checkbox") <> 0 then
+			goto firstInterviewCancel
+		endif
 
 
-			'-------------------- select packet
-			usepage("Adobe Acrobat Home")
-			res = clickhtmlelement("DIV[OUTERTEXT='" + applicantFName$ + " " + applicantLName$ + "' PRE', INDEX=8]", left)
-			pause 2
-			'------- error handling
-			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) error selecting packet", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) skipping to 1st interview packet", crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre-cancel_select_agreement.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) select packet failed", crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - (pre-cancel) select packet", crlf + crlf)
-				closebrowser()
-				goto firstInterviewCancel
-			endif
-			'------- validation
-			usepage("Adobe Acrobat Home")
-			ret = existhtmlelement("DIV[OUTERTEXT='" + applicantFName$ + " " + applicantLName$ + " PRE', INDEX=6]")
-			if ret <> 1 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) selecting packet validation failed", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) expected html element (packet title) not found in right panel", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) skipping to 1st interview packet", crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre-cancel_select_agreement.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) select packet failed", crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - (pre-cancel) select packet", crlf + crlf)
-				closebrowser()
-				goto firstInterviewCancel
-			endif
-			'------- debug logging
-			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) selected packet", crlf)
-			endif
+		'-------------------- click cancel agreement button
+		if webClickElement(btnAdobeCancelAgreement$, "cancel agreement") <> 0 then
+			goto firstInterviewCancel
+		endif
+		pause 2
+		if webValidateElement(txtAdobePktStatus$, "packet status", "cancel agreement") <> 1 then
+			goto firstInterviewCancel
+		else
+			iPreCompl = iPreCompl + 1
+		endif
 
 
-			'-------------------- make sure packet not already cancelled
-			res = existhtmlelement("SPAN[OUTERTEXT='Canceled']")
-			if res = 1 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) packet is already in cancelled state", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) skipping to 1st interview packet", crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre-cancel_select_agreement.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) packet already cancelled", crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: pre 1st interview packet already cancelled", crlf + crlf)
- 				closebrowser()
-				goto firstInterviewCancel
-			endif
-
-
-			'-------------------- click cancel
-			while iRetry <= 2
-				res = clickhtmlelement("BUTTON[INNERTEXT='Cancel']", left)
-				pause 2
-				iAttempt = iRetry + 1
-
-				if res <> 0 then
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) error clicking 'cancel' button on attempt: [" + str$(iAttempt) + "]", crlf)
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) error_code: (" + str$(res) + ") retrying", crlf)
-					iRetry = iRetry + 1
-					pause 2
-				endif
-
-				if res = 0 then
-					iRetry = 3
-				endif
-			wend
-			'------- error handling
-			if res <> 0 then
-				write(debuglogpath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) could not click cancel after [" + str$(iattempt) + "] attempts", crlf)
-				write(debuglogpath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) skipping to 1st interview packet", crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre-cancel_click_cancel_button.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) click cancel failed", crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - (pre-cancel) click cancel", crlf + crlf)
-				iRetry = 0
-				closebrowser()
-				goto firstInterviewCancel
-			endif
-			'------- validation
-			usepage("Adobe Acrobat Home")
-			ret = existhtmlelement("TEXTAREA[CLASS='spectrum-Textfield s']")
-			if ret <> 1 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) clicking 'cancel' validation failed", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) expected html element (popup textbox) not found on page", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) skipping to 1st interview packet", crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre-cancel_click_cancel.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) click cancel failed", crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - (pre-cancel) click cancel", crlf + crlf)
-				iRetry = 0
-				closebrowser()
-				goto firstInterviewCancel
-			endif
-			'------- debug logging
-			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) clicked 'cancel' link", crlf)
-			endif
-
-			iRetry = 0
-
-			'-------------------- enter cancel text
-			usepage("Adobe Acrobat Home")
-			res = writehtml("TEXTAREA[CLASS='spectrum-Textfield s']", "Cancelled.")
-			pause 2
-			'------- error handling
-			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) error entering cancel text", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) skipping to 1st interview packet", crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre-cancel_enter_cancel_text.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) enter cancel text failed", crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - (pre-cancel) enter cancel text", crlf + crlf)
-				closebrowser()
-				goto firstInterviewCancel
-			endif
-			'------- debug logging
-			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) entered cancel text", crlf)
-			endif
-
-
-			'-------------------- check notify via email checkbox
-			ret = useocrengine(3)
-			usewindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Documents - Google Chrome", 1)
-			res = clickontextocr("Notify recipients", left, single, InArea(781, 591, 236, 38))
-			pause 2
-			'------- error handling
-			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) error enabling email notify checkbox", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) skipping to 1st interview packet", crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre-cancel_enable_notify_email_checkbox.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) enable notify checkbox failed", crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - (pre-cancel) enable notify checkbox", crlf + crlf)
-				closebrowser()
-				goto firstInterviewCancel
-			endif
-			'------- debug logging
-			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) clicked notify via email checkbox", crlf)
-			endif
-
-
-			'-------------------- click cancel agreement button
-			usepage("Adobe Acrobat Home")
-			res = clickhtmlelement("BUTTON[INNERTEXT='Cancel Agreement']")
-			pause 2
-			'------- error handling
-			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) error clicking 'cancel agreement' button", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) skipping to 1st interview packet", crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre-cancel_click_cancel_agreement_button.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) click cancel agreement failed", crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - (pre-cancel) click cancel agreement", crlf + crlf)
-				closebrowser()
-				goto firstInterviewCancel
-			endif
-			'------- validation
-			usepage("Adobe Acrobat Home")
-			ret = existhtmlelement("SPAN[OUTERTEXT='Canceled']")
-			if ret <> 1 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) clicking 'cancel agreement' validation failed", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) expected html element (agreement status) not found in right panel", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) skipping to 1st interview packet", crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre-cancel_click_cancel_agreement_button.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-cancel) click cancel agreement failed", crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - (pre-cancel) click cancel agreement", crlf + crlf)
-				closebrowser()
-				goto firstInterviewCancel
-			endif
-			'------- debug logging
-			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": pre 1st interview packet cancelled", crlf)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": pre 1st interview packet cancelled", crlf)
-				write(successLogPath$, currDate$ + "-" + currTime$ + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(successLogPath$, currDate$ + "-" + currTime$ + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(successLogPath$, currDate$ + "-" + currTime$ + ": " + currScript$ + ": result: pre 1st interview packet cancelled", crlf + crlf)
-			endif
-
-
-			closebrowser()
+		closebrowser()
 
 
 firstInterviewCancel:
-			'----------------------------------------------------------------------------------------------------------------------- cancel 1st interview packet	
-			'-------------------- check packet status isn't complete or already cancelled
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) checking status oF 1st interview packet", crlf)
-			if instr(adobePcktStatus$, "1st Int Pkt Complete") <> 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) 1st interview packet has 'complete' status and can't be cancelled", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) resuming scan for next change event", crlf + crlf)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 1st interview packet has 'complete' status and can't be cancelled", crlf + crlf)
-				goto nextIteration
-			endif
-			if instr(adobePcktStatus$, "1st Int Pkt Canceled") <> 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) 1st interview packet has already been cancelled", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) resuming scan for next change event", crlf + crlf)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 1st interview packet has already been cancelled", crlf + crlf)
-				goto nextIteration
-			endif
-				
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) status indicates packet can be cancelled", crlf)				
-			
 
-			if webInvokeBrowser("CH", adobeURL$) <> 0 then
-				nextScript()
-				goto nextIteration
-			endif
+'-------------------------------------------------------------------------------------------------------------------------------- 1st int pkt start workflow
 
-
-			'-------------------- check for login page
-			if existhtmlelement("INPUT EMAIL[NAME='username', ID='EmailPage-EmailField']") = 1 then	
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) adobe acct was not signed in", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) logging in", crlf)
-				usepage("Adobe ID")
-				writehtml("INPUT EMAIL[NAME='username']", adobeUsername$)
-				writehtml("INPUT TEXT[NAME='password']", adobePassword$)
-				clickhtmlelement("SPAN[OUTERTEXT='Continue']")
-				pause 3
-				if currentpage$() <> "Adobe Acrobat Home" then
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) error logging in. browser not loaded to expected page", crlf)
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) expected: 'Adobe Acrobat Home' actual: " + currentpage$(), crlf)
-					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st-cancel_login_error.bmp", 1, 1)
-					closebrowser()
-					nextScript()
-					goto nextIteration
-				else
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) browser invoked and log in successfull", crlf)
-				endif
-			endif
-
-
-			'-------------------- click search icon
-			while iRetry <= 2
-				usepage("Adobe Acrobat Home")
-				res = clickhtmlelement("BUTTON[CLASS='spectrum-Tool Search']")
-				pause 2
-				iAttempt = iRetry + 1
-
-				if res <> 0 then
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) error clicking search icon on attempt: [" + str$(iAttempt) + "]", crlf)
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) error_code: (" + str$(res) + "); retrying", crlf)
-					iRetry = iRetry + 1
-					pause 2
-				endif
-
-				if res = 0 then
-					iRetry = 3
-				endif
-			wend
-			'------- error handling
-			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) search icon could not be clicked after: [" + str$(iAttempt) + "] attempts", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) error_code: (" + str$(res) + "); resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st-cancel_click_search.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) workflow failed; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - (1st-cancel) clicking search icon", crlf + crlf)
-				iRetry = 0
-				closebrowser()
-				goto nextIteration
-			endif
-			'------- debug logging
-			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) clicked search icon", crlf)
-			endif
-
-			iRetry = 0
-
-
-			'-------------------- enter search criteria
-			usewindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
-			res = sendkeys("<Doublequote>" + applicantFName$ + " " + applicantLName$ + " 1st<Doublequote><enter>")
-			pause 5
-			'------- error handling
-			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) error entering search criteria", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st-cancel_enter_search_criteria.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) workflow failed; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - (1st-cancel) enter search criteria", crlf + crlf)
-				closebrowser()
-				goto nextIteration
-			endif
-			'------- validation
-			usepage("Adobe Acrobat Home")
-			if iEnvironment = 1 then
-				res = existhtmlelement("DIV[OUTERTEXT='" + applicantFName$ + " " + applicantLName$ + " 1st', INDEX=8]")
-			endif
-			if iEnvironment = 2 then
-				res = existhtmlelement("DIV[OUTERTEXT='" + applicantFName$ + "',INDEX=8]")
-			endif
-			if res = 0 then
-				ret = existhtmlelement("DIV[OUTERTEXT='No', INDEX=8]")
-				if ret = 1 then
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) search returned no results", crlf)
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) resuming scan for next change event", crlf + crlf)
-					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st-cancel_no_search_results.bmp", 1, 1)
-					write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) search for pre 1st interview packet returned no results", crlf + crlf)
-					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error; (1st-cancel) 0 search results", crlf + crlf)
-					closebrowser()
-					goto nextIteration
-				else
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) packet search validation failed", crlf)
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) expected element (packet row) was not found on page", crlf)
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) resuming scan for next change event", crlf + crlf)
-					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st-cancel_search_error.bmp", 1, 1)
-					write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) packet search failed; proceeding to next change event", crlf + crlf)
-					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - (1st-cancel) packet search", crlf + crlf)
-					closebrowser()
-					goto nextIteration
-				endif
-			endif
-			'------- debug logging
-			if res = 1 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) entered criteria and searched", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) search returned packet", crlf)
-			endif
-
-
-			'-------------------- select packet
-			usepage("Adobe Acrobat Home")
-			res = clickhtmlelement("DIV[OUTERTEXT='" + applicantFName$ + " " + applicantLName$ + "' 1st', INDEX=8]", left)
-			pause 2
-			'------- error handling
-			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) error selecting packet", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st-cancel_select_agreement.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) select packet failed; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - (1st-cancel) select packet", crlf + crlf)
-				closebrowser()
-				goto nextIteration
-			endif
-			'------- validation
-			usepage("Adobe Acrobat Home")
-			ret = existhtmlelement("DIV[OUTERTEXT='" + applicantFName$ + " " + applicantLName$ + " 1st', INDEX=6]")
-			if ret <> 1 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) selecting packet validation failed", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) expected html element (packet title) not found in right panel", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st-cancel_select_agreement.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) select packet failed; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - (1st-cancel) select packet", crlf + crlf)
-				closebrowser()
-				goto nextIteration
-			endif
-			'------- debug logging
-			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) selected packet", crlf)
-			endif
-
-
-			'-------------------- make sure packet not already cancelled
-			res = existhtmlelement("SPAN[OUTERTEXT='Canceled']")
-			if res = 1 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) packet is already in cancelled state", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st-cancel_select_agreement.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) packet already cancelled; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: 1st interview packet already cancelled", crlf + crlf)
- 				closebrowser()
-				goto nextIteration
-			endif
-
-
-			'-------------------- click cancel
-			while iRetry <= 2
-				res = clickhtmlelement("BUTTON[INNERTEXT='Cancel']", left)
-				pause 2
-				iAttempt = iRetry + 1
-
-				if res <> 0 then
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) error clicking 'cancel' button on attempt: [" + str$(iAttempt) + "]", crlf)
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) error_code: (" + str$(res) + ") retrying", crlf)
-					iRetry = iRetry + 1
-					pause 2
-				endif
-
-				if res = 0 then
-					iRetry = 3
-				endif
-			wend
-			'------- error handling
-			if res <> 0 then
-				write(debuglogpath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) could not click cancel after [" + str$(iattempt) + "] attempts", crlf)
-				write(debuglogpath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st-cancel_click_cancel_button.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) click cancel failed; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - (1st-cancel) click cancel", crlf + crlf)
-				iRetry = 0
-				closebrowser()
-				goto nextIteration
-			endif
-			'------- validation
-			usepage("Adobe Acrobat Home")
-			ret = existhtmlelement("TEXTAREA[CLASS='spectrum-Textfield s']")
-			if ret <> 1 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) clicking 'cancel' validation failed", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) expected html element (popup textbox) not found on page", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st-cancel_click_cancel.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) click cancel failed; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - (1st-cancel) click cancel", crlf + crlf)
-				iRetry = 0
-				closebrowser()
-				goto nextIteration
-			endif
-			'------- debug logging
-			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) clicked 'cancel' link", crlf)
-			endif
-
-			iRetry = 0
-
-			'-------------------- enter cancel text
-			usepage("Adobe Acrobat Home")
-			res = writehtml("TEXTAREA[CLASS='spectrum-Textfield s']", "Cancelled.")
-			pause 2
-			'------- error handling
-			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) error entering cancel text", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st-cancel_enter_cancel_text.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) enter cancel text failed; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - (1st-cancel) enter cancel text", crlf + crlf)
-				closebrowser()
-				goto nextIteration
-			endif
-			'------- debug logging
-			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) entered cancel text", crlf)
-			endif
-
-
-			'-------------------- check notify via email checkbox
-			ret = useocrengine(3)
-			usewindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Documents - Google Chrome", 1)
-			res = clickontextocr("Notify recipients", left, single, InArea(781, 591, 236, 38))
-			pause 2
-			'------- error handling
-			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) error enabling email notify checkbox", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st-cancel_enable_notify_email_checkbox.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) enter cancel text failed; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - (1st-cancel) enable notify checkbox", crlf + crlf)
-				closebrowser()
-				goto nextIteration
-			endif
-			'------- debug logging
-			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) clicked notify via email checkbox", crlf)
-			endif
-
-
-			'-------------------- click cancel agreement button
-			usepage("Adobe Acrobat Home")
-			res = clickhtmlelement("BUTTON[INNERTEXT='Cancel Agreement']")
-			pause 2
-			'------- error handling
-			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) error clicking 'cancel agreement' button", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st-cancel_click_cancel_agreement_button.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) enter cancel text failed; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - (1st-cancel) click cancel agreement", crlf + crlf)
-				closebrowser()
-				goto nextIteration
-			endif
-			'------- validation
-			usepage("Adobe Acrobat Home")
-			ret = existhtmlelement("SPAN[OUTERTEXT='Canceled']")
-			if ret <> 1 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) clicking 'cancel agreement' validation failed", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) expected html element (agreement status) not found in right panel", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st-cancel_click_cancel_agreement_button.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-cancel) enter cancel text failed; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - (1st-cancel) click cancel agreement", crlf + crlf)
-				closebrowser()
-				goto nextIteration
-			endif
-			'------- debug logging
-			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 1st interview packet cancelled", crlf + crlf)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 1st interview packet cancelled", crlf + crlf)
-				write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: 1st interview packet cancelled", crlf + crlf)
-			endif
-
-
-			closebrowser()
-
-
-			iFirstCancelCompl = iFirstCancelCompl + 1
-
-
-		endif	'end 1st interview cancelled
-
-
-		'------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ stage: 1st interview ncns 
-		if curr_stage$ = "1st Interview NCNS" then
-
-
-			iFirstNCNSCnt = iFirstNCNSCnt + 1		'stage counter
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage for change event is '1st interview ncns' triggering workflow", crlf)
-			write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change event for stage '1st interview ncns' at row: " + str$(iExcelRow) + " triggered workflow", crlf)
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": getting data from employment inquiry for current row", crlf)
-
-
-			'-------------------- get data values for current record from employment inquiry
-			applicantID$ = arrApplicantID$(i)
-			applicantFName$ = arrApplicantFName$(i)
-			applicantLName$ = arrApplicantLName$(i)
-			adobePcktStatus$ = arrAdobePcktStatus$(i)
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-			write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": starting workflow for: " + applicantFName$ + " " + applicantLName$ + " record id: " + "[" + applicantID$ + "]", crlf)
-
-
-			'----------------------------------------------------------------------------------------------------------------------- cancel pre 1st interview (ncns)		
-			'-------------------- check packet status isn't complete or already cancelled
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) checking status oF pre 1st interview packet", crlf)
-			if instr(adobePcktStatus$, "Pre 1st Pkt Complete") <> 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) pre 1st packet has 'complete' status and can't be cancelled", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) skipping to 1st interview packet", crlf)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": pre 1st packet has 'complete' status and can't be cancelled", crlf)
-				goto firstInterviewNCNS
-			endif
-			if instr(adobePcktStatus$, "Pre 1st Pkt Canceled") <> 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) pre 1st packet has already been cancelled", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) skipping to 1st interview packet", crlf)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": pre 1st packet has already been cancelled", crlf)
-				goto firstInterviewNCNS
-			endif
-
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) proceeding with cancel", crlf)				
-			
-
-			'-------------------- invoke browser window
-			if webInvokeBrowser("CH", adobeURL$) <> 0 then
-				nextScript()
-				goto nextIteration
-			endif
-
-
-			'-------------------- check for login page
-			if existhtmlelement("INPUT EMAIL[NAME='username', ID='EmailPage-EmailField']") = 1 then	
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) adobe acct was not signed in", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) logging in", crlf)
-				usepage("Adobe ID")
-				writehtml("INPUT EMAIL[NAME='username']", adobeUsername$)
-				writehtml("INPUT TEXT[NAME='password']", adobePassword$)
-				clickhtmlelement("SPAN[OUTERTEXT='Continue']")
-				pause 3
-				if currentpage$() <> "Adobe Acrobat Home" then
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) error logging in. browser not loaded to expected page", crlf)
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) expected: 'Adobe Acrobat Home' actual: " + currentpage$(), crlf)
-					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre-ncns_login_error.bmp", 1, 1)
-					closebrowser()
-					nextScript()
-					goto nextIteration
-				else
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) browser invoked and log in successfull", crlf)
-				endif
-			endif
-
-
-			'-------------------- click search icon
-			while iRetry <= 2
-				usepage("Adobe Acrobat Home")
-				res = clickhtmlelement("BUTTON[CLASS='spectrum-Tool Search']")
-				pause 2
-				iAttempt = iRetry + 1
-
-				if res <> 0 then
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) error clicking search icon on attempt: [" + str$(iAttempt) + "]", crlf)
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) error_code: (" + str$(res) + "); retrying", crlf)
-					iRetry = iRetry + 1
-					pause 2
-				endif
-
-				if res = 0 then
-					iRetry = 3
-				endif
-			wend
-			'------- error handling
-			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) search icon could not be clicked after: [" + str$(iAttempt) + "] attempts", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) error_code: (" + str$(res) + "); resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre-ncns_click_search.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) workflow failed; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - (pre-ncns) clicking search icon", crlf + crlf)
-				iRetry = 0
-				closebrowser()
-				goto nextIteration
-			endif
-			'------- debug logging
-			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) clicked search icon", crlf)
-			endif
-
-			iRetry = 0
-
-
-			'-------------------- enter search criteria
-			usewindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
-			res = sendkeys("<Doublequote>" + applicantFName$ + " " + applicantLName$ + " PRE<Doublequote><enter>")
-			pause 5
-			'------- error handling
-			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) error entering search criteria", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre-ncns_enter_search_criteria.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) workflow failed; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - (pre-ncns) enter search criteria", crlf + crlf)
-				closebrowser()
-				goto nextIteration
-			endif
-			'------- validation
-			usepage("Adobe Acrobat Home")
-			res = existhtmlelement("DIV[OUTERTEXT='" + applicantFName$ + " " + applicantLName$ + " PRE', INDEX=8]")
-			if res = 0 then
-				ret = existhtmlelement("DIV[OUTERTEXT='No', INDEX=8]")
-				if ret = 1 then
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) search returned no results", crlf)
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) skipping to 1st interview packet", crlf)
-					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre-ncns_no_search_results.bmp", 1, 1)
-					write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) search for pre 1st interview packet returned no results", crlf)
-					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error; (pre-ncns) 0 search results", crlf + crlf)
-					closebrowser()
-					goto firstInterviewNCNS
-				else
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) packet search validation failed", crlf)
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) expected element (packet row) was not found on page", crlf)
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) skipping to 1st interview packet", crlf)
-					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre-ncns_search_error.bmp", 1, 1)
-					write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) packet search failed", crlf)
-					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - (pre-ncns) packet search", crlf + crlf)
-					closebrowser()
-					goto firstInterviewNCNS
-				endif
-			endif
-			'------- debug logging
-			if res = 1 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) entered criteria and searched", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) search returned packet", crlf)
-			endif
-
-
-			'-------------------- select packet
-			usepage("Adobe Acrobat Home")
-			res = clickhtmlelement("DIV[OUTERTEXT='" + applicantFName$ + " " + applicantLName$ + "' PRE', INDEX=8]", left)
-			pause 2
-			'------- error handling
-			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) error selecting packet", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) skipping to 1st interview packet", crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre-ncns_select_agreement.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) select packet failed", crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - (pre-ncns) select packet", crlf + crlf)
-				closebrowser()
-				goto firstInterviewNCNS
-			endif
-			'------- validation
-			usepage("Adobe Acrobat Home")
-			ret = existhtmlelement("DIV[OUTERTEXT='" + applicantFName$ + " " + applicantLName$ + " PRE', INDEX=6]")
-			if ret <> 1 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) selecting packet validation failed", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) expected html element (packet title) not found in right panel", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) skipping to 1st interview packet", crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre-ncns_select_agreement.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) select packet failed", crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - (pre-ncns) select packet", crlf + crlf)
-				closebrowser()
-				goto firstInterviewNCNS
-			endif
-			'------- debug logging
-			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) selected packet", crlf)
-			endif
-
-
-			'-------------------- make sure packet not already cancelled
-			res = existhtmlelement("SPAN[OUTERTEXT='Canceled']")
-			if res = 1 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) packet is already in cancelled state", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) skipping to 1st interview packet", crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre-ncns_select_agreement.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) packet already cancelled", crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: pre 1st interview packet already cancelled", crlf + crlf)
- 				closebrowser()
-				goto firstInterviewNCNS
-			endif
-
-
-			'-------------------- click cancel
-			while iRetry <= 2
-				res = clickhtmlelement("BUTTON[INNERTEXT='Cancel']", left)
-				pause 2
-				iAttempt = iRetry + 1
-
-				if res <> 0 then
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) error clicking 'cancel' button on attempt: [" + str$(iAttempt) + "]", crlf)
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) error_code: (" + str$(res) + ") retrying", crlf)
-					iRetry = iRetry + 1
-					pause 2
-				endif
-
-				if res = 0 then
-					iRetry = 3
-				endif
-			wend
-			'------- error handling
-			if res <> 0 then
-				write(debuglogpath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) could not click cancel after [" + str$(iattempt) + "] attempts", crlf)
-				write(debuglogpath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) skipping to 1st interview packet", crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre-ncns_click_cancel_button.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) click cancel failed", crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - (pre-ncns) click cancel", crlf + crlf)
-				iRetry = 0
-				closebrowser()
-				goto firstInterviewNCNS
-			endif
-			'------- validation
-			usepage("Adobe Acrobat Home")
-			ret = existhtmlelement("TEXTAREA[CLASS='spectrum-Textfield s']")
-			if ret <> 1 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) clicking 'cancel' validation failed", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) expected html element (popup textbox) not found on page", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) skipping to 1st interview packet", crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre-ncns_click_cancel.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) click cancel failed", crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - (pre-ncns) click cancel", crlf + crlf)
-				iRetry = 0
-				closebrowser()
-				goto firstInterviewNCNS
-			endif
-			'------- debug logging
-			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) clicked 'cancel' link", crlf)
-			endif
-
-			iRetry = 0
-
-
-			'-------------------- enter cancel text
-			usepage("Adobe Acrobat Home")
-			res = writehtml("TEXTAREA[CLASS='spectrum-Textfield s']", "NCNS.")
-			pause 2
-			'------- error handling
-			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) error entering cancel text", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) derror_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) skipping to 1st interview packet", crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre-ncns_enter_cancel_text.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) enter cancel text failed", crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - (pre-ncns) enter cancel text", crlf + crlf)
-				closebrowser()
-				goto firstInterviewNCNS
-			endif
-			'------- debug logging
-			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) entered cancel text", crlf)
-			endif
-
-
-			'-------------------- check notify via email checkbox
-			ret = useocrengine(3)
-			usewindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Documents - Google Chrome", 1)
-			res = clickontextocr("Notify recipients", left, single, InArea(781, 591, 236, 38))
-			pause 2
-			'------- error handling
-			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) error enabling email notify checkbox", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) skipping to 1st interview packet", crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre-ncns_enable_notify_email_checkbox.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) enable notify checkbox failed", crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - (pre-ncns) enable notify checkbox", crlf + crlf)
-				closebrowser()
-				goto firstInterviewNCNS
-			endif
-			'------- debug logging
-			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) clicked notify via email checkbox", crlf)
-			endif
-
-
-			'-------------------- click cancel agreement button
-			usepage("Adobe Acrobat Home")
-			res = clickhtmlelement("BUTTON[INNERTEXT='Cancel Agreement']")
-			pause 2
-			'------- error handling
-			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) error clicking 'cancel agreement' button", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) aAerror_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) skipping to 1st interview packet", crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre-ncns_click_cancel_agreement_button.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) click cancel agreement failed", crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - (pre-ncns) click cancel agreement", crlf + crlf)
-				closebrowser()
-				goto nextIteration
-			endif
-			'------- validation
-			usepage("Adobe Acrobat Home")
-			ret = existhtmlelement("SPAN[OUTERTEXT='Canceled']")
-			if ret <> 1 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) clicking 'cancel agreement' validation failed", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) expected html element (agreement status) not found in right panel", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) skipping to 1st interview packet", crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre-ncns_click_cancel_agreement_button.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (pre-ncns) click cancel agreement failed", crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - (pre-ncns) click cancel agreement", crlf + crlf)
-				closebrowser()
-				goto nextIteration
-			endif
-			'------- debug logging
-			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": pre 1st interview packet cancelled", crlf)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": pre 1st interview packet cancelled", crlf)
-				write(successLogPath$, currDate$ + "-" + currTime$ + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(successLogPath$, currDate$ + "-" + currTime$ + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(successLogPath$, currDate$ + "-" + currTime$ + ": " + currScript$ + ": result: pre 1st interview packet cancelled", crlf + crlf)
-			endif
-
-
-			closebrowser()
-
-
-firstInterviewNCNS:
-			'----------------------------------------------------------------------------------------------------------------------- cancel 1st interview packet (ncns)	
-			'-------------------- check packet status isn't complete or already cancelled
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) checking status oF 1st interview packet", crlf)
-			if instr(adobePcktStatus$, "1st Int Pkt Complete") <> 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) 1st interview packet has 'complete' status and can't be cancelled", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) resuming scan for next change event", crlf + crlf)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 1st interview packet has 'complete' status and can't be cancelled", crlf + crlf)
-				goto nextIteration
-			endif
-			if instr(adobePcktStatus$, "1st Int Pkt Canceled") <> 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) 1st interview packet has already been cancelled", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) resuming scan for next change event", crlf + crlf)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 1st interview packet has already been cancelled", crlf + crlf)
-				goto nextIteration
-			endif
-				
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) proceeding with cancel", crlf)				
-			
-
-			'-------------------- invoke browser window
-			if webInvokeBrowser("CH", adobeURL$) <> 0 then
-				nextScript()
-				goto nextIteration
-			endif
-
-
-			'-------------------- check for login page
-			if existhtmlelement("INPUT EMAIL[NAME='username', ID='EmailPage-EmailField']") = 1 then	
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) adobe acct was not signed in", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) logging in", crlf)
-				usepage("Adobe ID")
-				writehtml("INPUT EMAIL[NAME='username']", adobeUsername$)
-				writehtml("INPUT TEXT[NAME='password']", adobePassword$)
-				clickhtmlelement("SPAN[OUTERTEXT='Continue']")
-				pause 3
-				if currentpage$() <> "Adobe Acrobat Home" then
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) error logging in. browser not loaded to expected page", crlf)
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) expected: 'Adobe Acrobat Home' actual: " + currentpage$(), crlf)
-					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st-ncns_login_error.bmp", 1, 1)
-					closebrowser()
-					nextScript()
-					goto nextIteration
-				else
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) browser invoked and log in successfull", crlf)
-				endif
-			endif
-
-
-			'-------------------- click search icon
-			while iRetry <= 2
-				usepage("Adobe Acrobat Home")
-				res = clickhtmlelement("BUTTON[CLASS='spectrum-Tool Search']")
-				pause 2
-				iAttempt = iRetry + 1
-
-				if res <> 0 then
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) error clicking search icon on attempt: [" + str$(iAttempt) + "]", crlf)
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) error_code: (" + str$(res) + "); retrying", crlf)
-					iRetry = iRetry + 1
-					pause 2
-				endif
-
-				if res = 0 then
-					iRetry = 3
-				endif
-			wend
-			'------- error handling
-			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) search icon could not be clicked after: [" + str$(iAttempt) + "] attempts", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) error_code: (" + str$(res) + "); resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st-ncns_click_search.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) workflow failed; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - (1st-ncns) clicking search icon", crlf + crlf)
-				iRetry = 0
-				closebrowser()
-				goto nextIteration
-			endif
-			'------- debug logging
-			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) clicked search icon", crlf)
-			endif
-
-			iRetry = 0
-
-
-			'-------------------- enter search criteria
-			usewindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
-			res = sendkeys("<Doublequote>" + applicantFName$ + " " + applicantLName$ + " 1st<Doublequote><enter>")
-			pause 6
-			'------- error handling
-			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) error entering search criteria", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st-ncns_enter_search_criteria.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) workflow failed; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - (1st-ncns) enter search criteria", crlf + crlf)
-				closebrowser()
-				goto nextIteration
-			endif
-			'------- validation
-			usepage("Adobe Acrobat Home")
-			if iEnvironment = 1 then
-				res = existhtmlelement("DIV[OUTERTEXT='" + applicantFName$ + " " + applicantLName$ + " 1st', INDEX=8]")
-			endif
-			if iEnvironment = 2 then
-				res = existhtmlelement("DIV[OUTERTEXT='" + applicantFName$ + "',INDEX=8]")
-			endif
-			if res = 0 then
-				ret = existhtmlelement("DIV[OUTERTEXT='No', INDEX=8]")
-				if ret = 1 then
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) search returned no results", crlf)
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) resuming scan for next change event", crlf + crlf)
-					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st-ncns_no_search_results.bmp", 1, 1)
-					write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) search for pre 1st interview packet returned no results", crlf + crlf)
-					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error; (1st-ncns) 0 search results", crlf + crlf)
-					closebrowser()
-					goto nextIteration
-				else
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) packet search validation failed", crlf)
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) expected element (packet row) was not found on page", crlf)
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) resuming scan for next change event", crlf + crlf)
-					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st-ncns_search_error.bmp", 1, 1)
-					write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) packet search failed; proceeding to next change event", crlf + crlf)
-					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - (1st-ncns) packet search", crlf + crlf)
-					closebrowser()
-					goto nextIteration
-				endif
-			endif
-			'------- debug logging
-			if res = 1 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) entered criteria and searched", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) search returned packet", crlf)
-			endif
-
-
-			'-------------------- select packet
-			usepage("Adobe Acrobat Home")
-			res = clickhtmlelement("DIV[OUTERTEXT='" + applicantFName$ + " " + applicantLName$ + "' 1st', INDEX=8]", left)
-			pause 2
-			'------- error handling
-			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) error selecting packet", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st-ncns_select_agreement.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) select packet failed; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - (1st-ncns) select packet", crlf + crlf)
-				closebrowser()
-				goto nextIteration
-			endif
-			'------- validation
-			usepage("Adobe Acrobat Home")
-			ret = existhtmlelement("DIV[OUTERTEXT='" + applicantFName$ + " " + applicantLName$ + " 1st', INDEX=6]")
-			if ret <> 1 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) selecting packet validation failed", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) expected html element (packet title) not found in right panel", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st-ncns_select_agreement.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) select packet failed; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - (1st-ncns) select packet", crlf + crlf)
-				closebrowser()
-				goto nextIteration
-			endif
-			'------- debug logging
-			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) selected packet", crlf)
-			endif
-
-
-			'-------------------- make sure packet not already cancelled
-			res = existhtmlelement("SPAN[OUTERTEXT='Canceled']")
-			if res = 1 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) packet is already in cancelled state", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st-ncns_select_agreement.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) packet already cancelled; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: 1st interview packet already cancelled", crlf + crlf)
- 				closebrowser()
-				goto nextIteration
-			endif
-
-
-			'-------------------- click cancel
-			while iRetry <= 2
-				res = clickhtmlelement("BUTTON[INNERTEXT='Cancel']", left)
-				pause 2
-				iAttempt = iRetry + 1
-
-				if res <> 0 then
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) error clicking 'cancel' button on attempt: [" + str$(iAttempt) + "]", crlf)
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) error_code: (" + str$(res) + ") retrying", crlf)
-					iRetry = iRetry + 1
-					pause 2
-				endif
-
-				if res = 0 then
-					iRetry = 3
-				endif
-			wend
-			'------- error handling
-			if res <> 0 then
-				write(debuglogpath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) could not click cancel after [" + str$(iattempt) + "] attempts", crlf)
-				write(debuglogpath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st-ncns_click_cancel_button.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) click cancel failed; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - (1st-ncns) click cancel", crlf + crlf)
-				iRetry = 0
-				closebrowser()
-				goto nextIteration
-			endif
-			'------- validation
-			usepage("Adobe Acrobat Home")
-			ret = existhtmlelement("TEXTAREA[CLASS='spectrum-Textfield s']")
-			if ret <> 1 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) clicking 'cancel' validation failed", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) expected html element (popup textbox) not found on page", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st-ncns_click_cancel.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) click cancel failed; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - (1st-ncns) click cancel", crlf + crlf)
-				iRetry = 0
-				closebrowser()
-				goto nextIteration
-			endif
-			'------- debug logging
-			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) clicked 'cancel' link", crlf)
-			endif
-
-			iRetry = 0
-
-
-			'-------------------- enter cancel text
-			usepage("Adobe Acrobat Home")
-			res = writehtml("TEXTAREA[CLASS='spectrum-Textfield s']", "NCNS.")
-			pause 2
-			'------- error handling
-			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) error entering cancel text", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st-ncns_enter_cancel_text.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) enter cancel text failed; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - (1st-ncns) enter cancel text", crlf + crlf)
-				closebrowser()
-				goto nextIteration
-			endif
-			'------- debug logging
-			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) entered cancel text", crlf)
-			endif
-
-
-			'-------------------- check notify via email checkbox
-			ret = useocrengine(3)
-			usewindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Documents - Google Chrome", 1)
-			res = clickontextocr("Notify recipients", left, single, InArea(781, 591, 236, 38))
-			pause 2
-			'------- error handling
-			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) error enabling email notify checkbox", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st-ncns_enable_notify_email_checkbox.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) enter cancel text failed; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - (1st-ncns) enable notify checkbox", crlf + crlf)
-				closebrowser()
-				goto nextIteration
-			endif
-			'------- debug logging
-			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) clicked notify via email checkbox", crlf)
-			endif
-
-
-			'-------------------- click cancel agreement button
-			usepage("Adobe Acrobat Home")
-			res = clickhtmlelement("BUTTON[INNERTEXT='Cancel Agreement']")
-			pause 2
-			'------- error handling
-			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) error clicking 'cancel agreement' button", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st-ncns_click_cancel_agreement_button.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) enter cancel text failed; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - (1st-ncns) click cancel agreement", crlf + crlf)
-				closebrowser()
-				goto nextIteration
-			endif
-			'------- validation
-			usepage("Adobe Acrobat Home")
-			ret = existhtmlelement("SPAN[OUTERTEXT='Canceled']")
-			if ret <> 1 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) clicking 'cancel agreement' validation failed", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) expected html element (agreement status) not found in right panel", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-1st-ncns_click_cancel_agreement_button.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (1st-ncns) enter cancel text failed; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - (1st-ncns) click cancel agreement", crlf + crlf)
-				closebrowser()
-				goto nextIteration
-			endif
-			'------- debug logging
-			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 1st interview packet cancelled", crlf + crlf)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 1st interview packet cancelled", crlf + crlf)
-				write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: 1st interview packet cancelled", crlf + crlf)
-			endif
-
-
-			closebrowser()
-
-
-			iFirstNCNSCompl = iFirstNCNSCompl + 1
-
-
-		endif	'end 1st interview ncns
-
-
-		'------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ 2nd interview cancelled 
-
-		if curr_stage$ = "2nd Interview Cancelled" then
-
-			iSecondCancelCnt = iSecondCancelCnt + 1		'stage counter
-
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage for change event is '2nd interview cancelled' triggering workflow", crlf)
-			write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change event for stage '2nd interview cancelled' at row: " + str$(iExcelRow) + " triggered workflow", crlf)
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": getting data from employment inquiry for current row", crlf)
-
-
-			'-------------------- get data values for current record from employment inquiry
-			applicantID$ = arrApplicantID$(i)
-			applicantFName$ = arrApplicantFName$(i)
-			applicantLName$ = arrApplicantLName$(i)
-			adobePcktStatus$ = arrAdobePcktStatus$(i)
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-			write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": starting workflow for:" + applicantFName$ + " " + applicantLName$ + " record id: " + "[" + applicantID$ + "]", crlf)
-
-
-			'----------------------------------------------------------------------------------------------------------------------- cancel 2nd interview packet	
-			'-------------------- check packet status isn't complete or already cancelled
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) checking status oF 2nd interview packet", crlf)
-			if instr(adobePcktStatus$, "2nd Int Pkt Complete") <> 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) 2nd interview packet has 'complete' status and can't be cancelled", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) resuming scan for next change event", crlf + crlf)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 2nd interview packet has 'complete' status and can't be cancelled; proceeding to next change event", crlf + crlf)
-				goto nextIteration
-			endif
-			if instr(adobePcktStatus$, "2nd Int Pkt Canceled") <> 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) 2nd interview packet has already been cancelled", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) resuming scan for next change event", crlf + crlf)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 2nd interview packet has already been cancelled; proceeding to next change event", crlf + crlf)
-				goto nextIteration
-			endif
-				
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) proceeding with cancel", crlf)				
-			
-
-			'-------------------- invoke browser window
-			if webInvokeBrowser("CH", adobeURL$) <> 0 then
-				nextScript()
-				goto nextIteration
-			endif
-
-
-			'-------------------- check for login page
-			if existhtmlelement("INPUT EMAIL[NAME='username', ID='EmailPage-EmailField']") = 1 then	
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) adobe acct was not signed in", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) logging in", crlf)
-				usepage("Adobe ID")
-				writehtml("INPUT EMAIL[NAME='username']", adobeUsername$)
-				writehtml("INPUT TEXT[NAME='password']", adobePassword$)
-				clickhtmlelement("SPAN[OUTERTEXT='Continue']")
-				pause 3
-				if currentpage$() <> "Adobe Acrobat Home" then
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) error logging in. browser not loaded to expected page", crlf)
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) expected: 'Adobe Acrobat Home' actual: " + currentpage$(), crlf)
-					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-2nd-cancel_login_error.bmp", 1, 1)
-					closebrowser()
-					nextScript()
-					goto nextIteration
-				else
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) browser invoked and log in successfull", crlf)
-				endif
-			endif
-
-
-			'-------------------- click search icon
-			while iRetry <= 2
-				usepage("Adobe Acrobat Home")
-				res = clickhtmlelement("BUTTON[CLASS='spectrum-Tool Search']")
-				pause 2
-				iAttempt = iRetry + 1
-
-				if res <> 0 then
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) error clicking search icon on attempt: [" + str$(iAttempt) + "]", crlf)
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) error_code: (" + str$(res) + "); retrying", crlf)
-					iRetry = iRetry + 1
-					pause 2
-				endif
-
-				if res = 0 then
-					iRetry = 3
-				endif
-			wend
-			'------- error handling
-			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) search icon could not be clicked after: [" + str$(iAttempt) + "] attempts", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) error_code: (" + str$(res) + "); resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-2nd-cancel_click_search.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) workflow failed; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - (2nd-cancel) clicking search icon", crlf + crlf)
-				iRetry = 0
-				closebrowser()
-				goto nextIteration
-			endif
-			'------- debug logging
-			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) clicked search icon", crlf)
-			endif
-
-			iRetry = 0
-
-
-			'-------------------- enter search criteria
-			usewindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
-			res = sendkeys("<Doublequote>" + applicantFName$ + " " + applicantLName$ + " 2nd<Doublequote><enter>")
-			pause 6
-			'------- error handling
-			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) error entering search criteria", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-2nd-cancel_enter_search_criteria.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) workflow failed; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - (2nd-cancel) enter search criteria", crlf + crlf)
-				closebrowser()
-				goto nextIteration
-			endif
-			'------- validation
-			usepage("Adobe Acrobat Home")
-			if iEnvironment = 1 then
-				res = existhtmlelement("DIV[OUTERTEXT='" + applicantFName$ + " " + applicantLName$ + " 2nd', INDEX=8]")
-			endif
-			if iEnvironment = 2 then
-				res = existhtmlelement("DIV[OUTERTEXT='" + applicantFName$ + "',INDEX=8]")
-			endif
-			if res = 0 then
-				ret = existhtmlelement("DIV[OUTERTEXT='No', INDEX=8]")
-				if ret = 1 then
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) search returned no results", crlf)
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) resuming scan for next change event", crlf + crlf)
-					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-2nd-cancel_no_search_results.bmp", 1, 1)
-					write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) search for pre 1st interview packet returned no results", crlf + crlf)
-					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error; (2nd-cancel) 0 search results", crlf + crlf)
-					closebrowser()
-					goto nextIteration
-				else
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) packet search validation failed", crlf)
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) expected element (packet row) was not found on page", crlf)
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) resuming scan for next change event", crlf + crlf)
-					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-2nd-cancel_search_error.bmp", 1, 1)
-					write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) packet search failed; proceeding to next change event", crlf + crlf)
-					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - (2nd-cancel) packet search", crlf + crlf)
-					closebrowser()
-					goto nextIteration
-				endif
-			endif
-			'------- debug logging
-			if res = 1 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) entered criteria and searched", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) search returned packet", crlf)
-			endif
-
-
-			'-------------------- select packet
-			usepage("Adobe Acrobat Home")
-			res = clickhtmlelement("DIV[OUTERTEXT='" + applicantFName$ + " " + applicantLName$ + "' 2nd', INDEX=8]", left)
-			pause 2
-			'------- error handling
-			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) error selecting packet", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-2nd-cancel_select_agreement.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) select packet failed; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - (2nd-cancel) select packet", crlf + crlf)
-				closebrowser()
-				goto nextIteration
-			endif
-			'------- validation
-			usepage("Adobe Acrobat Home")
-			ret = existhtmlelement("DIV[OUTERTEXT='" + applicantFName$ + " " + applicantLName$ + " 2nd', INDEX=6]")
-			if ret <> 1 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) selecting packet validation failed", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) expected html element (packet title) not found in right panel", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-2nd-cancel_select_agreement.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) select packet failed; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - (2nd-cancel) select packet", crlf + crlf)
-				closebrowser()
-				goto nextIteration
-			endif
-			'------- debug logging
-			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) selected packet", crlf)
-			endif
-
-
-			'-------------------- make sure packet not already cancelled
-			res = existhtmlelement("SPAN[OUTERTEXT='Canceled']")
-			if res = 1 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) packet is already in cancelled state", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-2nd-cancel_select_agreement.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) packet already cancelled; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: 1st interview packet already cancelled", crlf + crlf)
- 				closebrowser()
-				goto nextIteration
-			endif
-
-
-			'-------------------- click cancel
-			while iRetry <= 2
-				res = clickhtmlelement("BUTTON[INNERTEXT='Cancel']", left)
-				pause 2
-				iAttempt = iRetry + 1
-
-				if res <> 0 then
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) error clicking 'cancel' button on attempt: [" + str$(iAttempt) + "]", crlf)
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) error_code: (" + str$(res) + ") retrying", crlf)
-					iRetry = iRetry + 1
-					pause 2
-				endif
-
-				if res = 0 then
-					iRetry = 3
-				endif
-			wend
-			'------- error handling
-			if res <> 0 then
-				write(debuglogpath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) could not click cancel after [" + str$(iattempt) + "] attempts", crlf)
-				write(debuglogpath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-2nd-cancel_click_cancel_button.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) click cancel failed; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - (2nd-cancel) click cancel", crlf + crlf)
-				iRetry = 0
-				closebrowser()
-				goto nextIteration
-			endif
-			'------- validation
-			usepage("Adobe Acrobat Home")
-			ret = existhtmlelement("TEXTAREA[CLASS='spectrum-Textfield s']")
-			if ret <> 1 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) clicking 'cancel' validation failed", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) expected html element (popup textbox) not found on page", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-2nd-cancel_click_cancel.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) click cancel failed; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - (2nd-cancel) click cancel", crlf + crlf)
-				iRetry = 0
-				closebrowser()
-				goto nextIteration
-			endif
-			'------- debug logging
-			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) clicked 'cancel' link", crlf)
-			endif
-
-			iRetry = 0
-
-
-			'-------------------- enter cancel text
-			usepage("Adobe Acrobat Home")
-			res = writehtml("TEXTAREA[CLASS='spectrum-Textfield s']", "Cancelled.")
-			pause 2
-			'------- error handling
-			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) error entering cancel text", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-2nd-cancel_enter_cancel_text.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) enter cancel text failed; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - (2nd-cancel) enter cancel text", crlf + crlf)
-				closebrowser()
-				goto nextIteration
-			endif
-			'------- debug logging
-			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) entered cancel text", crlf)
-			endif
-
-
-			'-------------------- check notify via email checkbox
-			ret = useocrengine(3)
-			usewindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Documents - Google Chrome", 1)
-			res = clickontextocr("Notify recipients", left, single, InArea(781, 591, 236, 38))
-			pause 2
-			'------- error handling
-			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) error enabling email notify checkbox", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-2nd-cancel_enable_notify_email_checkbox.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) enter cancel text failed; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - (2nd-cancel) enable notify checkbox", crlf + crlf)
-				closebrowser()
-				goto nextIteration
-			endif
-			'------- debug logging
-			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) clicked notify via email checkbox", crlf)
-			endif
-
-
-			'-------------------- click cancel agreement button
-			usepage("Adobe Acrobat Home")
-			res = clickhtmlelement("BUTTON[INNERTEXT='Cancel Agreement']")
-			pause 2
-			'------- error handling
-			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) error clicking 'cancel agreement' button", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-2nd-cancel_click_cancel_agreement_button.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) enter cancel text failed; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - (2nd-cancel) click cancel agreement", crlf + crlf)
-				closebrowser()
-				goto nextIteration
-			endif
-			'------- validation
-			usepage("Adobe Acrobat Home")
-			ret = existhtmlelement("SPAN[OUTERTEXT='Canceled']")
-			if ret <> 1 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) clicking 'cancel agreement' validation failed", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) expected html element (agreement status) not found in right panel", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-2nd-cancel_click_cancel_agreement_button.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-cancel) enter cancel text failed; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - (2nd-cancel) click cancel agreement", crlf + crlf)
-				closebrowser()
-				goto nextIteration
-			endif
-			'------- debug logging
-			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 1st interview packet cancelled", crlf + crlf)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 1st interview packet cancelled", crlf + crlf)
-				write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: 1st interview packet cancelled", crlf + crlf)
-			endif
-
-
-			closebrowser()
-
-
-			iSecondCancelCompl = iSecondCancelCompl + 1
-
-
-		endif	'end 2nd interview cancelled
-
-
-		'------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ 2nd interview ncns 
-
-		if curr_stage$ = "2nd Interview NCNS" then
-
-			iSecondNCNSCnt = iSecondNCNSCnt + 1		'stage counter
-
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage for change event is '2nd interview ncns' triggering workflow", crlf)
-			write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change event for stage '2nd interview ncns' at row: " + str$(iExcelRow) + " triggered workflow", crlf)
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": getting data from employment inquiry for current row", crlf)
-
-
-			'-------------------- get data values for current record from employment inquiry
-			applicantID$ = arrApplicantID$(i)
-			applicantFName$ = arrApplicantFName$(i)
-			applicantLName$ = arrApplicantLName$(i)
-			adobePcktStatus$ = arrAdobePcktStatus$(i)
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-			write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": starting workflow for:" + applicantFName$ + " " + applicantLName$ + " record id: " + "[" + applicantID$ + "]", crlf)
-
-
-			'----------------------------------------------------------------------------------------------------------------------- cancel 1st interview packet (ncns)	
-			'-------------------- check packet status isn't complete or already cancelled
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) checking status oF 2nd interview packet", crlf)
-			if instr(adobePcktStatus$, "2nd Int Pkt Complete") <> 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) 1st interview packet has 'complete' status and can't be cancelled", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) resuming scan for next change event", crlf + crlf)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 2nd interview packet has 'complete' status and can't be cancelled", crlf + crlf)
-				goto nextIteration
-			endif
-			if instr(adobePcktStatus$, "2nd Int Pkt Canceled") <> 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) 2nd interview packet has already been cancelled", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) resuming scan for next change event", crlf + crlf)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 2nd interview packet has already been cancelled; proceeding to next change event", crlf + crlf)
-				goto nextIteration
-			endif
-				
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) proceeding with cancel", crlf)		
-
-			
-			'-------------------- invoke browser window
-			if webInvokeBrowser("CH", adobeURL$) <> 0 then
-				nextScript()
-				goto nextIteration
-			endif
-
-
-			'-------------------- check for login page
-			if existhtmlelement("INPUT EMAIL[NAME='username', ID='EmailPage-EmailField']") = 1 then	
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) adobe acct was not signed in", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) logging in", crlf)
-				usepage("Adobe ID")
-				writehtml("INPUT EMAIL[NAME='username']", adobeUsername$)
-				writehtml("INPUT TEXT[NAME='password']", adobePassword$)
-				clickhtmlelement("SPAN[OUTERTEXT='Continue']")
-				pause 3
-				if currentpage$() <> "Adobe Acrobat Home" then
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) error logging in. browser not loaded to expected page", crlf)
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) expected: 'Adobe Acrobat Home' actual: " + currentpage$(), crlf)
-					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-2nd-ncns_login_error.bmp", 1, 1)
-					closebrowser()
-					nextScript()
-					goto nextIteration
-				else
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) browser invoked and log in successfull", crlf)
-				endif
-			endif
-
-
-			'-------------------- click search icon
-			while iRetry <= 2
-				usepage("Adobe Acrobat Home")
-				res = clickhtmlelement("BUTTON[CLASS='spectrum-Tool Search']")
-				pause 2
-				iAttempt = iRetry + 1
-
-				if res <> 0 then
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) error clicking search icon on attempt: [" + str$(iAttempt) + "]", crlf)
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) error_code: (" + str$(res) + "); retrying", crlf)
-					iRetry = iRetry + 1
-					pause 2
-				endif
-
-				if res = 0 then
-					iRetry = 3
-				endif
-			wend
-			'------- error handling
-			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) search icon could not be clicked after: [" + str$(iAttempt) + "] attempts", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) error_code: (" + str$(res) + "); resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-2nd-ncns_click_search.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) workflow failed; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - (2nd-ncns) clicking search icon", crlf + crlf)
-				iRetry = 0
-				closebrowser()
-				goto nextIteration
-			endif
-			'------- debug logging
-			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) clicked search icon", crlf)
-			endif
-
-			iRetry = 0
-
-
-			'-------------------- enter search criteria
-			usewindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome", 1)
-			res = sendkeys("<Doublequote>" + applicantFName$ + " " + applicantLName$ + " 2nd<Doublequote><enter>")
-			pause 6
-			'------- error handling
-			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) error entering search criteria", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-2nd-ncns_enter_search_criteria.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) workflow failed; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - (2nd-ncns) enter search criteria", crlf + crlf)
-				closebrowser()
-				goto nextIteration
-			endif
-			'------- validation
-			usepage("Adobe Acrobat Home")
-			if iEnvironment = 1 then
-				res = existhtmlelement("DIV[OUTERTEXT='" + applicantFName$ + " " + applicantLName$ + " 2nd', INDEX=8]")
-			endif
-			if iEnvironment = 2 then
-				res = existhtmlelement("DIV[OUTERTEXT='" + applicantFName$ + "',INDEX=8]")
-			endif
-			if res = 0 then
-				ret = existhtmlelement("DIV[OUTERTEXT='No', INDEX=8]")
-				if ret = 1 then
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) search returned no results", crlf)
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) resuming scan for next change event", crlf + crlf)
-					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-2nd-ncns_no_search_results.bmp", 1, 1)
-					write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) search for pre 1st interview packet returned no results", crlf + crlf)
-					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error; (2nd-ncns) 0 search results", crlf + crlf)
-					closebrowser()
-					goto nextIteration
-				else
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) packet search validation failed", crlf)
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) expected element (packet row) was not found on page", crlf)
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) resuming scan for next change event", crlf + crlf)
-					hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-2nd-ncns_search_error.bmp", 1, 1)
-					write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) packet search failed; proceeding to next change event", crlf + crlf)
-					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-					write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - (2nd-ncns) packet search", crlf + crlf)
-					closebrowser()
-					goto nextIteration
-				endif
-			endif
-			'------- debug logging
-			if res = 1 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) entered criteria and searched", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) search returned packet", crlf)
-			endif
-
-
-			'-------------------- select packet
-			usepage("Adobe Acrobat Home")
-			res = clickhtmlelement("DIV[OUTERTEXT='" + applicantFName$ + " " + applicantLName$ + "' 2nd', INDEX=8]", left)
-			pause 2
-			'------- error handling
-			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) error selecting packet", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-2nd-ncns_select_agreement.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) select packet failed; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - (2nd-ncns) select packet", crlf + crlf)
-				closebrowser()
-				goto nextIteration
-			endif
-			'------- validation
-			usepage("Adobe Acrobat Home")
-			ret = existhtmlelement("DIV[OUTERTEXT='" + applicantFName$ + " " + applicantLName$ + " 2nd', INDEX=6]")
-			if ret <> 1 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) selecting packet validation failed", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) expected html element (packet title) not found in right panel", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-2nd-ncns_select_agreement.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) select packet failed; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - (2nd-ncns) select packet", crlf + crlf)
-				closebrowser()
-				goto nextIteration
-			endif
-			'------- debug logging
-			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) selected packet", crlf)
-			endif
-
-
-			'-------------------- make sure packet not already cancelled
-			res = existhtmlelement("SPAN[OUTERTEXT='Canceled']")
-			if res = 1 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) packet is already in cancelled state", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-2nd-ncns_select_agreement.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) packet already ncnsled; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: 1st interview packet already cancelled", crlf + crlf)
- 				closebrowser()
-				goto nextIteration
-			endif
-
-
-			'-------------------- click cancel
-			while iRetry <= 2
-				res = clickhtmlelement("BUTTON[INNERTEXT='Cancel']", left)
-				pause 2
-				iAttempt = iRetry + 1
-
-				if res <> 0 then
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) error clicking 'ncns' button on attempt: [" + str$(iAttempt) + "]", crlf)
-					write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) error_code: (" + str$(res) + ") retrying", crlf)
-					iRetry = iRetry + 1
-					pause 2
-				endif
-
-				if res = 0 then
-					iRetry = 3
-				endif
-			wend
-			'------- error handling
-			if res <> 0 then
-				write(debuglogpath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) could not click ncns after [" + str$(iattempt) + "] attempts", crlf)
-				write(debuglogpath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-2nd-ncns_click_cancel_button.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) click cancel failed; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - (2nd-ncns) click cancel", crlf + crlf)
-				iRetry = 0
-				closebrowser()
-				goto nextIteration
-			endif
-			'------- validation
-			usepage("Adobe Acrobat Home")
-			ret = existhtmlelement("TEXTAREA[CLASS='spectrum-Textfield s']")
-			if ret <> 1 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) clicking 'cancel' validation failed", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) expected html element (popup textbox) not found on page", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-2nd-ncns_click_cancel.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) click cancel failed; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - (2nd-ncns) click cancel", crlf + crlf)
-				iRetry = 0
-				closebrowser()
-				goto nextIteration
-			endif
-			'------- debug logging
-			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) clicked 'cancel' link", crlf)
-			endif
-
-			iRetry = 0
-
-
-			'-------------------- enter cancel text
-			usepage("Adobe Acrobat Home")
-			res = writehtml("TEXTAREA[CLASS='spectrum-Textfield s']", "NCNS.")
-			pause 2
-			'------- error handling
-			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) error entering cancel text", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-2nd-ncns_enter_cancel_text.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) enter cancel text failed; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - (2nd-ncns) enter cancel text", crlf + crlf)
-				closebrowser()
-				goto nextIteration
-			endif
-			'------- debug logging
-			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) entered cancel text", crlf)
-			endif
-
-
-			'-------------------- check notify via email checkbox
-			ret = useocrengine(3)
-			usewindow("CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Documents - Google Chrome", 1)
-			res = clickontextocr("Notify recipients", left, single, InArea(781, 591, 236, 38))
-			pause 2
-			'------- error handling
-			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) error enabling email notify checkbox", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-2nd-ncns_enable_notify_email_checkbox.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) enter cancel text failed; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - (2nd-ncns) enable notify checkbox", crlf + crlf)
-				closebrowser()
-				goto nextIteration
-			endif
-			'------- debug logging
-			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) clicked notify via email checkbox", crlf)
-			endif
-
-
-			'-------------------- click cancel agreement button
-			usepage("Adobe Acrobat Home")
-			res = clickhtmlelement("BUTTON[INNERTEXT='Cancel Agreement']")
-			pause 2
-			'------- error handling
-			if res <> 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) error clicking 'cancel agreement' button", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-2nd-ncns_click_cancel_agreement_button.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) enter cancel text failed; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - (2nd-ncns) click cancel agreement", crlf + crlf)
-				closebrowser()
-				goto nextIteration
-			endif
-			'------- validation
-			usepage("Adobe Acrobat Home")
-			ret = existhtmlelement("SPAN[OUTERTEXT='Canceled']")
-			if ret <> 1 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) clicking 'cancel agreement' validation failed", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) expected html element (agreement status) not found in right panel", crlf)
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) resuming scan for next change event", crlf + crlf)
-				hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-2nd-ncns_click_cancel_agreement_button.bmp", 1, 1)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (2nd-ncns) enter cancel text failed; proceeding to next change event", crlf + crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - (2nd-ncns) click cancel agreement", crlf + crlf)
-				closebrowser()
-				goto nextIteration
-			endif
-			'------- debug logging
-			if res = 0 then
-				write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 1st interview packet cancelled", crlf + crlf)
-				write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 1st interview packet cancelled", crlf + crlf)
-				write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-				write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-				write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: 1st interview packet cancelled", crlf + crlf)
-			endif
-
-
-			closebrowser()
-
-
-			iSecondNCNSCompl = iSecondNCNSCompl + 1
-
-
-		endif	'end 2nd interview ncns
-
-
-		'-------------------------------------------------------------------------------------------------------------------------------- other stages
-		if curr_stage$ <> "1st Interview Cancelled" and curr_stage$ <> "1st Interview NCNS" and curr_stage$ <> "2nd Interview Cancelled" and curr_stage$ <> "2nd Interview NCNS" then
-			write(debugLogPath$, currDate$ + "-" + currTime$ + ": " + currScript$ + ": status for change event at row: (" + str$(iExcelRow) + "] did not trigger workflow", crlf)
-			write(debugLogPath$, currDate$ + "-" + currTime$ + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)			
+		'-------------------- check packet status
+		if adobeCancelStatusChk("1st") = 1 then
+			goto secondInterviewCancel
 		endif
+
+
+		if webInvokeBrowser("CH", adobeURL$) <> 0 then
+			nextScript()
+			goto nextIteration
+		endif
+
+
+		'-------------------- log in if not already
+		if adobeLogIn() = 1 then
+			nextScript()
+			goto nextIteration
+		endif
+
+
+		'-------------------- click search icon
+		if adobeClickSearchIcon() <> 0 then
+			goto secondInterviewCancel
+		endif
+
+'------------------------------------------------------------------------------------------------------------------------------ 1st int pkt search
+
+		'-------------------- enter search criteria
+		usewindow(wndAdobeHomePage$, 1)
+		srcString$ = adobeCancelCompileSrcStr$("1st")
+		if winSendKeys(srcString$, "packet search") <> 0 then
+			goto secondInterviewCancel
+		endif
+		pause 5
+		if adobeNoResultsErrorChk("1st") = 1 then
+			goto secondInterviewCancel
+		endif
+
+
+		'-------------------- select packet
+		clickmouse(left, down, 745, 300, absolute)
+		clickmouse(left, up, 745, 300, absolute)
+		pause 3
+		if webValidateElement(lblAdobeStatus$, "status field label", "select packet") <> 1 then
+			goto secondInterviewCancel
+		endif
+
+
+		'-------------------- make sure packet not already cancelled
+		if adobeChkPktForCancelStatus("1st") = 1 then
+			goto secondInterviewCancel
+		endif
+
+'------------------------------------------------------------------------------------------------------------------------------ 1st int pkt start cancel
+
+		if adobeClickCancel("1st") = 1 then
+			goto secondInterviewCancel
+		endif
+		if webValidateElement(diaAdobeCancelPktPopup$, "cancel popup dialogbox", "clicking cancel btn") <> 1 then
+			goto secondInterviewCancel
+		endif
+
+
+		'-------------------- enter cancel text
+		if webPasteText(diaAdobeCancelPktPopup$, reason$, "enter cancel reason") <> 0 then
+			goto secondInterviewCancel
+		endif
+		pause 2
+
+
+		'-------------------- check notify via email checkbox
+		ret = useocrengine(3)
+		usewindow(wndAdobeDocView$, 1)
+		if webLeftSingleClickOCRText("Notify recipients", 781, 591, 236, 38, 0, 0, "click notify checkbox") <> 0 then
+			goto secondInterviewCancel
+		endif
+
+
+		'-------------------- click cancel agreement button
+		if webClickElement(btnAdobeCancelAgreement$, "cancel agreement") <> 0 then
+			goto secondInterviewCancel
+		endif
+		pause 2
+		if webValidateElement(txtAdobePktStatus$, "packet status", "cancel agreement") <> 1 then
+			goto secondInterviewCancel
+		else
+			iFirstCompl = iFirstCompl + 1
+		endif
+
+
+		closebrowser()
+
+secondInterviewCancel:
+
+'-------------------------------------------------------------------------------------------------------------------------------- 2nd int pkt start workflow
+
+		'-------------------- bypass if 1st interview
+		if instr(curr_stage$, "1st") <> 0 then
+			goto nextIteration
+		endif
+		
+
+		'-------------------- check packet status
+		if adobeCancelStatusChk("2nd") = 1 then
+			goto nextIteration
+		endif
+
+
+		if webInvokeBrowser("CH", adobeURL$) <> 0 then
+			nextScript()
+			goto nextIteration
+		endif
+
+
+		'-------------------- log in if not already
+		if adobeLogIn() = 1 then
+			nextScript()
+			goto nextIteration
+		endif
+
+
+		'-------------------- click search icon
+		if adobeClickSearchIcon() <> 0 then
+			goto nextIteration
+		endif
+
+'------------------------------------------------------------------------------------------------------------------------------ 2nd int pkt search
+
+		'-------------------- enter search criteria
+		usewindow(wndAdobeHomePage$, 1)
+		srcString$ = adobeCancelCompileSrcStr$("2nd")
+		if winSendKeys(srcString$, "packet search") <> 0 then
+			goto nextIteration
+		endif
+		pause 5
+		if adobeNoResultsErrorChk("2nd") = 1 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- select packet
+		clickmouse(left, down, 745, 300, absolute)
+		clickmouse(left, up, 745, 300, absolute)
+		pause 3
+		if webValidateElement(lblAdobeStatus$, "status field label", "select packet") <> 1 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- make sure packet not already cancelled
+		if adobeChkPktForCancelStatus("2nd") = 1 then
+			goto nextIteration
+		endif
+
+'------------------------------------------------------------------------------------------------------------------------------ 2nd int pkt start cancel
+
+		if adobeClickCancel("2nd") = 1 then
+			goto nextIteration
+		endif
+		if webValidateElement(diaAdobeCancelPktPopup$, "cancel popup dialogbox", "clicking cancel btn") <> 1 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- enter cancel text
+		if webPasteText(diaAdobeCancelPktPopup$, reason$, "enter cancel reason") <> 0 then
+			goto nextIteration
+		endif
+		pause 2
+
+
+		'-------------------- check notify via email checkbox
+		ret = useocrengine(3)
+		usewindow(wndAdobeDocView$, 1)
+		if webLeftSingleClickOCRText("Notify recipients", 781, 591, 236, 38, 0, 0, "click notify checkbox") <> 0 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- click cancel agreement button
+		if webClickElement(btnAdobeCancelAgreement$, "cancel agreement") <> 0 then
+			goto nextIteration
+		endif
+		pause 2
+		if webValidateElement(txtAdobePktStatus$, "packet status", "cancel agreement") <> 1 then
+			goto nextIteration
+		else
+			iSecondCompl = iSecondCompl + 1
+		endif
+
+
+		closebrowser()
 
 
 	endif	'end status if
@@ -2263,30 +388,8 @@ i = i + 1
 until i = 5000
 
 
-'#############################################################################################################################
-'##   												END	SCRIPT										 						##
-'#############################################################################################################################
-write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf)
-write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events detected:            " + str$(iEventCnt), crlf)
-write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 1st interview cancelled stage:     " + str$(iFirstCancelCnt), crlf)
-write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 1st interview cancelled completed: " + str$(iFirstCancelCompl), crlf)
-write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 1st interview NCNS stage:          " + str$(iFirstNCNSCnt), crlf)
-write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 1st interview NCNS completed:      " + str$(iFirstNCNSCompl), crlf)
-write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 2nd interview cancelled stage:     " + str$(iSecondCancelCnt), crlf)
-write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 2nd interview cancelled completed: " + str$(iSecondCancelCCompl), crlf)
-write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 2nd interview NCNS stage:          " + str$(iSecondNCNSCnt), crlf)
-write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 2nd interview NCNS completed:      " + str$(iSecondNCNSCompl), crlf)
-write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf)
-write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events detected:            " + str$(iEventCnt), crlf)
-write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 1st interview cancelled stage:     " + str$(iFirstCancelCnt), crlf)
-write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 1st interview cancelled completed: " + str$(iFirstCancelCompl), crlf)
-write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 1st interview NCNS stage:          " + str$(iFirstNCNSCnt), crlf)
-write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 1st interview NCNS completed:      " + str$(iFirstNCNSCompl), crlf)
-write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 2nd interview cancelled stage:     " + str$(iSecondCancelCnt), crlf)
-write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 2nd interview cancelled completed: " + str$(iSecondCancelCCompl), crlf)
-write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 2nd interview NCNS stage:          " + str$(iSecondNCNSCnt), crlf)
-write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 2nd interview NCNS completed:      " + str$(iSecondNCNSCompl), crlf)
-write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
-write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
-write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
-write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
+'###############################################################################################################################################
+'##   													script end
+'###############################################################################################################################################
+
+adobeCancelLogStats()                                                                 

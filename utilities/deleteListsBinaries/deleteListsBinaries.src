@@ -1,61 +1,222 @@
 #ignoreerrors = 1
 
 res = kill("C:\v-angels-automation\scripts\_CG-initiateScan\_CG-initiateScan.rob")
+if res <> 0 then
+	msgbox("File was not deleted. error_code [" + str$(res) + "]")
+	end()
+endif
 res = kill("C:\v-angels-automation\scripts\_CG-initiateScan\_CG-initiateScan.lst")
+if res <> 0 then
+	msgbox("File was not deleted. error_code [" + str$(res) + "]")
+	end()
+endif
 
 res = kill("C:\v-angels-automation\scripts\CG-adobeCancelPackets\CG-adobeCancelPackets.rob")
+if res <> 0 then
+	msgbox("File was not deleted. error_code [" + str$(res) + "]")
+	end()
+endif
 res = kill("C:\v-angels-automation\scripts\CG-adobeCancelPackets\CG-adobeCancelPackets.lst")
+if res <> 0 then
+	msgbox("File was not deleted. error_code [" + str$(res) + "]")
+	end()
+endif
 
 res = kill("C:\v-angels-automation\scripts\CG-adobeSendPackets\CG-adobeSendPackets.rob")
+if res <> 0 then
+	msgbox("File was not deleted. error_code [" + str$(res) + "]")
+	end()
+endif
 res = kill("C:\v-angels-automation\scripts\CG-adobeSendPackets\CG-adobeSendPackets.lst")
+if res <> 0 then
+	msgbox("File was not deleted. error_code [" + str$(res) + "]")
+	end()
+endif
 
 res = kill("C:\v-angels-automation\scripts\CG-arcsSubmitApp\CG-arcsSubmitApp.rob")
+if res <> 0 then
+	msgbox("File was not deleted. error_code [" + str$(res) + "]")
+	end()
+endif
 res = kill("C:\v-angels-automation\scripts\CG-arcsSubmitApp\CG-arcsSubmitApp.lst")
+if res <> 0 then
+	msgbox("File was not deleted. error_code [" + str$(res) + "]")
+	end()
+endif
 
 res = kill("C:\v-angels-automation\scripts\CG-gmsSubmitForm\CG-gmsSubmitForm.rob")
+if res <> 0 then
+	msgbox("File was not deleted. error_code [" + str$(res) + "]")
+	end()
+endif
 res = kill("C:\v-angels-automation\scripts\CG-gmsSubmitForm\CG-gmsSubmitForm.lst")
+if res <> 0 then
+	msgbox("File was not deleted. error_code [" + str$(res) + "]")
+	end()
+endif
 
 res = kill("C:\v-angels-automation\scripts\CG-gmsTerminations\CG-gmsTerminations.rob")
+if res <> 0 then
+	msgbox("File was not deleted. error_code [" + str$(res) + "]")
+	end()
+endif
 res = kill("C:\v-angels-automation\scripts\CG-gmsTerminations\CG-gmsTerminations.lst")
+if res <> 0 then
+	msgbox("File was not deleted. error_code [" + str$(res) + "]")
+	end()
+endif
 
 res = kill("C:\v-angels-automation\scripts\CG-zipwhipInitTxtMsgs\CG-zipwhipInitTxtMsgs.rob")
+if res <> 0 then
+	msgbox("File was not deleted. error_code [" + str$(res) + "]")
+	end()
+endif
 res = kill("C:\v-angels-automation\scripts\CG-zipwhipInitTxtMsgs\CG-zipwhipInitTxtMsgs.lst")
+if res <> 0 then
+	msgbox("File was not deleted. error_code [" + str$(res) + "]")
+	end()
+endif
 
 res = kill("C:\v-angels-automation\framework\CG-adobeFunctions\CG-adobeFunctions.rob")
+if res <> 0 then
+	msgbox("File was not deleted. error_code [" + str$(res) + "]")
+	end()
+endif
 res = kill("C:\v-angels-automation\framework\CG-adobeFunctions\CG-adobeFunctions.lst")
+if res <> 0 then
+	msgbox("File was not deleted. error_code [" + str$(res) + "]")
+	end()
+endif
 
 res = kill("C:\v-angels-automation\framework\CG-arcsFunctions\CG-arcsFunctions.rob")
+if res <> 0 then
+	msgbox("File was not deleted. error_code [" + str$(res) + "]")
+	end()
+endif
 res = kill("C:\v-angels-automation\framework\CG-arcsFunctions\CG-arcsFunctions.lst")
+if res <> 0 then
+	msgbox("File was not deleted. error_code [" + str$(res) + "]")
+	end()
+endif
 
 res = kill("C:\v-angels-automation\framework\CG-globalDimDeclarations\CG-globalDimDeclarations.rob")
+if res <> 0 then
+	msgbox("File was not deleted. error_code [" + str$(res) + "]")
+	end()
+endif
 res = kill("C:\v-angels-automation\framework\CG-globalDimDeclarations\CG-globalDimDeclarations.lst")
+if res <> 0 then
+	msgbox("File was not deleted. error_code [" + str$(res) + "]")
+	end()
+endif
 
 res = kill("C:\v-angels-automation\framework\CG-globalFunctions\CG-globalFunctions.rob")
+if res <> 0 then
+	msgbox("File was not deleted. error_code [" + str$(res) + "]")
+	end()
+endif
 res = kill("C:\v-angels-automation\framework\CG-globalFunctions\CG-globalFunctions.lst")
+if res <> 0 then
+	msgbox("File was not deleted. error_code [" + str$(res) + "]")
+	end()
+endif
 
 res = kill("C:\v-angels-automation\framework\CG-globalLogging\CG-globalLogging.rob")
+if res <> 0 then
+	msgbox("File was not deleted. error_code [" + str$(res) + "]")
+	end()
+endif
 res = kill("C:\v-angels-automation\framework\CG-globalLogging\CG-globalLogging.lst")
+if res <> 0 then
+	msgbox("File was not deleted. error_code [" + str$(res) + "]")
+	end()
+endif
 
 res = kill("C:\v-angels-automation\framework\CG-globalSubDefinitions\CG-globalSubDefinitions.rob")
+if res <> 0 then
+	msgbox("File was not deleted. error_code [" + str$(res) + "]")
+	end()
+endif
 res = kill("C:\v-angels-automation\framework\CG-globalSubDefinitions\CG-globalSubDefinitions.lst")
+if res <> 0 then
+	msgbox("File was not deleted. error_code [" + str$(res) + "]")
+	end()
+endif
 
 res = kill("C:\v-angels-automation\framework\CG-globalVariables\CG-globalVariables.rob")
+if res <> 0 then
+	msgbox("File was not deleted. error_code [" + str$(res) + "]")
+	end()
+endif
 res = kill("C:\v-angels-automation\framework\CG-globalVariables\CG-globalVariables.lst")
+if res <> 0 then
+	msgbox("File was not deleted. error_code [" + str$(res) + "]")
+	end()
+endif
 
 res = kill("C:\v-angels-automation\framework\CG-globalWebFunctions\CG-globalWebFunctions.rob")
+if res <> 0 then
+	msgbox("File was not deleted. error_code [" + str$(res) + "]")
+	end()
+endif
 res = kill("C:\v-angels-automation\framework\CG-globalWebFunctions\CG-globalWebFunctions.lst")
+if res <> 0 then
+	msgbox("File was not deleted. error_code [" + str$(res) + "]")
+	end()
+endif
 
 res = kill("C:\v-angels-automation\framework\CG-globalWebValidations\CG-globalWebValidations.rob")
+if res <> 0 then
+	msgbox("File was not deleted. error_code [" + str$(res) + "]")
+	end()
+endif
 res = kill("C:\v-angels-automation\framework\CG-globalWebValidations\CG-globalWebValidations.lst")
+if res <> 0 then
+	msgbox("File was not deleted. error_code [" + str$(res) + "]")
+	end()
+endif
 
 res = kill("C:\v-angels-automation\framework\CG-globalWinFunctions\CG-globalWinFunctions.rob")
+if res <> 0 then
+	msgbox("File was not deleted. error_code [" + str$(res) + "]")
+	end()
+endif
 res = kill("C:\v-angels-automation\framework\CG-globalWinFunctions\CG-globalWinFunctions.lst")
+if res <> 0 then
+	msgbox("File was not deleted. error_code [" + str$(res) + "]")
+	end()
+endif
 
 res = kill("C:\v-angels-automation\framework\CG-gmsFunctions\CG-gmsFunctions.rob")
+if res <> 0 then
+	msgbox("File was not deleted. error_code [" + str$(res) + "]")
+	end()
+endif
 res = kill("C:\v-angels-automation\framework\CG-gmsFunctions\CG-gmsFunctions.lst")
+if res <> 0 then
+	msgbox("File was not deleted. error_code [" + str$(res) + "]")
+	end()
+endif
 
 res = kill("C:\v-angels-automation\framework\CG-loadWorkflowData\CG-loadWorkflowData.rob")
+if res <> 0 then
+	msgbox("File was not deleted. error_code [" + str$(res) + "]")
+	end()
+endif
 res = kill("C:\v-angels-automation\framework\CG-loadWorkflowData\CG-loadWorkflowData.lst")
+if res <> 0 then
+	msgbox("File was not deleted. error_code [" + str$(res) + "]")
+	end()
+endif
 
 res = kill("C:\v-angels-automation\framework\CG-zwFunctions\CG-zwFunctions.rob")
+if res <> 0 then
+	msgbox("File was not deleted. error_code [" + str$(res) + "]")
+	end()
+endif
 res = kill("C:\v-angels-automation\framework\CG-zwFunctions\CG-zwFunctions.lst")
+if res <> 0 then
+	msgbox("File was not deleted. error_code [" + str$(res) + "]")
+	end()
+endif
+

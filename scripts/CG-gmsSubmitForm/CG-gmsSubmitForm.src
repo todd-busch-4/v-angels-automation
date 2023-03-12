@@ -1,23 +1,22 @@
-'#############################################################################################################################
+'###############################################################################################################################################
 '## author:                 todd busch
 '##
-'## date:                   01/25/2023
+'## description:            iterates wintask change event col in employment inquiry list.xlsx in packages downloads folder, rows flagged with
+'##							'yes' and a gms col containing 'new hire invited' a new hire form is entered in gms. if applicant is already in gms 
+'##							(previous employee) it submits rehire form.
 '##
-'## description:            iterates wintask change event col in employment inquiry list.xlsx in packages downloads folder,
-'##							rows flagged with 'yes' and if gms col contains 'new hire invited' a new hire form is entered in
-'##							gms. if applicant is already in gms (previous employee) it submits rehire form.
-'##
-'## run in:					firefox (issue with 404 errors returned in chrome)
+'## run in:					firefox
 '##
 '## notes:                  bypasses warning popup and enters rehire form for employees flagged 'no-rehire'
-'##
-'#############################################################################################################################
+'##							
+'###############################################################################################################################################
 
-'#############################################################################################################################
-'##   													script prep									 						##
-'#############################################################################################################################
+'###############################################################################################################################################
+'##   													script prep																			  
+'###############################################################################################################################################
 include "C:\v-angels-automation\framework\CG-globalDimDeclarations\CG-globalDimDeclarations.src"
 include "C:\v-angels-automation\framework\CG-loadWorkflowData\CG-loadWorkflowData.src"
+include "C:\v-angels-automation\framework\CG-globalDataLoaders\CG-globalDataLoaders.src"
 include "C:\v-angels-automation\framework\CG-globalWebFunctions\CG-globalWebFunctions.src"
 include "C:\v-angels-automation\framework\CG-globalWinFunctions\CG-globalWinFunctions.src"
 include "C:\v-angels-automation\framework\CG-globalWebValidations\CG-globalWebValidations.src"
@@ -41,16 +40,19 @@ if LoadWorkflowData(currScript$) = 1 then
 endif
 
 
-'#############################################################################################################################
-'##   													script start								 						##
-'#############################################################################################################################
+'###############################################################################################################################################
+'##   													script start																			  
+'###############################################################################################################################################
 
 logStartScript("gms Form submit")
 
-'-------------------- begin iterating through change event column
+'------------------------------------------------------------------------------------------------------------------------------ begin iterating through change event column
+
 i = 0
 
+
 repeat
+
 
 	'-------------------- get change event status for current row
 	curr_status$ = arrChangeEvents$(i)
@@ -59,19 +61,21 @@ repeat
 	if curr_status$ = "Yes" then
 
 
-		iEventCnt = iEventCnt + 1			'change event counter
-		iExcelRow = i + 2					'add 1 for header and 1 for zero indexed arrays
+		'-------------------- start counters; log message
+		iEventCnt = iEventCnt + 1
+		iExcelRow = i + 2
 		logEventFound()
 
+'------------------------------------------------------------------------------------------------------------------------------ stage check
 
 		'-------------------- get stage of current change event
 		curr_stage$ = arrCurrentStage$(i)
 
 
 		if curr_stage$ = "On-board" then
-
-			iOnboardCnt = iOnboardCnt + 1		'stage counter
+			iOnboardCnt = iOnboardCnt + 1
 			logStageMatch()
+
 
 			'-------------------- get data values for current record
 			if gmsSubmitGetData() = 1 then
@@ -80,7 +84,6 @@ repeat
 			logDataValues()
 
 
-			'-------------------- format raw values to match app formatted values for a couple validation(s)
 			'------- add leading zeroes to single char day/month in company start date
 			startDateCompany$ = zeroPadDate$(startDateCompany$)
 		            	
@@ -88,12 +91,14 @@ repeat
 			'------- add dashes to ssn's that don't have them
 			applicantSSN$ = formatSSN$(applicantSSN$)
 
+'------------------------------------------------------------------------------------------------------------------------------ status check
 
 			'-------------------- check status for value to trigger form submission
 			if gmsSubmitChkStatus() = 1 then
 				goto nextIteration
 			endif
 
+'------------------------------------------------------------------------------------------------------------------------------ log in
 
 			'-------------------- invoke browser
 			if webInvokeBrowser("FF", gmsURL$) <> 0 then
@@ -102,34 +107,32 @@ repeat
 			endif
 
 
-			'------------------------------------------------------------ log in
 			'-------------------- enter username
 			usepage(pgGMSLogin$)
-			if webEnterText(txtUsername$, gmsUsername$, "entering username") <> 0 then
+			if webEnterText(inputGMSUsername$, gmsUsername$, "entering username") <> 0 then
 				goto nextIteration
 			endif
-			if webValidateText(txtUsername$, gmsUsername$, "entering text") <> 0 then
+			if webValidateText(inputGMSUsername$, gmsUsername$, "entering text") <> 0 then
 				goto nextIteration
 			endif																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																												
 																																																																																																																																																																																																																																																																																																																			
 
-
 			'-------------------- enter password
 			usepage(pgGMSLogin$)
-			if webEnterText(txtPassword$, gmsPassword$, "entering password") <> 0 then
+			if webEnterText(inputGMSPassword$, gmsPassword$, "entering password") <> 0 then
 				goto nextIteration
 			endif
-			if webValidateText(txtPassword$, gmsPassword$, "entering password") <> 0 then
+			if webValidateText(inputGMSPassword$, gmsPassword$, "entering password") <> 0 then
 				goto nextIteration
 			endif
 
 
 			'-------------------- click 'sign in' button
-			if webClickElement(btnLogin$, "clicking login button") <> 0 then
+			if webClickElement(btnGMSLogin$, "clicking login button") <> 0 then
 				goto nextIteration
 			endif
 			pause 5
-			if webValidateElement(bmpLogo$, "gms logo", "clicking login button") <> 1 then
+			if webValidateElement(bmpGMSLogo$, "gms logo", "clicking login button") <> 1 then
 				goto nextIteration
 			endif
 
@@ -141,37 +144,35 @@ repeat
 
 
 			'-------------------- click 'new hire' link
-			usepage(pgEnhancedDashboard$)
-			if webClickElement(lnkNewHire$, "clicking new hire link") <> 0 then
+			usepage(pgGMSEnhancedDashboard$)
+			if webClickElement(lnkGMSNewHire$, "clicking new hire link") <> 0 then
 				goto nextIteration
 			endif
 			pause 2
-			if webValidateElement(txtWorkLoc$, "work loc textfield", "clicking 'new hire' link") <> 1 then
+			if webValidateElement(inputGMSWorkLoc$, "work loc textfield", "clicking 'new hire' link") <> 1 then
 				goto nextIteration
 			endif
 
-
-			'-------------------------------------------------------------------------------------------------------------------------------- enter form details
-
+'------------------------------------------------------------------------------------------------------------------------------ enter form details
 
 			'-------------------- enter work location
-			usepage(pgNewHireForm$)
-			clickhtmlelement(txtWorkLoc$)
-			if webEnterText(txtWorkLoc$, "1", "entering work loc") <> 0 then
+			usepage(pgGMSNewHireForm$)
+			clickhtmlelement(inputGMSWorkLoc$)
+			if webEnterText(inputGMSWorkLoc$, "1", "entering work loc") <> 0 then
 				goto nextIteration
 			endif
 			pause 2
 			if gmsSubmitErrorChk() = 1 then
 				goto nextIteration
 			endif
-			if webValidateText(txtWorkLoc$, "1", "entering work loc") <> 0 then
+			if webValidateText(inputGMSWorkLoc$, "1", "entering work loc") <> 0 then
 				goto nextIteration
 			endif
 
 
 			'-------------------- enter social security number
-			clickhtmlelement(txtSocial$)			
-			if webEnterText(txtSocial$, applicantSSN$, "entering ssn") <> 0 then
+			clickhtmlelement(inputGMSSocial$)			
+			if webEnterText(inputGMSSocial$, applicantSSN$, "entering ssn") <> 0 then
 				goto nextIteration
 			endif
 			if gmsSubmitErrorChk() = 2 then
@@ -180,174 +181,145 @@ repeat
 			if gmsSubmitErrorChk() = 1 then
 				goto nextIteration
 			endif
-			if webValidateText(txtSocial$, applicantSSN$, "entering ssn") <> 0 then
+			if webValidateText(inputGMSSocial$, applicantSSN$, "entering ssn") <> 0 then
 				goto nextIteration
 			endif
 
 
 			'-------------------- enter first name
-			clickhtmlelement(txtFirstName$)
-			if webEnterText(txtFirstName$, applicantFName$, "entering first name") <> 0 then
+			clickhtmlelement(inputGMSFirstName$)
+			if webEnterText(inputGMSFirstName$, applicantFName$, "entering first name") <> 0 then
 				goto nextIteration
 			endif
 			if gmsSubmitErrorChk() = 1 then
 				goto nextIteration
 			endif
-			if webValidateText(txtFirstName$, applicantFName$, "entering first name") <> 0 then
+			if webValidateText(inputGMSFirstName$, applicantFName$, "entering first name") <> 0 then
 				goto nextIteration
 			endif
 
 
 			'-------------------- enter last name
-			clickhtmlelement(txtLastName$)
-			if webEnterText(txtLastName$, applicantLName$, "entering last name") <> 0 then
+			clickhtmlelement(inputGMSLastName$)
+			if webEnterText(inputGMSLastName$, applicantLName$, "entering last name") <> 0 then
 				goto nextIteration
 			endif
 			if gmsSubmitErrorChk() = 1 then
 				goto nextIteration
 			endif
-			if webValidateText(txtLastName$, applicantLName$, "entering last name") <> 0 then
+			if webValidateText(inputGMSLastName$, applicantLName$, "entering last name") <> 0 then
 				goto nextIteration
 			endif
 
 
 			'-------------------- enter email
-			clickhtmlelement(txtEmail$)
-			if webEnterText(txtEmail$, applicantEmail$, "entering email") <> 0 then
+			clickhtmlelement(inputGMSEmail$)
+			if webEnterText(inputGMSEmail$, applicantEmail$, "entering email") <> 0 then
 				goto nextIteration
 			endif
 			if gmsSubmitErrorChk() = 1 then
 				goto nextIteration
 			endif
-			if webValidateText(txtEmail$, applicantEmail$, "entering email") <> 0 then
+			if webValidateText(inputGMSEmail$, applicantEmail$, "entering email") <> 0 then
 				goto nextIteration
 			endif
 
 
 			'-------------------- enter company start date
-			clickhtmlelement(dtCompanyStartDt$)
-			if webEnterText(dtCompanyStartDt$, startDateCompany$, "entering company start date") <> 0 then
+			clickhtmlelement(dtGMSCompanyStartDt$)
+			if webEnterText(dtGMSCompanyStartDt$, startDateCompany$, "entering company start date") <> 0 then
 				goto nextIteration
 			endif
 			if gmsSubmitErrorChk() = 1 then
 				goto nextIteration
 			endif
-			if webValidateText(dtCompanyStartDt$, startDateCompany$, "entering company start date") <> 0 then
+			if webValidateText(dtGMSCompanyStartDt$, startDateCompany$, "entering company start date") <> 0 then
 				goto nextIteration
 			endif
 
 																																							
 			'-------------------- enter position
-			clickhtmlelement(txtPosition$)
-			if webEnterText(txtPosition$, position$, "entering position") <> 0 then
+			clickhtmlelement(inputGMSPosition$)
+			if webEnterText(inputGMSPosition$, position$, "entering position") <> 0 then
 				goto nextIteration
 			endif
-			if gmsSubmitErrorChk() = 1 then
-				goto nextIteration
-			endif
-			if webValidateText(txtPosition$, position$, "entering position") <> 0 then
-				goto nextIteration
-			endif
-
-
-			'-------------------- enter employment status
-			clickhtmlelement(txtEmployStatus$)
-			if webEnterText(txtEmployStatus$, employStatus$, "entering employment status") <> 0 then
-				goto nextIteration
-			endif
-			if gmsSubmitErrorChk() = 1 then
-				goto nextIteration
-			endif
-			if webValidateText(txtEmployStatus$, employStatus$, "entering employment status") <> 0 then
-				goto nextIteration
-			endif
-
-
-			'-------------------- enter employment type
-			clickhtmlelement(txtEmployType$)
-			if webEnterText(txtEmployType$, employType$, "entering employment type") <> 0 then
-				goto nextIteration
-			endif
-			if gmsSubmitErrorChk() = 1 then
-				goto nextIteration
-			endif
-			if webValidateText(txtEmployType$, employType$, "entering employment type") <> 0 then
+			if webValidateText(inputGMSEmployType$, employType$, "entering employment type") <> 0 then
 				goto nextIteration
 			endif
 
 
 			'-------------------- enter benefit group
-			clickhtmlelement(txtBenefitGrp$)
-			if webEnterText(txtBenefitGrp$, benefitGroup$, "entering benefit group") <> 0 then
+			clickhtmlelement(inputGMSBenefitGrp$)
+			if webEnterText(inputGMSBenefitGrp$, benefitGroup$, "entering benefit group") <> 0 then
 				goto nextIteration
 			endif
 			if gmsSubmitErrorChk() = 1 then
 				goto nextIteration
 			endif
-			if webValidateText(txtBenefitGrp$, benefitGroup$, "entering benefit group") <> 0 then
+			if webValidateText(inputGMSBenefitGrp$, benefitGroup$, "entering benefit group") <> 0 then
 				goto nextIteration
 			endif
 
 
 			'-------------------- enter pay group
-			clickhtmlelement(txtPayGrp$)
-			if webEnterText(txtPayGrp$, payGroup$, "entering pay group") <> 0 then
+			clickhtmlelement(inputGMSPayGrp$)
+			if webEnterText(inputGMSPayGrp$, payGroup$, "entering pay group") <> 0 then
 				goto nextIteration
 			endif
 			if gmsSubmitErrorChk() = 1 then
 				goto nextIteration
 			endif
-			if webValidateText(txtPayGrp$, payGroup$, "entering pay group") <> 0 then
+			if webValidateText(inputGMSPayGrp$, payGroup$, "entering pay group") <> 0 then
 				goto nextIteration
 			endif
 
 
 			'-------------------- select pay method
-			if webSelectItem(selPayMethod$, payMethod$, "selecting pay method") <> 0 then
+			if webSelectItem(selGMSPayMethod$, payMethod$, "selecting pay method") <> 0 then
 				goto nextIteration
 			endif
 			if gmsSubmitErrorChk() = 1 then
 				goto nextIteration
 			endif
-			if webValidateText(selPayMethod$, "H", "selecting pay method") <> 0 then
+			if webValidateText(selGMSPayMethod$, "H", "selecting pay method") <> 0 then
 				goto nextIteration
 			endif
 
 
 			'-------------------- enter pay rate
-			clickhtmlelement(txtPayRate$)
+			clickhtmlelement(inputGMSPayRate$)
 			pause 1
-			if webEnterText(txtPayRate$, payRate$, "entering pay rate") <> 0 then
+			if webEnterText(inputGMSPayRate$, payRate$, "entering pay rate") <> 0 then
 				goto nextIteration
 			endif
 			if gmsSubmitErrorChk() = 1 then
 				goto nextIteration
 			endif
 			pause 2
-			if webValidateText(txtPayRate$, payRate$, "entering pay rate") <> 0 then
+			if webValidateText(inputGMSPayRate$, payRate$, "entering pay rate") <> 0 then
 				goto nextIteration
 			endif
 
 
 			'-------------------- enter std hours
-			clickhtmlelement(txtStdHours$)
-			if webEnterText(txtStdHours$, stdHours$, "entering std hours") <> 0 then
+			clickhtmlelement(inputGMSStdHours$)
+			if webEnterText(inputGMSStdHours$, stdHours$, "entering std hours") <> 0 then
 				goto nextIteration
 			endif
 			if gmsSubmitErrorChk() = 1 then
 				goto nextIteration
 			endif
-			if webValidateText(txtStdHours$, stdHours$, "entering std hours") <> 0 then
+			if webValidateText(inputGMSStdHours$, stdHours$, "entering std hours") <> 0 then
 				goto nextIteration
 			endif
 
 
 			'-------------------- click save
-			if webClickElement(btnSave$, "clicking new hire save") <> 0 then
+			if webClickElement(btnGMSSave$, "clicking new hire save") <> 0 then
 				goto nextIteration
 			endif
 			pause 20
-			if webValidateElement(btnDone$, "done button", "clicking new hire save") <> 1 then
+			if webValidateElement(btnGMSDone$, "done button", "clicking new hire save") <> 1 then
 				goto nextIteration
 			endif
 			logWorkflowSuccess("new hire form successfully submitted")
@@ -361,12 +333,13 @@ repeat
 
 			goto nextIteration
 
+'------------------------------------------------------------------------------------------------------------------------------ enter rehire form
 
 rehireFlow:
-			gmsSubbmitErrorChk$ = ""
+			gmsSubmitErrorChk$ = ""
 
 			'-------------------- hit enter to close popup
-			usewindow(wndNewHireForm$, 1)
+			usewindow(wndGMSNewHireForm$, 1)
 			if winSendKeys("<enter>", "closing popup") <> 0 then
 				goto nextIteration
 			endif
@@ -374,103 +347,103 @@ rehireFlow:
 
 
 			'-------------------- return to dashboard
-			usepage(pgNewHireForm$)
-			if webClickElement(bmpLogo$, "nav to dashboard") <> 0 then                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
+			usepage(pgGMSNewHireForm$)
+			if webClickElement(bmpGMSLogo$, "nav to dashboard") <> 0 then                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
 				goto nextIteration
 			endif
 			pause 2
-			if webValidateCurrPage(pgEnhancedDashboard$, "nav to dashboard") <> 0 then
+			if webValidateCurrPage(pgGMSEnhancedDashboard$, "nav to dashboard") <> 0 then
 				goto nextIteration
 			endif
 
 
 			'-------------------- click rehire link
-			usepage(pgEnhancedDashboard$)
-			if webClickElement(lnkRehire$, "clicking rehire link") <> 0 then
+			usepage(pgGMSEnhancedDashboard$)
+			if webClickElement(lnkGMSRehire$, "clicking rehire link") <> 0 then
 				goto nextIteration
 			endif
 			pause 2
-			if webValidateCurrPage(pgRehireForm$, "clicking rehire link") <> 0 then
+			if webValidateCurrPage(pgGMSRehireForm$, "clicking rehire link") <> 0 then
 				goto nextIteration
 			endif
 
 
 			'-------------------- enter ssn
-			usepage(pgRehireForm$)
-			if webEnterText(txtRHSocial$, applicantSSN$, "entering ssn") <> 0 then
+			usepage(pgGMSRehireForm$)
+			if webEnterText(inputGMSRHSocial$, applicantSSN$, "entering ssn") <> 0 then
 				goto nextIteration
 			endif
 			pause 1
 			if gmsSubmitNoRehireChk() = 1 then
 				goto nextIteration
 			endif
-			if webValidateElement(lblLastNameLabel$, "last name label", "entering ssn") <> 1 then
+			if webValidateElement(lblGMSLastNameLabel$, "last name label", "entering ssn") <> 1 then
 				goto nextIteration
 			endif
 
 
 			'-------------------- capture employee id						
-			res = gethtmledittext(txtRHSocial$, val$)
+			res = gethtmledittext(inputGMSRHSocial$, val$)
 			applicantEmployeeID$ = val$
 			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employee id: (" + val$ + ") ", crlf)
-			usewindow(wndRehireForm$, 1)
+			usewindow(wndGMSRehireForm$, 1)
 			sendkeys("<tab>", noactivate)
 
 
 			'-------------------- select active from rehired empl status dropdown
-			usepage(pgRehireForm$)
-			if webSelectItem(selRehireStatus$, gmsRehireStatus$, "selecting rehire status") <> 0 then
+			usepage(pgGMSRehireForm$)
+			if webSelectItem(selGMSRehireStatus$, gmsRehireStatus$, "selecting rehire status") <> 0 then
 				goto nextIteration
 			endif
-			if webValidateText(selRehireStatus$, "A", "selecting rehire status") <> 0 then
+			if webValidateText(selGMSRehireStatus$, "A", "selecting rehire status") <> 0 then
 				goto nextIteration
 			endif
 
 
 			'-------------------- select 'pb' from rehired employment type dropdown
-			if webSelectItem(selRehireType$, gmsRehireType$, "selecting rehire type") <> 0 then
+			if webSelectItem(selGMSRehireType$, gmsRehireType$, "selecting rehire type") <> 0 then
 				goto nextIteration
 			endif
-			if webValidateText(selRehireType$, gmsRehireType$, "selecting rehire type") <> 0 then
+			if webValidateText(selGMSRehireType$, gmsRehireType$, "selecting rehire type") <> 0 then
 				goto nextIteration
 			endif
 
 
 			'-------------------- enter rehire date
 			currDate$ = zeroPadDate$(currDate$)
-			if webEnterText(dtRehireDate$, currDate$, "entering rehire date") <> 0 then
+			if webEnterText(dtGMSRehireDate$, currDate$, "entering rehire date") <> 0 then
 				goto nextIteration
 			endif
 			clickhtmlelement(txtEmployeeID$)	'to get focus off field
-			if webValidateText(dtRehireDate$, currDate$, "entering rehire date") <> 0 then
+			if webValidateText(dtGMSRehireDate$, currDate$, "entering rehire date") <> 0 then
 				goto nextIteration
 			endif
 
 
 			'-------------------- select 'rehire' reason code
-			if webSelectItem(selRehireCode$, gmsReasonCode$, "selecting rehire reason code") <> 0 then
+			if webSelectItem(selGMSRehireCode$, gmsReasonCode$, "selecting rehire reason code") <> 0 then
 				goto nextIteration
 			endif
-			if webValidateText(selRehireCode$, gmsReasonCode$, "selecting rehire reason code") <> 0 then
+			if webValidateText(selGMSRehireCode$, gmsReasonCode$, "selecting rehire reason code") <> 0 then
 				goto nextIteration
 			endif
 
 
 			'-------------------- enter pay rate
-			if webEnterText(txtRHPayRate$, gmsPayRate$, "entering pay rate") <> 0 then
+			if webEnterText(inputGMSRHPayRate$, gmsPayRate$, "entering pay rate") <> 0 then
 				goto nextIteration
 			endif
-			if webValidateText(txtRHPayRate$, gmsPayRate$, "entering pay rate") <> 0 then
+			if webValidateText(inputGMSRHPayRate$, gmsPayRate$, "entering pay rate") <> 0 then
 				goto nextIteration
 			endif
 
 
 			'-------------------- click save
-			if webClickElement(btnSave$, "clicking rehire save") <> 0 then
+			if webClickElement(btnGMSSave$, "clicking rehire save") <> 0 then
 				goto nextIteration
 			endif
 			pause 20
-			if webValidateText(txtRHSocial$, "", "clicking rehire save") <> 0 then
+			if webValidateText(inputGMSRHSocial$, "", "clicking rehire save") <> 0 then
 				goto nextIteration
 			endif
 			logWorkflowSuccess("rehire form successfully submitted")
@@ -486,7 +459,7 @@ rehireFlow:
 
 
 		if curr_stage$ <> "On-board" then
-			write(debuglogpath$, currdate$ + "-" + currtime$ + ": " + currscript$ + ": stage did not trigger workflow", crlf + crlf)
+			logStageBypass()
 		endif
 
 
@@ -502,18 +475,7 @@ i = i + 1
 until i = 5000 	'iterate through all rows in array
 
 
-'#############################################################################################################################
-'##   												end	script										 						##
-'#############################################################################################################################
-write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf)
-write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events detected:               " + str$(iEventCnt), crlf)
-write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events with 'On-board' stage:  " + str$(iOnboardCnt), crlf)
-write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": gms forms submitted:                  " + str$(iOnboardCompl), crlf)
-write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf)
-write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events detected:               " + str$(iEventCnt), crlf)
-write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events with 'On-board' stage:  " + str$(iOnboardCnt), crlf)
-write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": gms forms submitted:                  " + str$(iOnboardCompl), crlf)
-write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
-write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
-write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
-write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
+'###############################################################################################################################################
+'##   												end	script										 						
+'###############################################################################################################################################
+gmsSubmitFormLogStats()

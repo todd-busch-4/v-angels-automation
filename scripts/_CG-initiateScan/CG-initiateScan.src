@@ -1,15 +1,13 @@
 '#############################################################################################################################
 '## author:                 todd busch
 '##
-'## date:                   01/09/2023
-'##
-'## description:            this script is used to kick off the office automation package for caregiver workflows; it
+'## description:            this script is used to kick off the office automation scan for caregiver workflows; it
 '##							downloads the latest copy of the employment inquiry list.xlsx doc and then runs the workflow
 '##							scripts one at a time
 '##
-'## notes:                  download location needs to default to the downloads folder for the windows user. a variable in
-'##							CG-globalVariables stores the path to that location. update that variable for the current user
-'##							and ensure chrome is set to default to that folder for downloads before running
+'## notes:                  download location needs to default to the downloads folder for the windows user and chrome
+'##							settings configured to "not ask each time" (location) when downloading. a variable in
+'##							CG-globalVariables stores the path to that location
 '##
 '#############################################################################################################################
 
@@ -35,8 +33,10 @@ iHr$ = Hour$()
 iMin$ = Min$()
 
 
-write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": STARTING INTERVAL SCAN", crlf)
-write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": STARTING INTERVAL SCAN", crlf)
+write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": -------------------------------------- START OF SCAN ------------------------------------------------------------------------------", crlf + crlf)
+write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + "-------------------------------------- START OF SCAN ------------------------------------------------------------------------------", crlf + crlf)
+write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + "-------------------------------------- START OF SCAN ------------------------------------------------------------------------------", crlf + crlf)
+write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + "-------------------------------------- START OF SCAN ------------------------------------------------------------------------------", crlf + crlf)
 
 
 '-------------------------------------------------------------------------------------------------------------------------------- download latest employment inquiry doc
@@ -57,7 +57,7 @@ endif
 if res = 0 then
 	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": browser invoked and loaded sharepoint page", crlf)
 endif
-
+pause 5
 
 '-------------------- select employment inquiry doc
 usewindow( "CHROME.EXE|Chrome_WidgetWin_1|CareGiver Portal - WinTask Data - All Documents - Google Chrome", 1)
@@ -78,7 +78,7 @@ if iEnvironment = 2 then
 endif
 '------- debug logging
 write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": selected employment inquiry doc row", crlf)
-
+pause 2
 
 '-------------------- click download link
 usepage("CareGiver Portal - WinTask Data - All Documents")
@@ -98,7 +98,7 @@ endif
 
 
 '-------------------- allow doc to complete download
-pause 3
+pause 5
 
 
 '-------------------- copy to package directory
@@ -131,7 +131,7 @@ write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": latest ver
 run(scriptsPath$ + "CG-adobeSendPackets\CG-adobeSendPackets.rob")
 run(scriptsPath$ + "CG-adobeCancelPackets\CG-adobeCancelPackets.rob")
 run(scriptsPath$ + "CG-zipwhipInitTxtMsgs\CG-zipwhipInitTxtMsgs.rob")
-run(scriptsPath$ + "CG-gmsFormSubmit\CG-gmsFormSubmit.rob")
+run(scriptsPath$ + "CG-gmsSubmitForm\CG-gmsSubmitForm.rob")
 run(scriptsPath$ + "CG-gmsTerminations\CG-gmsTerminations.rob")
 run(scriptsPath$ + "CG-gmsAddLegalFunctions\CG-gmsAddLegalFunctions.rob")
 
@@ -150,6 +150,6 @@ endif
 
 
 write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": -------------------------------------- END OF SCAN ------------------------------------------------------------------------------", crlf + crlf)
-write(executionLogPath$, basicLogHdr$ + "-------------------------------------- END OF SCAN ------------------------------------------------------------------------------", crlf + crlf)
-write(scanFailuresPath$, basicLogHdr$ + "-------------------------------------- END OF SCAN ------------------------------------------------------------------------------", crlf + crlf)
-write(successLogPath$, basicLogHdr$ + "-------------------------------------- END OF SCAN ------------------------------------------------------------------------------", crlf + crlf)
+write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + "-------------------------------------- END OF SCAN ------------------------------------------------------------------------------", crlf + crlf)
+write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + "-------------------------------------- END OF SCAN ------------------------------------------------------------------------------", crlf + crlf)
+write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + "-------------------------------------- END OF SCAN ------------------------------------------------------------------------------", crlf + crlf)
