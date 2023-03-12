@@ -1,9 +1,9 @@
 '###############################################################################################################################################
 '## author:                 todd busch
 '##
-'## date:                   03/03/2023
-'##
-'## description:            terseDescription
+'## description:            iterates the change event column of the employment inquiry list.xlsx for row flagged with 'yes'. Rows with stage
+'##                         values of "On-board", "On-board INTRO", and "Active Employee" with a GMS Connect value of "Active", or "i-9 Ready
+'##                         for review" will trigger the workflow to enter a legal recurring deduction
 '##
 '## run in:                 firefox
 '##
@@ -12,6 +12,7 @@
 '###############################################################################################################################################
 include "C:\v-angels-automation\framework\CG-globalDimDeclarations\CG-globalDimDeclarations.src"
 include "C:\v-angels-automation\framework\CG-gmsAddLegalFunctions\CG-gmsAddLegalFunctions.src"
+include "C:\v-angels-automation\framework\CG-globalDataLoaders\CG-globalDataLoaders.src"
 include "C:\v-angels-automation\framework\CG-loadWorkflowData\CG-loadWorkflowData.src"
 include "C:\v-angels-automation\framework\CG-globalFunctions\CG-globalFunctions.src"
 include "C:\v-angels-automation\framework\CG-gmsFunctions\CG-gmsFunctions.src"
@@ -41,8 +42,8 @@ endif
 '###############################################################################################################################################
 logStartScript("gms add recurring deduction")
 
-
 '------------------------------------------------------------------------------------------------------------------------------ begin iterating through change event column
+
 i = 0
 
 

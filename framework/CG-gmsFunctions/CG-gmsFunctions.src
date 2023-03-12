@@ -1,14 +1,14 @@
-/*#############################################################################################################################################################
-##  filename:						cg-gmsFunctions
-##
-##  purpose:						library of functions for use in GMS workflow script development in order to minimize code duplication,
-##									increase script cleanliness/readability, and reduce maintenance efforts by providing a single centralized
-##									location for changes
-##
-##  contents:						gmsCompanyChk, gmsSubmitGetData, gmsSubmitChkStatus, gmsSubmitErrorChk, gmsSubmitNoRehireChk, gmsTermsChkStatus,
-==									gmsTermsChkStage, gmsTermsGetData$, gmsTermsFmtDates, gmsTermsLogStats, gmsTermsErrorChck, gmsTermsEarlyDateChk
-##
-#############################################################################################################################################################*/
+'###############################################################################################################################################################
+'##  filename:						cg-gmsFunctions
+'##
+'##  purpose:						library of functions for use in GMS workflow script development in order to minimize code duplication, increase script
+'##									cleanliness/readability, and reduce maintenance efforts by providing a single centralized location for changes
+'##
+'##  contents:						gmsCompanyChk, gmsSubmitChkStatus, gmsSubmitErrorChk, gmsSubmitNoRehireChk, gmsTermsChkStatus, gmsTermsChkStage,
+'##									gmsTermsFmtDates, gmsTermsLogStats, gmsTermsErrorChck, gmsTermsEarlyDateChk, gmsAddLegalStageChk, gmsAddLegalStatusChk,
+'##									gmsAddLegalLogStats, gmsSubmitFormLogStats
+'##
+'###############################################################################################################################################################
 
 '=============================================================================================================================================================
 '== function name:          	gmsCompanyChk
@@ -30,7 +30,7 @@ function gmsCompanyChk()
 	local r
 
 	r = useocrengine(3)
-	sCompany$ = captureareaocr$(wndEnhancedDashboard$, topinstance(), 823, 138, 28, 472)
+	sCompany$ = captureareaocr$(wndGMSEnhancedDashboard$, topinstance(), 823, 138, 28, 472)
 	sActiveCompany$ = mid$(sCompany$, 12, 5)
 
 	if sActiveCompany$ = sTargetCompany$ then
@@ -43,13 +43,13 @@ function gmsCompanyChk()
 		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": active company: (" + sActiveCompany$ + ") is not target company: (" + sTargetCompany$ + ")", crlf)
 		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": switching companies", crlf)
 		r = useocrengine(3)
-		usewindow(wndEnhancedDashboard$, 1)
+		usewindow(wndGMSEnhancedDashboard$, 1)
 		clickontextocr("(" + sActiveCompany$ + ")", left, single, inarea(749, 138, 685, 28))
 
-		usepage(pgCompanySrc$)
+		usepage(pgGMSCompanySrc$)
 		clickhtmlelement("TD[OUTERTEXT='" + sTargetCompany$ + "']")
 
-		sCompany$ = captureareaocr$(wndEnhancedDashboard$, topinstance(), 823, 138, 28, 472)
+		sCompany$ = captureareaocr$(wndGMSEnhancedDashboard$, topinstance(), 823, 138, 28, 472)
 		sActiveCompany$ = mid$(sCompany$, 12, 5)
 		if sActiveCompany$ = sTargetCompany$ then
 			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": target company: (" + sTargetCompany$ + ") is now active", crlf)
@@ -63,40 +63,6 @@ function gmsCompanyChk()
 		endif
 	endif
 
-endfunction
-
-'=============================================================================================================================================================
-'== function name:          	gmsSubmitGetData
-	'==
-	'== developer:              todd busch
-	'==
-	'== purpose:                get data from data arrays for the current row being processed
-	'==
-	'== input parms:            none
-	'==
-	'== returns:                int:	0 - success
-	'==
-	'== notes:                  none
-	'==
-'=============================================================================================================================================================*/
-function gmsSubmitGetData()
-	applicantID$ = arrApplicantID$(i)
-	applicantFName$ = arrApplicantFName$(i)
-	applicantLName$ = arrApplicantLName$(i)
-	gmsStatus$ = arrGMSStatus$(i)
-	applicantEmail$ = arrApplicantEmail$(i)
-	applicantSSN$ = arrApplicantSSN$(i)
-	if applicantSSN$ = "" then
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": SSN was blank for current row", crlf)
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
-		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": blank ssn; proceeding to next change event", crlf + crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employee: " + applicantFName$ + " " + applicantLName$, crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: gmsSubmitGetData - no ssn", crlf + crlf)
-		gmsSubmitGetData = 1
-		exitfunction
-	endif
-	applicantLNameCaps$ = ucase$(applicantLName$)
 endfunction
 
 '=============================================================================================================================================================
@@ -156,7 +122,7 @@ function gmsSubmitErrorChk()
 	local r, err$
 
 	'get focus off textfield to prompt popup if error
-	usewindow(wndNewHireForm$, 1)
+	usewindow(pgGMSNewHireForm$, 1)
 	clickmouse(left, down, 950, 250, absolute)
 	clickmouse(left, up, 950, 250, absolute)
 	pause 2
@@ -173,7 +139,7 @@ function gmsSubmitErrorChk()
 	endif
 
 	'capture area error popup is typically displayed in
-	err$ = captureareaocr$(wndNewHireForm$, topinstance(), 739, 467, 191, 442)
+	err$ = captureareaocr$(pgGMSNewHireForm$, topinstance(), 739, 467, 191, 442)
 
 	'check for captured error msg
 	if instr(err$, "gmsprismhicom") <> 0 then
@@ -257,7 +223,7 @@ function gmsSubmitNoRehireChk()
 	endif
 
 	'capture ocr in area where popup is typically displayed
-	err$ = captureareaocr$(wndRehireForm$, topinstance(), 731, 459, 244, 502)
+	err$ = captureareaocr$(wndGMSRehireForm$, topinstance(), 731, 459, 244, 502)
 
 	'exit function if no error popup found
 	if instr(err$, "gmsprismhicom") = 0 then
@@ -272,7 +238,7 @@ function gmsSubmitNoRehireChk()
 		if instr(err$, "No-Rehire") <> 0 then
 			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant was set to 'no-rehire'", crlf)
 			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": dismissing warning and continuing to submit rehire form", crlf)
-			usewindow(wndRehireForm$, 1)
+			usewindow(wndGMSRehireForm$, 1)
 			sendkeys("<enter>", noactivate)
 			gmsSubmitNoRehireChk = 0
 			exitfunction
@@ -365,33 +331,6 @@ function gmsTermsChkStage()
 endfunction
 
 '=============================================================================================================================================================
-'== function name:       	   gmsTermsGetData
-	'==
-	'== developer:              todd busch
-	'==
-	'== purpose:                get data for the current row from data arrays
-	'==
-	'== input parms:            none
-	'==
-	'== returns:                int:	0 - for success
-	'==
-	'== notes:                  none
-	'==
-'=============================================================================================================================================================*/
-function gmsTermsGetData()
-
-	applicantID$ = arrApplicantID$(i)
-	applicantFName$ = arrApplicantFName$(i)
-	applicantLName$ = arrApplicantLName$(i)
-	gmsStatus$ = arrGMSStatus$(i)
-	applicantSSN$ = arrApplicantSSN$(i)
-	termedLOADate$ = arrTermedLOADate$(i)
-
-	gmsTermsGetData = 0
-
-endfunction
-
-'=============================================================================================================================================================
 '== function name:      	    gmsTermsFmtDates$
 	'==
 	'== developer:              todd busch
@@ -477,7 +416,7 @@ function gmsTermsErrorChk()
 	endif
 
 	'capture area error popup is typically displayed in
-	err$ = captureareaocr$(wndNewHireForm$, topinstance(), 739, 467, 191, 442)
+	err$ = captureareaocr$(pgGMSNewHireForm$, topinstance(), 739, 467, 191, 442)
 
 	'exit function if no error found
 	if err$ = "" then
@@ -557,7 +496,7 @@ function gmsTermsEarlyDateChk()
 	endif
 
 	'capture area error popup is typically displayed in
-	err$ = captureareaocr$(wndTerminationForm$, topinstance(), 739, 467, 191, 442)
+	err$ = captureareaocr$(wndGMSTerminationForm$, topinstance(), 739, 467, 191, 442)
 
 	'check for error text
 	if instr(err$, "is prior to employee's hire date") <> 0 then
@@ -603,30 +542,6 @@ function gmsAddLegalStageChk()
 	else
 		gmsAddLegalStageChk = 1
 	endif
-endfunction
-
-'=============================================================================================================================================================
-'== function name:				gmsAddLegalGetData
-	'==
-	'== developer:              todd busch
-	'==
-	'== purpose:                get value of data elements used by script for current row
-	'==
-	'== input parms:            none
-	'==
-	'== returns:                int:	0 - success
-	'==
-	'== notes:                  none
-	'==
-'=============================================================================================================================================================*/
-function gmsAddLegalGetData()
-	applicantID$ = arrApplicantID$(i)
-	applicantFName$ = arrApplicantFName$(i)
-	applicantLName$ = arrApplicantLName$(i)
-	gmsStatus$ = arrGMSStatus$(i)
-	gmsLegalShield$ = arrLegalShield$(i)
-
-	gmsAddLegalGetData = 0
 endfunction
 
 '=============================================================================================================================================================
@@ -693,4 +608,36 @@ function gmsAddLegalLogStats()
 	write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
 
 	gmsAddLegalLogStats = 0
+endfunction
+
+'=============================================================================================================================================================
+'== function name:				gmsSubmitFormLogStats
+	'==
+	'== developer:              todd busch
+	'==
+	'== purpose:                logs the end of workflow messages/data to log files for SubmitForm script
+	'==
+	'== input parms:            none
+	'==
+	'== returns:                int:	0 - success
+	'==
+	'== notes:                  none
+	'==
+'=============================================================================================================================================================*/
+function gmsSubmitFormLogStats()
+
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events detected:               " + str$(iEventCnt), crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events with 'On-board' stage:  " + str$(iOnboardCnt), crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": gms forms submitted:                  " + str$(iOnboardCompl), crlf)
+	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf)
+	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events detected:               " + str$(iEventCnt), crlf)
+	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events with 'On-board' stage:  " + str$(iOnboardCnt), crlf)
+	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": gms forms submitted:                  " + str$(iOnboardCompl), crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
+	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
+	write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
+	write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
+
+	gmsSubmitFormLogStats = 0
 endfunction

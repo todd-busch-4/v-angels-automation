@@ -1,5 +1,5 @@
 /*#############################################################################################################################################################
-##  filename:						cg-[script]loadWorkflowData
+##  filename:						cg-loadWorkflowData
 ##
 ##  purpose:						collection of functions to load data needed/used by the scripts from the employment inquiry list.xlsx. Loading 5k rows for 
 ##									all data elements used has grown to take quite a bit of time using a single function called by each script. Every data

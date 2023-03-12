@@ -18,6 +18,7 @@
 '###############################################################################################################################################
 include "C:\v-angels-automation\framework\CG-globalDimDeclarations\CG-globalDimDeclarations.src"
 include "C:\v-angels-automation\framework\CG-loadWorkflowData\CG-loadWorkflowData.src"
+include "C:\v-angels-automation\framework\CG-globalDataLoaders\CG-globalDataLoaders.src"
 include "C:\v-angels-automation\framework\CG-globalFunctions\CG-globalFunctions.src"
 include "C:\v-angels-automation\framework\CG-zwFunctions\CG-zwFunctions.src"
 include "c:\v-angels-automation\framework\CG-globalWinFunctions\CG-globalWinFunctions.src"
@@ -50,6 +51,7 @@ logStartScript("zipwhip init msgs")
 
 
 '-------------------------------------------------------------------------------------------------------------------------------- begin iterating through change event column
+
 i = 0
 
 
@@ -61,18 +63,16 @@ repeat
 
 
 	if curr_status$ = "Yes" then
-
-
 		iChangeCnt = iChangeCnt + 1
 		iExcelRow = i + 2
 		logEventFound()
 
+'------------------------------------------------------------------------------------------------------------------------------ stage check
 
 		'-------------------- get stage of current change event
 		curr_stage$ = arrCurrentStage$(i)
 
 
-		'------------------------------------------------------------------------------------------------------------------------ stage triggere - begin workflow admin 
 		if zwInitStageChk() = 0 then
 			iStageCnt = iStageCnt + 1
 			logStageMatch()
@@ -82,7 +82,7 @@ repeat
 		endif
 
 
-		'-------------------- get data values for current record from employment inquiry
+		'-------------------- get data values for current row
 		zwInitGetData()
 		logDataValues()
 
@@ -108,15 +108,14 @@ repeat
 		dtDayBefore$ = zwFmtDayPriorFirstAppt$(applicant1stApp$)
 		dtFirstApptTime$ = zwFmtFirstApptTime$(applicant1stApp$)
 
+'------------------------------------------------------------------------------------------------------------------------------ status check
 
 		'-------------------- check txt messages status column
 		if zwInitStatusChk() = 1 then
 			goto nextIteration
 		endif
 
-
-		'------------------------------------------------------------------------------------------------------------------------ create contact record 
-
+'------------------------------------------------------------------------------------------------------------------------------ log in
 
 		'-------------------- invoke browser
 		if webInvokeBrowser("FF", zipWhipURL$) = 1 then
@@ -126,21 +125,16 @@ repeat
 		maximizewindow(wndBrowser$, 1)
 
 
-		'-------------------- verify browser state
+		'-------------------- check if logged in
 		if zwLoginChk() = 1 then
 			goto nextIteration
 		endif
 
-
+'------------------------------------------------------------------------------------------------------------------------------ create contact
 		'-------------------- click 'contacts' icon
-		'usepage(wndZWMainDan$)
 		if webNavigate(urlZWContacts$, "contacts") <> 0 then
 			goto nextIteration
 		endif
-
-		'if webClickElement(btnZWContacts$, "clicking contacts") <> 0 then
-		'	goto nextIteration
-		'endif
 		pause 2
 		if iEnvironment = 1 then
 			if webWaitForText(wndZWMainDan$, "Contacts", "contacts hdr", 10, "clicking contacts", 574, 136, 51, 155) = 1 then
@@ -238,9 +232,7 @@ repeat
 		'-------------------- end contact creation
 		logWorkflowStepSuccess("contact record created successfully")
 
-
 		'------------------------------------------------------------------------------------------------------------------------------ send initial text
-
 
 		'-------------------- nav to conversations
 		if webNavigate(urlZWConversations$, "conversations") <> 0 then
@@ -283,22 +275,16 @@ repeat
 		
 
 		'-------------------- send initial text
-		if iEnvironment = 1 then
-			if webClickElement(btnZWSend$, "sending init txt msg") <> 0 then
-				goto nextIteration
-			endif
-		endif
-		if iEnvironment = 2 then
-			clickmouse(left, down, 1385, 1015, absolute)
-			clickmouse(left, up, 1385, 1015, absolute)
-		endif
+		clickmouse(left, down, 1385, 1015, absolute)
+		clickmouse(left, up, 1385, 1015, absolute)
+		pause 1
+		clickmouse(left, down, 1385, 1015, absolute)
+		clickmouse(left, up, 1385, 1015, absolute)
+
 
 		logWorkflowStepSuccess("initial text sent successfully")
-		
-
 
 		'------------------------------------------------------------------------------------------------------------------------------ schedule day before confirm
-
 
 		'-------------------- check if day prior confirm txt is needed
 		if zwPriorDayChk() = 1 then
@@ -404,18 +390,14 @@ repeat
 
 
 		'-------------------- click schedule
-		if iEnvironment = 1 then
-			if webClickElement(btnZWSend$, "scheduling day before confirm msg") <> 0 then
-				goto nextIteration
-			endif
-		endif
-		if iEnvironment = 2 then
-			clickmouse(left, down, 1385, 1015, absolute)
-			clickmouse(left, up, 1385, 1015, absolute)
-		endif
+		clickmouse(left, down, 1385, 1015, absolute)
+		clickmouse(left, up, 1385, 1015, absolute)
+		pause 1
+		clickmouse(left, down, 1385, 1015, absolute)
+		clickmouse(left, up, 1385, 1015, absolute)
+
 
 		logWorkflowStepSuccess("day before confirm scheduled successfully")
-
 
 		'------------------------------------------------------------------------------------------------------------------------------ schedule day of confirm
 
@@ -518,16 +500,11 @@ dayOfConfirm:
 
 
 		'-------------------- click schedule
-		if iEnvironment = 1 then
-			if webClickElement(btnZWSend$, "scheduling day of confirm msg") <> 0 then
-				goto nextIteration
-			endif
-		endif
-		if iEnvironment = 2 then
-			clickmouse(left, down, 1385, 1015, absolute)
-			clickmouse(left, up, 1385, 1015, absolute)
-		endif
-
+		clickmouse(left, down, 1385, 1015, absolute)
+		clickmouse(left, up, 1385, 1015, absolute)
+		pause 1
+		clickmouse(left, down, 1385, 1015, absolute)
+		clickmouse(left, up, 1385, 1015, absolute)
 		logWorkflowSuccess("day of confirm scheduled successfully; workflow complete")
 
 
@@ -550,20 +527,8 @@ until i = 5000
 '##############################################################
 '##   			script end									 ##
 '##############################################################
-write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ", crlf) 
-write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf) 
-write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events detected:            " + str$(iChangeCnt), crlf)
-write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": events with '1st interview' stage: " + str$(iStageCnt), crlf)
-write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": records msgs sent for:             " + str$(iCompleted), crlf)
-write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf)
-write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change event rows detected: " + str$(iChangeCnt), crlf)
-write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 1st Interview events:       " + str$(iStageCnt), crlf)
-write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": records msgs sent for:      " + str$(iCompleted), crlf)
-write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
-write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
-write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
-write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
 
+zwInitLogState()
 
 
 

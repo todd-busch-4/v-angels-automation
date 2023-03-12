@@ -1,5 +1,30 @@
-'
+'###############################################################################################################################################################
+'##  filename:						cg-zwFunctions
+    '##
+    '##  purpose:					library of functions for use in zipwhip workflow script development in order to minimize code duplication, increase script
+    '##								cleanliness/readability, and reduce maintenance efforts by providing a single centralized location for changes
+    '##
+    '##  contents:					zwInitStageChk, zwInitGetData, zwNonStdPhoneFormatChk, zwFmtFirstApptDate, zwFmtDayPriorFirstAppt, zwFmtFirstApptTime,
+    '##								zwInitStatusChk, zwLoginChk, zwAddContactErrorChk, zwFmtInitMsgTxt, zwFmtDayPriorMsgTxt, zwFmtDayOfApptMsgTxt, 
+    '##								zwPriorDayChk, zwInitLogState
+    '##
+'###############################################################################################################################################################
 
+'=============================================================================================================================================================
+'== function name:              zwInitStageChk
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                determines if current stage matches a trigger value
+    '==
+    '== input parms:            none
+    '==
+    '== returns:                int:    0 - success/match
+    '==                                 1 - failure/no match
+    '==
+    '== notes:                  none
+    '==
+'=============================================================================================================================================================*/
 function zwInitStageChk()
 
     if curr_stage$ = "1st Interview" then
@@ -12,6 +37,20 @@ function zwInitStageChk()
 
 endfunction
 
+'=============================================================================================================================================================
+'== function name:              zwInitGetData
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                get worksheet data used by script for the current row
+    '==
+    '== input parms:            none
+    '==
+    '== returns:                int:    0 - success
+    '==
+    '== notes:                  none
+    '==
+'=============================================================================================================================================================*/
 function zwInitGetData()
 
     applicantID$ = arrApplicantID$(i)
@@ -28,6 +67,20 @@ function zwInitGetData()
 
 endfunction
 
+'=============================================================================================================================================================
+'== function name:              zwNonStdPhoneFormatChk
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                checks if current phone has one of known quirky formats and reformats to standard if it does
+    '==
+    '== input parms:            none
+    '==
+    '== returns:                int:    0 - success
+    '==
+    '== notes:                  none
+    '==
+'===============================================================================================================================================================
 function zwNonStdPhoneFormatChk()
     local r
 
@@ -42,6 +95,21 @@ function zwNonStdPhoneFormatChk()
 
 endfunction
 
+'=============================================================================================================================================================
+'== function name:              zwFmtFirstApptDate
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                terseDescription
+    '==
+    '== input parms:            none
+    '==
+    '== returns:                int:    0 - success
+    '==                                 1 - failure
+    '==
+    '== notes:                  none
+    '==
+'===============================================================================================================================================================
 function zwFmtFirstApptDate$(dtDate$)
     local r, p, firstAppDateOnly$, firstAppMonth$, firstAppDay$, firstAppYr$
 
@@ -74,6 +142,21 @@ function zwFmtFirstApptDate$(dtDate$)
 
 endfunction
 
+'=============================================================================================================================================================
+'== function name:              zwFmtDayPriorFirstAppt
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                terseDescription
+    '==
+    '== input parms:            none
+    '==
+    '== returns:                int:    0 - success
+    '==                                 1 - failure
+    '==
+    '== notes:                  none
+    '==
+'===============================================================================================================================================================
 function zwFmtDayPriorFirstAppt$(dtDate$)
     local r, p, l, firstAppDateOnly$, firstAppMonth$, firstAppDay$, firstAppYr$, firstAppPriorDay
 
@@ -116,6 +199,21 @@ function zwFmtDayPriorFirstAppt$(dtDate$)
 
 endfunction
 
+'=============================================================================================================================================================
+'== function name:              zwFmtFirstApptTime
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                terseDescription
+    '==
+    '== input parms:            none
+    '==
+    '== returns:                int:    0 - success
+    '==                                 1 - failure
+    '==
+    '== notes:                  none
+    '==
+'===============================================================================================================================================================
 function zwFmtFirstApptTime$(dtDate$)
     local firstAppLongTime$, dayNightDes$, firstAppTimeNoSecs$, firstAppHour$, firstAppMinutes$
 
@@ -140,6 +238,21 @@ function zwFmtFirstApptTime$(dtDate$)
     zwFmtFirstApptTime$ = firstAppTimeNoSecs$ + dayNightDes$
 endfunction
 
+'=============================================================================================================================================================
+'== function name:              zwInitStatusChk
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                terseDescription
+    '==
+    '== input parms:            none
+    '==
+    '== returns:                int:    0 - success
+    '==                                 1 - failure
+    '==
+    '== notes:                  none
+    '==
+'===============================================================================================================================================================
 function zwInitStatusChk()
 
     write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": checking status of text msg column", crlf)
@@ -158,6 +271,21 @@ function zwInitStatusChk()
 
 endfunction
 
+'=============================================================================================================================================================
+'== function name:              zwLoginChk
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                terseDescription
+    '==
+    '== input parms:            none
+    '==
+    '== returns:                int:    0 - success
+    '==                                 1 - failure
+    '==
+    '== notes:                  none
+    '==
+'===============================================================================================================================================================
 function zwLoginChk()
     local r, x
 
@@ -216,6 +344,21 @@ function zwLoginChk()
 
 endfunction
 
+'=============================================================================================================================================================
+'== function name:              zwAddContactErrorChk
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                terseDescription
+    '==
+    '== input parms:            none
+    '==
+    '== returns:                int:    0 - success
+    '==                                 1 - failure
+    '==
+    '== notes:                  none
+    '==
+'===============================================================================================================================================================
 function zwAddContactErrorChk()
     local r, n
 
@@ -266,21 +409,81 @@ function zwAddContactErrorChk()
 
 endfunction
 
+'=============================================================================================================================================================
+'== function name:              zwFmtInitMsgTxt
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                terseDescription
+    '==
+    '== input parms:            none
+    '==
+    '== returns:                int:    0 - success
+    '==                                 1 - failure
+    '==
+    '== notes:                  none
+    '==
+'===============================================================================================================================================================
 function zwFmtInitMsgTxt$(fname$, appt_day$, appt_time$)
     local fname$, appt_day$, appt_time$
     zwFmtInitMsgTxt$ = "Hello " + fname$ + ",<Enter>Thank you for applying to Visiting Angels. We have scheduled an interview time for you on " + appt_day$ + " at " +  appt_time$ + ". You will be receiving two emails with interview packets (Pre 1st Interview and 1st Interview). Please click the 'Review and Sign' link and provide the information requested. If you do not have internet access to get online and finish the documentation, we can provide you access to a computer in our office (you will need to know your email password). Please bring your photo ID, social security card, and proof of auto insurance. We look forward to seeing you soon!<Enter>"
 endfunction
 
+'=============================================================================================================================================================
+'== function name:              zwFmtDayPriorMsgTxt
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                terseDescription
+    '==
+    '== input parms:            none
+    '==
+    '== returns:                int:    0 - success
+    '==                                 1 - failure
+    '==
+    '== notes:                  none
+    '==
+'===============================================================================================================================================================
 function zwFmtDayPriorMsgTxt$(fname$, appt_day$, appt_time$)
     local fname$, appt_day$, appt_time$
     zwFmtDayPriorMsgTxt$ = "Hello " + fname$ + ",<Enter>You are scheduled for an interview at Visiting Angels Grove City tomorrow " + appt_day$ + " at " +  appt_time$ + ". You should have received emails with Adobe documents to be filled out and signed electronically. It would be extremely helpful in streamlining your interview if you could complete those prior to your arrival. Also, if you have not already done so, please fill out our online application at https://generations.idb-sys.com/OnlineApplication.aspx?guid=ccfff3c9-c5ab-4bea-aeb5-9f8001115743 . Thank you and we look forward to seeing you!"
 endfunction
 
+'=============================================================================================================================================================
+'== function name:              zwFmtDayOfApptMsgTxt
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                terseDescription
+    '==
+    '== input parms:            none
+    '==
+    '== returns:                int:    0 - success
+    '==                                 1 - failure
+    '==
+    '== notes:                  none
+    '==
+'===============================================================================================================================================================
 function zwFmtDayOfApptMsgTxt$(fname$, appt_time$)
     local fname$, appt_time$
     zwFmtDayOfApptMsgTxt$ = "Good morning " + fname$ + ", this is Visiting Angels reminding you of your interview today at " + appt_time$ + ". Please reply to confirm as our office runs on confirmed appointments only.<Enter>Please text '1' to confirm, '2' to reschedule, or '3' to cancel.<Enter>Thank you and we look forward to seeing you."
 endfunction
 
+'=============================================================================================================================================================
+'== function name:              zwPriorDayChk
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                terseDescription
+    '==
+    '== input parms:            none
+    '==
+    '== returns:                int:    0 - success
+    '==                                 1 - failure
+    '==
+    '== notes:                  none
+    '==
+'===============================================================================================================================================================
 function zwPriorDayChk()
 
     if day$() >= firstAppPriorDay$ then
@@ -290,4 +493,38 @@ function zwPriorDayChk()
         exitfunction
     endif
 
+endfunction
+
+'=============================================================================================================================================================
+'== function name:              zwInitLogState
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                terseDescription
+    '==
+    '== input parms:            none
+    '==
+    '== returns:                int:    0 - success
+    '==                                 1 - failure
+    '==
+    '== notes:                  none
+    '==
+'===============================================================================================================================================================
+function zwInitLogState()
+
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ", crlf) 
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf) 
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events detected:            " + str$(iChangeCnt), crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": events with '1st interview' stage: " + str$(iStageCnt), crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": records msgs sent for:             " + str$(iCompleted), crlf)
+    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf)
+    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change event rows detected: " + str$(iChangeCnt), crlf)
+    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 1st Interview events:       " + str$(iStageCnt), crlf)
+    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": records msgs sent for:      " + str$(iCompleted), crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
+    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
+
+    zwInitLogState = 0
 endfunction

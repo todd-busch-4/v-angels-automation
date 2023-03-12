@@ -1,8 +1,6 @@
 '###############################################################################################################################################
 '## author:                 todd busch
 '##
-'## date:                   02/12/2023
-'##
 '## description:            scans the change event column in employment inquiry list.xlsx spreadsheet in package downloads folder; it will 
 '##
 '## run in:					chrome
@@ -16,6 +14,7 @@
 '###############################################################################################################################################
 include "C:\v-angels-automation\framework\CG-globalDimDeclarations\CG-globalDimDeclarations.src"
 include "C:\v-angels-automation\framework\CG-loadWorkflowData\CG-loadWorkflowData.src"
+include "C:\v-angels-automation\framework\CG-globalDataLoaders\CG-globalDataLoaders.src"
 include "C:\v-angels-automation\framework\CG-globalFunctions\CG-globalFunctions.src"
 include "C:\v-angels-automation\framework\CG-arcsFunctions\CG-arcsFunctions.src"
 include "c:\v-angels-automation\framework\CG-globalWinFunctions\CG-globalWinFunctions.src"

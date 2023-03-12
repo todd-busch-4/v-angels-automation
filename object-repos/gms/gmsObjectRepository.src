@@ -60,7 +60,7 @@ dtGMSRehireDate$ = "INPUT TEXT[NAME='EmployeeActionFormsR']"
 inputGMSEmployeeID$ = "SPAN[ID='label36v1']"
 selGMSRehireCode$ = "SELECT[NAME='EmployeeActionFormsRea']"
 inputGMSRHPayRate$ = "INPUT TEXT[NAME='EmployeeActionFormsRhPayR']"
-lblGMSLastNameLabel$ = "SPAN[OUTERTEXT='" + applicantLNameCaps$ + "',ID='label40v1']"
+lblGMSLastNameLabel$ = "SPAN[OUTERTEXT=ID='label40v1']"
 'save button has same descriptor as on new hire page
 
 '-------------------- terminations form
