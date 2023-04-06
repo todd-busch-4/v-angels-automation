@@ -15,6 +15,7 @@
 '##   													scan prep									 						##
 '#############################################################################################################################
 include "C:\v-angels-automation\framework\CG-globalDimDeclarations\CG-globalDimDeclarations.src"
+include "C:\v-angels-automation\framework\CG-globalLogging\CG-globalLogging.src"
 include "C:\v-angels-automation\framework\CG-globalFunctions\CG-globalFunctions.src"
 include "C:\v-angels-automation\framework\CG-globalSubDefinitions\CG-globalSubDefinitions.src"
 include "C:\v-angels-automation\framework\CG-globalVariables\CG-globalVariables.src"
@@ -58,27 +59,15 @@ if res = 0 then
 	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": browser invoked and loaded sharepoint page", crlf)
 endif
 pause 5
+endpause
 
 '-------------------- select employment inquiry doc
 usewindow( "CHROME.EXE|Chrome_WidgetWin_1|CareGiver Portal - WinTask Data - All Documents - Google Chrome", 1)
-if iEnvironment = 1 then
-	res = clickonbitmap(imagePath$ + "sharepoint-excelIcon.bmp", left, single)	'easiest way to set focus to row given issues wintask has seeing/clicking certain containing elements
-	'------- error handling
-	if res <> 0 then
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": could not set focus to document row", crlf)
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
-		hardcopy(screenshotsPath$ + currScript$ + "-sel_doc_row_.bmp", 1, 1)
-		closebrowser()
-		criticalStop()
-	endif
-endif
-if iEnvironment = 2 then
-	clickmouse(left, down, 330, 421, absolute)
-	clickmouse(left, up, 330, 421, absolute)
-endif
-'------- debug logging
-write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": selected employment inquiry doc row", crlf)
+clickmouse(left, down, 600, 450, absolute)
+clickmouse(left, up, 600, 450, absolute)
+logMsgStd("selected doc row")
 pause 2
+endpause
 
 '-------------------- click download link
 usepage("CareGiver Portal - WinTask Data - All Documents")
@@ -99,6 +88,7 @@ endif
 
 '-------------------- allow doc to complete download
 pause 5
+endpause
 
 
 '-------------------- copy to package directory
@@ -133,7 +123,7 @@ run(scriptsPath$ + "CG-adobeCancelPackets\CG-adobeCancelPackets.rob")
 run(scriptsPath$ + "CG-zipwhipInitTxtMsgs\CG-zipwhipInitTxtMsgs.rob")
 run(scriptsPath$ + "CG-gmsSubmitForm\CG-gmsSubmitForm.rob")
 run(scriptsPath$ + "CG-gmsTerminations\CG-gmsTerminations.rob")
-run(scriptsPath$ + "CG-gmsAddLegalFunctions\CG-gmsAddLegalFunctions.rob")
+run(scriptsPath$ + "CG-gmsAddLegalFee\CG-gmsAddLegalFee.rob")
 
 
 '#############################################################################################################################

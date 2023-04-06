@@ -88,13 +88,13 @@ repeat
 
 
 		'-------------------- check for scheduled appointment
-		if chkNullDataElement(applicant1stApp$) = 1 then
+		if nullDataElementChk(applicant1stApp$) = 1 then
 			goto nextIteration
 		endif
 
 
 		'-------------------- check for phone number
-		if chkNullDataElement(applicantPhone$) = 1 then
+		if nullDataElementChk(applicantPhone$) = 1 then
 			goto nextIteration
 		endif
 

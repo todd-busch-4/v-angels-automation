@@ -17,15 +17,15 @@
 include "C:\v-angels-automation\framework\CG-globalDimDeclarations\CG-globalDimDeclarations.src"
 include "C:\v-angels-automation\framework\CG-loadWorkflowData\CG-loadWorkflowData.src"
 include "C:\v-angels-automation\framework\CG-globalDataLoaders\CG-globalDataLoaders.src"
-include "C:\v-angels-automation\framework\CG-globalWebFunctions\CG-globalWebFunctions.src"
-include "C:\v-angels-automation\framework\CG-globalWinFunctions\CG-globalWinFunctions.src"
-include "C:\v-angels-automation\framework\CG-globalWebValidations\CG-globalWebValidations.src"
 include "C:\v-angels-automation\framework\CG-globalFunctions\CG-globalFunctions.src"
 include "C:\v-angels-automation\framework\CG-gmsFunctions\CG-gmsFunctions.src"
+include "c:\v-angels-automation\framework\CG-globalWinFunctions\CG-globalWinFunctions.src"
+include "c:\v-angels-automation\framework\CG-globalWebFunctions\CG-globalWebFunctions.src"
+include "c:\v-angels-automation\framework\CG-globalWebValidations\CG-globalWebValidations.src"
 include "C:\v-angels-automation\framework\CG-globalLogging\CG-globalLogging.src"
 include "C:\v-angels-automation\framework\CG-globalSubDefinitions\CG-globalSubDefinitions.src"
-include "C:\v-angels-automation\framework\CG-globalVariables\CG-globalVariables.src" 
-include "C:\v-angels-automation\object-repos\gms\gmsObjectRepository.src" 
+include "C:\v-angels-automation\framework\CG-globalVariables\CG-globalVariables.src"
+include "C:\v-angels-automation\object-repos\gms\gmsObjectRepository.src"
 
 
 currScript$ = "CG-gmsSubmitForm"
@@ -162,9 +162,6 @@ repeat
 				goto nextIteration
 			endif
 			pause 2
-			if gmsSubmitErrorChk() = 1 then
-				goto nextIteration
-			endif
 			if webValidateText(inputGMSWorkLoc$, "1", "entering work loc") <> 0 then
 				goto nextIteration
 			endif
@@ -175,14 +172,26 @@ repeat
 			if webEnterText(inputGMSSocial$, applicantSSN$, "entering ssn") <> 0 then
 				goto nextIteration
 			endif
-			if gmsSubmitErrorChk() = 2 then
-				goto rehireFlow
-			endif
-			if gmsSubmitErrorChk() = 1 then
-				goto nextIteration
-			endif
 			if webValidateText(inputGMSSocial$, applicantSSN$, "entering ssn") <> 0 then
 				goto nextIteration
+			endif
+
+
+			'-------------------- shift focus from ssn field to fire check
+			usewindow(wndGMSNewHireForm$, 1)
+			if winSendKeys("<tab>", "shift focus off ssn") <> 0 then
+				goto nextIteration
+			endif
+			pause 1
+			
+			
+			'-------------------- check for popup error
+			iStatus = gmsSubmitPopupChk()
+			if iStatus = 2 then
+				goto rehireFlow
+			endif
+			if iStatus = 1 then
+				goto nextiteration
 			endif
 
 
@@ -191,9 +200,7 @@ repeat
 			if webEnterText(inputGMSFirstName$, applicantFName$, "entering first name") <> 0 then
 				goto nextIteration
 			endif
-			if gmsSubmitErrorChk() = 1 then
-				goto nextIteration
-			endif
+			pause 1
 			if webValidateText(inputGMSFirstName$, applicantFName$, "entering first name") <> 0 then
 				goto nextIteration
 			endif
@@ -204,9 +211,7 @@ repeat
 			if webEnterText(inputGMSLastName$, applicantLName$, "entering last name") <> 0 then
 				goto nextIteration
 			endif
-			if gmsSubmitErrorChk() = 1 then
-				goto nextIteration
-			endif
+			pause 1
 			if webValidateText(inputGMSLastName$, applicantLName$, "entering last name") <> 0 then
 				goto nextIteration
 			endif
@@ -217,9 +222,7 @@ repeat
 			if webEnterText(inputGMSEmail$, applicantEmail$, "entering email") <> 0 then
 				goto nextIteration
 			endif
-			if gmsSubmitErrorChk() = 1 then
-				goto nextIteration
-			endif
+			pause 1
 			if webValidateText(inputGMSEmail$, applicantEmail$, "entering email") <> 0 then
 				goto nextIteration
 			endif
@@ -230,20 +233,50 @@ repeat
 			if webEnterText(dtGMSCompanyStartDt$, startDateCompany$, "entering company start date") <> 0 then
 				goto nextIteration
 			endif
-			if gmsSubmitErrorChk() = 1 then
-				goto nextIteration
-			endif
+			pause 1
 			if webValidateText(dtGMSCompanyStartDt$, startDateCompany$, "entering company start date") <> 0 then
 				goto nextIteration
 			endif
+			pause 1
 
-																																							
+
+			'-------------------- close date picker control
+			usewindow(wndGMSNewHireForm$, 1)
+			if winSendKeys("<tab><tab>", "closing date picker control") <> 0 then
+				goto nextIteration
+			endif
+			pause 1
+
+
 			'-------------------- enter position
 			clickhtmlelement(inputGMSPosition$)
 			if webEnterText(inputGMSPosition$, position$, "entering position") <> 0 then
 				goto nextIteration
 			endif
-			if webValidateText(inputGMSEmployType$, employType$, "entering employment type") <> 0 then
+			pause 1
+			if webValidateText(inputGMSPosition$, position$, "entering position") <> 0 then
+				goto nextIteration
+			endif
+
+
+			'-------------------- enter status
+			clickhtmlelement(inputGMSEmployStatus$)
+			if webEnterText(inputGMSEmployStatus$, employStatus$, "entering status") <> 0 then
+				goto nextIteration
+			endif
+			pause 1
+			if webValidateText(inputGMSEmployStatus$, employStatus$, "entering status") <> 0 then
+				goto nextIteration
+			endif
+
+
+			'-------------------- enter type
+			clickhtmlelement(inputGMSEmployType$)
+			if webEnterText(inputGMSEmployType$, employType$, "entering type") <> 0 then
+				goto nextIteration
+			endif
+			pause 1
+			if webValidateText(inputGMSEmployType$, employType$, "entering type") <> 0 then
 				goto nextIteration
 			endif
 
@@ -253,9 +286,7 @@ repeat
 			if webEnterText(inputGMSBenefitGrp$, benefitGroup$, "entering benefit group") <> 0 then
 				goto nextIteration
 			endif
-			if gmsSubmitErrorChk() = 1 then
-				goto nextIteration
-			endif
+			pause 1
 			if webValidateText(inputGMSBenefitGrp$, benefitGroup$, "entering benefit group") <> 0 then
 				goto nextIteration
 			endif
@@ -266,9 +297,7 @@ repeat
 			if webEnterText(inputGMSPayGrp$, payGroup$, "entering pay group") <> 0 then
 				goto nextIteration
 			endif
-			if gmsSubmitErrorChk() = 1 then
-				goto nextIteration
-			endif
+			pause 1
 			if webValidateText(inputGMSPayGrp$, payGroup$, "entering pay group") <> 0 then
 				goto nextIteration
 			endif
@@ -278,24 +307,24 @@ repeat
 			if webSelectItem(selGMSPayMethod$, payMethod$, "selecting pay method") <> 0 then
 				goto nextIteration
 			endif
-			if gmsSubmitErrorChk() = 1 then
-				goto nextIteration
-			endif
+			pause 1
 			if webValidateText(selGMSPayMethod$, "H", "selecting pay method") <> 0 then
 				goto nextIteration
 			endif
 
 
 			'-------------------- enter pay rate
-			clickhtmlelement(inputGMSPayRate$)
+			'usewindow(wndGMSNewHireForm$, 1)
+			if winSendKeys("<tab>", "set focus to pay rate") <> 0 then
+				goto nextIteration
 			pause 1
-			if webEnterText(inputGMSPayRate$, payRate$, "entering pay rate") <> 0 then
+			endif
+			clickhtmlelement(inputGMSPayRate$)
+			if winSendKeys(payRate$, "entering pay rate") <> 0 then
 				goto nextIteration
 			endif
-			if gmsSubmitErrorChk() = 1 then
-				goto nextIteration
-			endif
-			pause 2
+			pause 1
+			usepage(pgGMSNewHireForm$)
 			if webValidateText(inputGMSPayRate$, payRate$, "entering pay rate") <> 0 then
 				goto nextIteration
 			endif
@@ -306,9 +335,7 @@ repeat
 			if webEnterText(inputGMSStdHours$, stdHours$, "entering std hours") <> 0 then
 				goto nextIteration
 			endif
-			if gmsSubmitErrorChk() = 1 then
-				goto nextIteration
-			endif
+			pause 1
 			if webValidateText(inputGMSStdHours$, stdHours$, "entering std hours") <> 0 then
 				goto nextIteration
 			endif
@@ -374,7 +401,7 @@ rehireFlow:
 				goto nextIteration
 			endif
 			pause 1
-			if gmsSubmitNoRehireChk() = 1 then
+			if gmsSubmitPopupChk() = 1 then
 				goto nextIteration
 			endif
 			if webValidateElement(lblGMSLastNameLabel$, "last name label", "entering ssn") <> 1 then

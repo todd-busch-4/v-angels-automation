@@ -27,7 +27,8 @@ res = StartBrowser("CH", employmentInquirySharePointPath$, 3)
 
 '-------------------- select employment inquiry doc
 UseWindow( "CHROME.EXE|Chrome_WidgetWin_1|CareGiver Portal - WinTask Data - All Documents - Google Chrome", 1)
-res = ClickOnBitmap(imagePath$ + "sharepoint-excelIcon.bmp", left, single )	'easiest way to set focus to row given issues wintask has seeing/clicking certain containing elements
+clickmouse(left, down, 400, 450, absolute)
+clickmouse(left, up, 400, 450, absolute)
 
 
 '-------------------- click download link

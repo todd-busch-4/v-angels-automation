@@ -1,30 +1,27 @@
-/*#############################################################################################################################################################
-##  filename:						cg-globalFunctions
-##
-##  purpose:						library of general functions for use in caregiver workflow script development in order to minimize code
-##									duplication, increase script cleanliness/readability, and reduce maintenance efforts by providing a single
-##									centralized location for changes
-##
-##  contents:						zeroPadDate$, formatSSN$, checkForNullSSN, loadEmploymentInquiryRows, convertStateFromCode$
-##
-#############################################################################################################################################################*/
+'#############################################################################################################################################################
+'##  filename:				cg-globalFunctions
+'##
+'##  purpose:				library of general functions for use in caregiver workflow script development in order to minimize code duplication, increase
+'##							script cleanliness/readability, and reduce maintenance efforts by providing a single centralized location for changes
+'##
+'#############################################################################################################################################################
 
 '=============================================================================================================================================================
-'== function name:           zeroPadDate$
+'== function name:           	zeroPadDate$
 	'==
-	'== developer:               todd busch
+	'== developer:              todd busch
 	'==
-	'== purpose:                 adds a leading zero to single digit day and month parts of a short formatted date (m/d/yyyy)
+	'== purpose:                adds a leading zero to single digit day and month parts of a short formatted date (m/d/yyyy)
 	'==
-	'== input parms:             dt_date$:	date to be formatted
+	'== input parms:            dt_date$:	date to be formatted (must be in short format)
 	'==
-	'== returns:                 string:		the converted date with leading zeros
+	'== returns:                string:	the converted date with leading zeros
 	'==
-	'== notes:                   n/a
+	'== notes:                  n/a
 	'==
-'=============================================================================================================================================================*/
+'=============================================================================================================================================================
 function zeroPadDate$(dt_date$)
-	local r
+	local r, dt_date$, dtDay$, dtYr$, dtMo$
 
 	'-------------------- parse date into parts
 	'get day part
@@ -53,27 +50,27 @@ function zeroPadDate$(dt_date$)
 endfunction
 
 '=============================================================================================================================================================
-'== function name:           formatSSN$
+'== function name:           	formatSSN$
 	'==
-	'== developer:               todd busch
+	'== developer:              todd busch
 	'==
-	'== purpose:                 adds dashes to specified ssn if it does not have them
+	'== purpose:                adds dashes to specified ssn if it does not have them
 	'==
-	'== input parms:            	str_ssn$:	the ssn to be formatted
+	'== input parms:            str_ssn$:	the ssn to be formatted
 	'==
-	'== returns:                 string:		the formatted ssn with dashes
+	'== returns:                string:		the formatted ssn with dashes
 	'==
-	'== notes:                   n/a
+	'== notes:                  n/a
 	'==
-'=============================================================================================================================================================*/
+'=============================================================================================================================================================
 function formatSSN$ (str_ssn$)
-     local middle$, pre$, post$
+     local str_ssn$, middle$, pre$, post$
    
-    if instr(str_ssn$, "-")  = 0 then
+    if instr(str_ssn$, "-") = 0 then
         'divide # into parts
-        pre$ = left$(applicantSSN$, 3)
-        middle$ = mid$(applicantSSN$, 4, 2)
-        post$ = right$(applicantSSN$, 4)
+        pre$ = left$(str_ssn$, 3)
+        middle$ = mid$(str_ssn$, 4, 2)
+        post$ = right$(str_ssn$, 4)
 
         'assemble string    
         formatSSN$ = pre$ + "-" + middle$ + "-" + post$
@@ -85,52 +82,124 @@ function formatSSN$ (str_ssn$)
 endfunction
 
 '=============================================================================================================================================================
-'== function name:           chkNullDataElement
+'== function name:           	nullDataElementChk
 	'==
-	'== developer:               todd busch
+	'== developer:              todd busch
 	'==
-	'== purpose:                 checks value from employment inquiry ssn column for blank value
+	'== purpose:                checks specified data element for a null value
 	'==
-	'== returns:                 int:	0 - contained ssn
-	'==									1 - ssn was null
+	'== returns:                int:	0 - not null
+	'==									1 - null value
 	'==
-	'== notes:                   none
+	'== notes:                  none
 	'==
-'=============================================================================================================================================================*/
-function chkNullDataElement(element$)
+'=============================================================================================================================================================
+function nullDataElementChk(str_object$)
+	local str_object$
 
-	if element$ = "" or element$ = "[]"then
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + element$ + " col did not contain a value for the current row", crlf)
+	if str_object$ = "" or str_object$ = "[]" then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + str_object$ + " did not contain a value for the current row", crlf)
 		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
 		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
 		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - null " + element$, crlf + crlf)
-		checkForNullSSN = 1
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": nullDataElementChk: null value: [" + str_object$ + "]", crlf + crlf)
+		nullDataElementChk = 1
+		exitfunction
 	else
-		checkForNullSSN = 0
+		nullDataElementChk = 0
 	endif
 
 endfunction
 
 '=============================================================================================================================================================
-'== function name:           convertStateFromCode$
+'== function name:           	convStateToName$
 	'==
-	'== developer:               todd busch
+	'== developer:              todd busch
 	'==
-	'== purpose:                 terseDescription
+	'== purpose:                converts the specified state value from whatever the current form is to the capitalized name
 	'==
-	'== input parms:            	paramName:	purpose
+	'== input parms:            str_state$:		the state value to convert
 	'==
-	'== returns:                 typeValue
+	'== returns:                str:			the capitalized state name (e.g. Ohio)
 	'==
-	'== notes:                   pertinentinfo
+	'== notes:                  none
 	'==
-'=============================================================================================================================================================*/
-function convertStateFromCode$(state$)
+'=============================================================================================================================================================
+function convStateToName$(str_state$)
+	local str_state$
 
-	if state$ = "OH" then
-		convertStateFromCode$ = "Ohio"
+	if str_state$ = "OH" then
+		convStateToName$ = "Ohio"
+		exitfunction
 	endif
+	if str_state$ = "Oh" then
+		convStateToName$ = "Ohio"
+		exitfunction
+	endif
+	if str_state$ = "Ohio" then
+		convStateToName$ = "Ohio"
+		exitfunction
+	endif
+	if str_state$ = "OHIO" then
+		convStateToName$ = "Ohio"
+		exitfunction
+	endif
+
+endfunction
+
+'=============================================================================================================================================================
+'== function name:				convStateToCode$
+	'==
+	'== developer:              todd busch
+	'==
+	'== purpose:                converts the specified state value from whatever the current form is to the all caps state code
+	'==
+	'== input parms:            str_state$:		the state value to convert
+	'==
+	'== returns:                str:			the all caps state code (e.g. OH)
+	'==
+	'== notes:                  none
+	'==
+'=============================================================================================================================================================
+function convStateToCode$(str_state$)
+	local str_state$
+	
+	'-------------------- ohio
+	if str_state$ = "OH" then
+		convStateToCode$ = "OH"
+		exitfunction
+	endif
+	if str_state$ = "Oh" then
+		convStateToCode$ = "OH"
+		exitfunction
+	endif
+	if str_state$ = "Ohio" then
+		convStateToCode$ = "OH"
+		exitfunction
+	endif
+	if str_state$ = "OHIO" then
+		convStateToCode$ = "OH"
+		exitfunction
+	endif
+
+	'-------------------- tennessee
+	if str_state$ = "TN" then
+		convStateToCode$ = "TN"
+		exitfunction
+	endif
+	if str_state$ = "Tn" then
+		convStateToCode$ = "TN"
+		exitfunction
+	endif
+	if str_state$ = "Tennessee" then
+		convStateToCode$ = "TN"
+		exitfunction
+	endif
+	if str_state$ = "TENNESSEE" then
+		convStateToCode$ = "TN"
+		exitfunction
+	endif
+
 
 endfunction

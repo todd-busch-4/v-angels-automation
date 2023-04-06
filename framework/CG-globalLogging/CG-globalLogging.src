@@ -163,3 +163,26 @@ function logWorkflowSuccess(text$)
 	write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + text$, crlf + crlf)
 	logWorkflowSuccess = 0
 endfunction
+
+'=============================================================================================================================================================
+'== function name:				logMsgStd
+	'==
+	'== developer:              todd busch
+	'==
+	'== purpose:                terseDescription
+	'==
+	'== input parms:            none
+	'==
+	'== returns:                int:	0 - success
+	'==									1 - failure
+	'==
+	'== notes:                  none
+	'==
+'===============================================================================================================================================================
+function logMsgStd(str_msg$)
+	local str_msg$
+
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + str_msg$, crlf)
+	logMsgStd = 0
+
+endfunction
