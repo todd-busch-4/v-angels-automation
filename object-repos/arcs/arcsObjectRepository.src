@@ -4,44 +4,44 @@
 ##  contents:						contains window and object definitions for the arcs web application
 ##
 #############################################################################################################################################################*/
-
-urlArcsNewScreening$ = "https://arcs.ohio.gov/BCS/NewScreening"
-
-'======================================================================= window definitions =====================================================================
-wndArcsHomePage$ = "CHROME.EXE|Chrome_WidgetWin_1|ARCS Home - Google Chrome"
-
-
-'======================================================================= page definitions =====================================================================
-pgArcsLogin$ = "Login"
-pgArcsNewApplicant$ = "ARCS New Applicant"
-
-
-
-
-'======================================================================= object definitions =====================================================================
 '-------------------- login page
+urlArcsLogin$ = "https://arcs.ohio.gov/BCS/Auth?ReturnUrl=%2fBCS%2fHome"
+wndArcsLogin$ = "CHROME.EXE|Chrome_WidgetWin_1|Login - Google Chrome"
+pgArcsLogin$ = "Login"
 inputArcsUsername$ = "INPUT TEXT[NAME='UserName']"
 inputArcsPassword$ = "INPUT PASSWORD[NAME='Password']"
 btnArcsLogin$ = "BUTTON[INNERTEXT='Login']"
 
 '-------------------- home page
+urlArcsHomePage$ = "https://arcs.ohio.gov/BCS/Home"
+wndArcsHomePage$ = "CHROME.EXE|Chrome_WidgetWin_1|ARCS Home - Google Chrome"
+pgArcsHome$ = "ARCS Home"
 imgARCSLogo$ = "IMG[SRC='https://arcs.ohio.go']"
+lnkArcsNewApp$ = "A[INNERTEXT='Add New']"
 
 '-------------------- end user agreement
 chkArcsAccepted$ = "INPUT CHECKBOX[NAME='Accepted']"
 btnArcsSubmit$ = "BUTTON[INNERTEXT='Submit']"
 
 '-------------------- new applicant search
+urlArcsNewScreening$ = "https://arcs.ohio.gov/BCS/NewScreening"
+wndArcsNewApplicant$ = "CHROME.EXE|Chrome_WidgetWin_1|ARCS New Applicant - Google Chrome"
+pgArcsNewApplicant$ = "ARCS New Applicant"
 inputArcsSSN$ = "INPUT TEXT[NAME='Ssn']"
 inputArcsLName$ = "INPUT TEXT[NAME='LastName']"
-btnArcaSearch$ = "BUTTON[INNERTEXT='Search']"
+btnArcsSearch$ = "BUTTON[INNERTEXT='Search']"
 btnArcsAddNewApplicant$ = "BUTTON[INNERTEXT='Add New Applicant']"
 
 '-------------------- person summary page
+wndArcsPersSummary$ = "CHROME.EXE|Chrome_WidgetWin_1|ARCS Person Summary - Google Chrome"
+pgArcsPersSummary$ = "ARCS Person Summary"
+btnArcsEdit$ = "BUTTON[INNERTEXT='Edit']"
 btnArcsAddNewApplication$ = "BUTTON[INNERTEXT='Add New Application']"
 btnArcsCaseNotes$ = "BUTTON[INNERTEXT='Case Notes']"
 
-'-------------------- new applicant form - personal & demographic
+'-------------------- new applicant form - profile - personal & demographic
+wndArcsProfileDemo$ = "CHROME.EXE|Chrome_WidgetWin_1|ARCS Create Applicant Profile - Google Chrome"
+pgArcsProfileDemo$ = "ARCS Create Applicant Profile"
 hdrArcsProfile$ = "H1[CONTENT='Profile']"
 inputArcsFName$ = "INPUT TEXT[NAME='FirstName']"
 inputArcsConfirmSsn$ = "INPUT TEXT[NAME='ConfirmSsn']"
@@ -59,6 +59,53 @@ btnArcsAddAlias$ = "BUTTON[INNERTEXT='Add Alias']"
 btnArcsAddPriorAddr$ = "BUTTON[INNERTEXT='Add Prior Address']"
 btnArcsNext$ = "BUTTON[INNERTEXT='Next']"
 
+'-------------------- new applicant form - profile - pre-employment
+wndArcsProfilePreEmpl$ = "CHROME.EXE|Chrome_WidgetWin_1|ARCS Pre-Employment Information - Google Chrome"
+pgArcsProfilePreEmpl$ = "ARCS Pre-Employment Information"
+selArcsPosCategory$ = "SELECT[NAME='PositionCategoryId']"
+selArcsPosition$ = "SELECT[NAME='PositionId']"
+selArcsEmplType$ = "SELECT[NAME='EmployeeTypeId']"
+btnArcsSaveClose$ = "BUTTON[INNERTEXT='Save and Close']"
+btnArcsBack$ = "BUTTON[INNERTEXT='Back']"
+btnArcsNext$ = "BUTTON[INNERTEXT='Next']"
+btnArcsLicClose$ = "BUTTON[INNERTEXT='Close Due to Invalid']"
+
+'-------------------- new applicant form - profile - verify identity
+wndArcsProfileVerifyID$ = "CHROME.EXE|Chrome_WidgetWin_1|ARCS Verify Identity - Google Chrome"
+pgArcsProfileVerifyID$ = "ARCS Verify Identity"
+selArcsIDType$ = "SELECT[NAME='ADocId']"
+inputArcsIssueAuth$ = "INPUT TEXT[NAME='AIssuingAuthority']"
+inputArcsIDNum$ = "INPUT TEXT[NAME='ADocNumber']"
+inputArcsIDExp$ = "INPUT TEXT[NAME='AExpirationDate']"
+btnArcsSaveClose$ = "BUTTON[INNERTEXT='Save and Close']"
+btnArcsUploadDoc$ = "BUTTON[INNERTEXT='Upload Document']"
+btnArcsNext$ = "BUTTON[INNERTEXT='Next']"
+
+'-------------------- new applicant form - profile - confirm consent
+wndArcsProfileConsent$ = "CHROME.EXE|Chrome_WidgetWin_1|ARCS - Google Chrome"
+pgArcsProfileConsent$ = "ARCS"
+hdrArcsConfirmConsent$ = "H1[CONTENT='Confirm']"
+chkArcsConsent$ = "INPUT CHECKBOX[NAME='consentIds']"
+btnArcsSaveClose$ = "BUTTON[INNERTEXT='Save and Close']"
+btnArcsBack$ = "BUTTON[INNERTEXT='Back']"
+btnArcsNext$ = "BUTTON[INNERTEXT='Next']"
+
+'-------------------- research registries
+wndArcsRegistryChk$ = "CHROME.EXE|Chrome_WidgetWin_1|ARCS Registry Check - Google Chrome"
+pgArcsRegistryChk$ = "ARCS Registry Check"
+btnArcsSaveClose$ = "BUTTON[INNERTEXT='Save and Close']"
+selArcsResultsMedicaid$ = "SELECT[NAME='ko_unique_1']"
+selArcsResultsOIG$ = "SELECT[NAME='ko_unique_2']"
+selArcsResultsNNAR$ = "SELECT[NAME='ko_unique_3']"
+selArcsResultsODRC$ = "SELECT[NAME='ko_unique_4']"
+selArcsResultsDODD$ = "SELECT[NAME='ko_unique_5']"
+selArcsResultsAGO$ = "SELECT[NAME='ko_unique_6']"
+lnkArcsExclPartiesList$ = "A[INNERTEXT='Excluded Parties Lis']"
+selArcsExclPartiesList$ = "SELECT[NAME='ko_unique_7']"
 
 
-'======================================================================= data definitions =====================================================================
+
+'-------------------- sams.gov
+inputSamsSrc$ = "INPUT SEARCH[NAME='search']"
+btnSamsSrc$ = "BUTTON[CLASS='usa-button ng-star-i']"
+

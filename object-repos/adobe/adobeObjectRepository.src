@@ -7,17 +7,20 @@
 
 '======================================================================= window definitions =====================================================================
 wndAdobeHomePage$ = "CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Home - Google Chrome"
+wndAdobeMainPage$ = "CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat - Google Chrome"
 wndAdobeESign$ = "CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat E-Sign - Google Chrome"
 wndAdobeDocView$ = "CHROME.EXE|Chrome_WidgetWin_1|Adobe Acrobat Documents - Google Chrome"
 
 '======================================================================= page definitions =====================================================================
 pgAdobeLogin$ = "Adobe ID"
+pgAdobeMain$ = "Adobe Acrobat"
 pgAdobeHomePage$ = "Adobe Acrobat Home"
 
 
 '======================================================================= object definitions =====================================================================
 '-------------------- global
 btnAdobeContinue$ = "SPAN[OUTERTEXT='Continue']"
+btnAdobeSelFiles$ = "BUTTON[INNERTEXT='Select files']"
 
 '-------------------- login page
 inputAdobeUsername$ = "INPUT EMAIL[NAME='username']"
@@ -32,10 +35,17 @@ txtAdobeNoResults$ = "DIV[OUTERTEXT='No', INDEX=8]"
 
 '-------------------- file select popup dialogbox
 lnkAdobeDocs$ = "SPAN[OUTERTEXT='Documents', INDEX=3]"
-lnkAdobeAutomated$ = "DIV[OUTERTEXT='Auto', INDEX=9]"
-lnkAdobeEmployeeForms$ = "DIV[CONTENT='EmployeEmployee']"
-lnkAdobePre1stPkt$ = "DIV[CONTENT='PRE 1st IntervPRE']"
-lnkAdobe1stIntPkt$ = "DIV[OUTERTEXT='1st', INDEX=8]"
+lnkAdobeAutomated$ = "DIV[OUTERTEXT='AutoAutomateddetam',INDEX=6]"
+lnkAdobeEmployeeForms$ = "DIV[OUTERTEXT='EmployeEmployee',INDEX=6]"
+lnkAdobeApplToNewHireForms$ = "SPAN[CLASS='szBN4hIsWfmfCc5CthDq',INDEX=61]"
+lnkAdobePre1stPkt$ = "SPAN[OUTERTEXT='e',INDEX=6]"
+lnkAdobePre1stPktOrig$ = "DIV[CONTENT='PRE 1st IntervPRE']"
+lnkAdobe1stIntPkt$ = "INPUT CHECKBOX[ID='react-spectrum-113-0']"
+lnkAdobe1stIntPktOrig$ = "DIV[OUTERTEXT='1st', INDEX=8]"
+btnAdobeSelPktContinue$ = "BUTTON[INNERTEXT='Continue']"
+
+'-------------------- get doc signed page
+lblAdobeStatusAdd$ = "DIV[OUTERTEXT='current',INDEX=6]"
 
 '-------------------- document view - right verticle panel
 lblAdobeStatus$ = "SPAN[OUTERTEXT='Status']"

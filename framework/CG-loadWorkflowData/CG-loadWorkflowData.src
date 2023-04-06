@@ -285,6 +285,14 @@ function LoadWorkflowData(script$)
 			loadEmploymentInquiryData = 1
 			exitfunction
 		endif
+		'-------------------- zip
+		r = readexcel (employmentInquiryPath$, employmentInquiryZipCol$, arrApplicantZip$())
+		if instr(str$(r), "-") <> 0 then
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading zip column.  error_code: (" + str$(r) + ")", crlf)
+			write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (zip)", crlf)
+			loadEmploymentInquiryData = 1
+			exitfunction
+		endif
 		'-------------------- county
 		r = readexcel (employmentInquiryPath$, employmentInquiryCountyCol$, arrApplicantCounty$())
 		if instr(str$(r), "-") <> 0 then

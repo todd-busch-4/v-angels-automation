@@ -1,16 +1,17 @@
 '###############################################################################################################################################
 '## author:                 todd busch
 '##
-'## description:            scans the change event column in employment inquiry list.xlsx spreadsheet in package downloads folder; it will 
+'## description:            scans the change event column in employment inquiry list.xlsx spreadsheet in package downloads folder; for rows
+'##							with a 'yes' value 
 '##
 '## run in:					chrome
-'#\\]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]============================+???_________
+'##
 '## notes:                  none
 '##							
 '###############################################################################################################################################
 
 '###############################################################################################################################################
-'##   													script prep																			  ##
+'##   													script prep																			  
 '###############################################################################################################################################
 include "C:\v-angels-automation\framework\CG-globalDimDeclarations\CG-globalDimDeclarations.src"
 include "C:\v-angels-automation\framework\CG-loadWorkflowData\CG-loadWorkflowData.src"
@@ -32,19 +33,19 @@ currScript$ = "CG-arcsSubmitApp"
 #IgnoreErrors = 1
 
 
-'----------------------------------------------------------------------------------------------------------------------------------------------- read in columns from employment inquiry doc
+'------------------------------------------------------------------------------------------------------------------------------  read in columns from employment inquiry doc
 if LoadWorkflowData(currScript$) = 1 then
 	criticalStop()
 endif
 
 
 '###############################################################################################################################################
-'##   													script start																		  ##
+'##   													script start																		  
 '###############################################################################################################################################
 logStartScript("arcs submit")
 
+'------------------------------------------------------------------------------------------------------------------------------ begin iterating through change event column
 
-'----------------------------------------------------------------------------------------------------------------------------------------------- begin iterating through change event column
 i = 0
 
 
@@ -56,214 +57,390 @@ repeat
 
 
 	if curr_status$ = "Yes" then
-
-
-		iEventCnt = iEventCnt + 1	'change event counter
-		iExcelRow = i + 2			'add 1 for header row and 1 for zero indexed arrays
+		iEventCnt = iEventCnt + 1
+		iExcelRow = i + 2
 		logEventFound()
 
+'------------------------------------------------------------------------------------------------------------------------------ stage check
 
-		'-------------------- get the stage for the current change event
+		'-------------------- get stage for current change event
 		curr_stage$ = arrCurrentStage$(i)
 
 
-		if curr_stage$ = "2nd Interview" or curr_stage$ = "2nd Interview Rescheduled" or curr_stage$ = "On-board" then
-
+		if arcsSubAppStageChk() = 0 then
 			iTriggeredCnt = iTriggeredCnt + 1
 			logStageMatch()			
-			
-			'-------------------- get data values for current record from employment inquiry
-			arcsGetCurrData()
-			logDataValues()
-			convState$ = convertStateFromCode$(applicantState$)
-			convPriorState$ = convertStateFromCode$(applicantPriorState$)
-			applicantBDay$ = zeroPadDate$(applicantBDay$)
+		else
+			logStageBypass()	
+		endif
+
+		'-------------------- get data values for current record
+		arcsSubAppGetCurrData()
+		logDataValues()
+		stateNm$ = convStateToName$(applicantState$)
+		stateCode$ = convStateToCode$(applicantState$)
+		priorStateNm$ = convStateToName$(applicantPriorState$)
+		priorStateCode$ = convStateToCode$(applicantPriorState$)
+		applicantBDay$ = zeroPadDate$(applicantBDay$)
+		idStateCode$ = convStateToCode$(applicantIDState$)
+		idExpDate$ = zeroPadDate$(applicantIDExpDate$)
+
+'------------------------------------------------------------------------------------------------------------------------------ status check
+
+		'-------------------- verify background check is ready to be submitted
+		if arcsSubAppStatusChk() = 1 then
+			goto nextIteration
+		endif
 
 
-			'-------------------- verify background check is ready to be submitted
-			if arcsStatusChk() = 1 then
-				goto nextIteration
-			endif
+		'-------------------- verify all required data is provided
+		if arcsSubAppReqDataChk() = 1 then
+			goto nextIteration
+		endif
+
+'------------------------------------------------------------------------------------------------------------------------------  log in
+
+		'-------------------- invoke browser
+		if webInvokeBrowser("CH", arcsURL$) = 1 then
+			nextScript()
+			goto nextIteration
+		endif
 
 
-			'-------------------- verify all required data is provided
-			if arcsRequiredDataChk() = 1 then
-				goto nextIteration
-			endif
-
-'----------------------------------------------------------------------------------------------------------------------------------------------- log in
-			'-------------------- invoke browser
-			if webInvokeBrowser("CH", arcsURL$) = 1 then
-				nextScript()
-				goto nextIteration
-			endif
-
-
-			'-------------------- enter username
-			usepage(pgArcsLogin$)
-			if webEnterText(inputArcsUsername$, arcsUsername$, "entering username") <> 0 then
-				goto nextIteration
-			endif
-			if webValidateText(inputArcsUsername$, arcsUsername$, "entering username") <> 0 then
-				goto nextIteration
-			endif
+		'-------------------- enter username
+		usepage(pgArcsLogin$)
+		if webEnterText(inputArcsUsername$, arcsUsername$, "entering username") <> 0 then
+			goto nextIteration
+		endif
+		if webValidateText(inputArcsUsername$, arcsUsername$, "entering username") <> 0 then
+			goto nextIteration
+		endif
 
 				
-			'-------------------- enter password
-			if webEnterText(inputArcsPassword$, arcsPassword$, "entering password") <> 0 then
-				goto nextIteration
-			endif
-			if webValidateText(inputArcsPassword$, arcsPassword$, "entering password") <> 0 then
-				goto nextIteration
-			endif
+		'-------------------- enter password
+		if webEnterText(inputArcsPassword$, arcsPassword$, "entering password") <> 0 then
+			goto nextIteration
+		endif
+		if webValidateText(inputArcsPassword$, arcsPassword$, "entering password") <> 0 then
+			goto nextIteration
+		endif
 
 				
-			'-------------------- click login button
-			if webClickElement(btnArcsLogin$, "clicking login") <> 0 then
+		'-------------------- click login button
+		if webClickElement(btnArcsLogin$, "clicking login") <> 0 then
+			goto nextIteration
+		endif
+		if webValidateElement(imgARCSLogo$, "arcs logo", "clicking login") <> 1 then
+			goto nextIteration
+		endif
+		pause 3
+
+		'-------------------- accept end user agreement if presented
+		if arcsSubAppAcceptUsrAgree() <> 0 then
+			nextScript()
+			goto nextIteration
+		endif
+
+'------------------------------------------------------------------------------------------------------------------------------  applicant search
+
+		'-------------------- navigate to new applicants page
+		if webNavigate(urlArcsNewScreening$, "new screening") <> 0 then
+			goto nextIteration
+		endif
+		pause 1
+		if webValidateCurrPage(pgArcsNewApplicant$, "new screening") <> 0 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- enter ssn
+		usepage(pgArcsNewApplicant$)
+		if webPasteText(inputArcsSSN$, applicantSSN$, "entering ssn") <> 0 then
+			goto nextIteration
+		endif
+		pause 1
+		if webValidateText(inputArcsSSN$, applicantSSN$, "entering ssn") <> 0 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- enter last name
+		if webPasteText(inputArcsLName$, applicantLName$, "entering last name") <> 0 then
+			goto nextIteration
+		endif
+		pause 1
+		if webValidateText(inputArcsLName$, applicantLName$, "entering last name") <> 0 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- click search button
+		if webClickElement(btnArcsSearch$, "clicking search button") <> 0 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- determine if applicant has existing application
+		if arcsSubAppExistAppChk() = 1 then
+			goto enterNewApplication
+		endif
+
+'------------------------------------------------------------------------------------------------------------------------------  enter new applicant form
+
+		'-------------------- click enter new applicant
+		if webClickElement(btnArcsAddNewApplicant$, "clicking add new applicant") <> 0 then
+			goto nextIteration
+		endif
+		pause 2
+		if webValidateElement(hdrArcsProfile$, "banner - profile", "clicking add new applicant") <> 1 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- enter first name
+		if webPasteText(inputArcsFName$, applicantFName$, "entering first name") <> 0 then
+			goto nextIteration
+		endif
+		pause 1
+		if webValidateText(inputArcsFName$, applicantFName$, "entering first name") <> 0 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- eenter middle name
+		if applicantMName$ <> "" then
+			if webPasteText(inputArcsMName$, applicantMName$, "entering middle name") <> 0 then
 				goto nextIteration
 			endif
-			if webValidateElement(imgARCSLogo$, "arcs logo", "clicking login") <> 1 then
+			pause 1
+			if webValidateText(inputArcsMName$, applicantMName$, "entering middle name") <> 0 then
 				goto nextIteration
 			endif
-			pause 3
+		endif
 
-			'-------------------- accept end user agreement if presented
-			if arcsAcceptUserAgreement() <> 0 then
-				nextScript()
+
+		'-------------------- enter address 1
+		if webPasteText(inputArcsAddress1$, applicantAddr1$, "entering address 1") <> 0 then
+			goto nextIteration
+		endif
+		pause 1
+		if webValidateText(inputArcsAddress1$, applicantAddr1$, "entering address 1") <> 0 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- eenter address 2
+		if applicantAddr2$ <> "" then
+			if webPasteText(inputArcsAddress2$, applicantAddr2$, "entering address 2") <> 0 then
 				goto nextIteration
 			endif
-
-
-'----------------------------------------------------------------------------------------------------------------------------------------------- applicant search
-			'-------------------- navigate to new applicants page
-			if webNavigate(urlArcsNewScreening$, "new screening") <> 0 then
+			pause 1
+			if webValidateText(inputArcsAddress2$, applicantAddr2$, "entering address 2") <> 0 then
 				goto nextIteration
 			endif
-			if webValidateCurrPage(pgArcsNewApplicant$, "new screening") <> 0 then
+		endif
+
+
+		'-------------------- enter city
+		if webPasteText(inputArcsCity$, applicantCity$, "entering city") <> 0 then
+			goto nextIteration
+		endif
+		pause 1
+		if webValidateText(inputArcsCity$, applicantCity$, "entering city") <> 0 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- select state
+		if webSelectItem(selArcsState$, stateNm$, "selecting state") <> 0 then
+			goto nextIteration
+		endif
+		pause 1
+		if webValidateText(selArcsState$, stateCode$, "selecting state") <> 0 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- enter zip
+		if webPasteText(inputArcsZip$, applicantZip$, "entering zip") <> 0 then
+			goto nextIteration
+		endif
+		pause 1
+		if webValidateObjContains(inputArcsZip$, applicantZip$, "entering zip") <> 0 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- enter dob
+		if webPasteText(inputArcsDOB$, applicantBDay$, "entering dob") <> 0 then
+			goto nextIteration
+		endif
+		pause 1
+		if webValidateText(inputArcsDOB$, applicantBDay$, "entering dob") <> 0 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- enter phone
+		if applicantPhone$ <> "" then
+			if webPasteText(inputArcsPhone$, applicantPhone$, "entering phone") <> 0 then
 				goto nextIteration
 			endif
-
-
-			'-------------------- enter ssn
-			usepage(pgArcsNewApplicant$)
-			if webPasteText(inputArcsSSN$, applicantSSN$, "entering ssn") <> 0 then
+		pause 1
+			if webValidateText(inputArcsPhone$, applicantPhone$, "entering phone") <> 0 then
 				goto nextIteration
 			endif
-			if webValidateText(inputArcsSSN$, applicantSSN$, "entering ssn") <> 0 then
-				goto nextIteration
-			endif
+		endif
+
+  
+		'-------------------- enter email
+		if webPasteText(inputArcsEmail$, applicantEmail$, "entering email") <> 0 then
+			goto nextIteration
+		endif
+		pause 1
+		if webValidateText(inputArcsEmail$, applicantEmail$, "entering email") <> 0 then
+			goto nextIteration
+		endif
 
 
-			'-------------------- enter last name
-			if webPasteText(inputArcsLName$, applicantLName$, "entering last name") <> 0 then
-				goto nextIteration
-			endif
-			if webValidateText(inputArcsLName$, applicantLName$, "entering last name") <> 0 then
-				goto nextIteration
-			endif
+		'-------------------- confirm ssn
+		if webPasteText(inputArcsConfirmSsn$, applicantSSN$, "confirming ssn") <> 0 then
+			goto nextIteration
+		endif
+		pause 1
+		if webValidateText(inputArcsConfirmSsn$, applicantSSN$, "confirming ssn") <> 0 then
+			goto nextIteration
+		endif
 
 
-			'-------------------- click search button
-			if webClickElement(btnArcaSearch$, "clicking search button") <> 0 then
-				goto nextIteration
-			endif
+		'-------------------- click next
+		if webClickElement(btnArcsNext$, "clicking next") <> 0 then
+			goto nextIteration
+		endif
+		pause 1
+		if webValidateElement(btnArcsLicClose$, "close because licenses", "clicking next...") <> 1 then
+			goto nextIteration
+		endif
 
 
-			'-------------------- determine if applicant has existing application
-			if evalARCSNewAppSrcResult() = 1 then
-				goto enterNewApplication
-			endif
+'------------------------------------------------------------------------------------------------------------------------------ enter pre-employment
+
+		'-------------------- select position category
+		if webSelectItem(selArcsPosCategory$, arcsPositionCatId$, "selecting position cat id") <> 0 then
+			goto nextIteration
+		endif
+		pause 1
+		if webValidateText(selArcsPosCategory$, arcsPositionCatId$, "selecting position cat id") <> 0 then
+			goto nextIteration
+		endif
 
 
-'----------------------------------------------------------------------------------------------------------------------------------------------- enter new applicant form
+		'-------------------- select position
+		if webSelectItem(selArcsPosition$, arcsPositionId$, "selecting position id") <> 0 then
+			goto nextIteration
+		endif
+		pause 1
+		if webValidateText(selArcsPosition$, arcsPositionId$, "selecting position id") <> 0 then
+			goto nextIteration
+		endif
 
 
-			'-------------------- click enter new applicant
-			if webClickElement(btnArcsAddNewApplicant$, "clicking add new applicant") <> 0 then
-				goto nextIteration
-			endif
-			pause 2
-			if webValidateElement(hdrArcsProfile$, "banner - profile", "clicking add new applicant") <> 1 then
-				goto nextIteration
-			endif
+		'-------------------- select employment type
+		if webSelectItem(selArcsEmplType$, arcsEmployeeTypeId$, "selecting employment type") <> 0 then
+			goto nextIteration
+		endif
+		pause 1
+		if webValidateText(selArcsEmplType$, arcsEmployeeTypeId$, "selecting employment type") <> 0 then
+			goto nextIteration
+		endif
 
 
-			'-------------------- enter first name
-			if webPasteText(inputArcsFName$, applicantFName$, "entering first name") <> 0 then
-				goto nextIteration
-			endif
-			if webValidateText(inputArcsFName$, applicantFName$, "entering first name") <> 0 then
-				goto nextIteration
-			endif
+		'-------------------- click next
+		if webClickElement(btnArcsNext$, "clicking next") <> 0 then
+			goto nextIteration
+		endif
+		pause 1
+		if webValidateElement(btnArcsUploadDoc$, "upload doc button", "clicking next...") <> 1 then
+			goto nextIteration
+		endif
+
+'------------------------------------------------------------------------------------------------------------------------------ enter id info
+
+		'-------------------- select id type
+		if webSelectItem(btnArcsUploadDoc$, arcsTypeOfId$, "selecting id type") <> 0 then
+			goto nextIteration
+		endif
+		pause 1
+		if webValidateElement(btnArcsUploadDoc$, arcsTypeOfId$, "selecting id type") <> 1 then
+			goto nextIteration
+		endif
 
 
-			'-------------------- eenter middle name
-			if applicantMName$ <> "" then
-				if webPasteText(inputArcsMName$, applicantMName$, "entering middle name") <> 0 then
-					goto nextIteration
-				endif
-				if webValidateText(inputArcsMName$, applicantMName$, "entering middle name") <> 0 then
-					goto nextIteration
-				endif
-			endif
+		'-------------------- enter issuing authority
+		if webPasteText(inputArcsIssueAuth$, idStateCode$, "entering id state") <> 0 then
+			goto nextIteration
+		endif
+		pause 1
+		if webValidateText(inputArcsIssueAuth$, idStateCode$, "entering id state") <> 0 then
+			goto nextIteration
+		endif
 
 
-			'-------------------- enter address 1
-			if webPasteText(inputArcsAddress1$, applicantAddr1$, "entering address 1") <> 0 then
-				goto nextIteration
-			endif
-			if webValidateText(inputArcsAddress1$, applicantAddr1$, "entering address 1") <> 0 then
-				goto nextIteration
-			endif
+		'-------------------- enter id number
+		if webPasteText(inputArcsIDNum$, applicantIDNum$, "entering id num") <> 0 then
+			goto nextIteration
+		endif
+		pause 1
+		if webValidateText(inputArcsIDNum$, applicantIDNum$, "entering id num") <> 0 then
+			goto nextIteration
+		endif
 
 
-			'-------------------- eenter address 2
-			if applicantAddr2$ <> "" then
-				if webPasteText(inputArcsAddress2$, applicantAddr2$, "entering address 2") <> 0 then
-					goto nextIteration
-				endif
-				if webValidateText(inputArcsAddress2$, applicantAddr2$, "entering address 2") <> 0 then
-					goto nextIteration
-				endif
-			endif
+		'-------------------- enter id exp date
+		if webPasteText(inputArcsIDExp$, idExpDate$, "entering id exp date") <> 0 then
+			goto nextIteration
+		endif
+		pause 1
+		if webValidateText(inputArcsIDExp$, idExpDate$, "entering id exp date") <> 0 then
+			goto nextIteration
+		endif
 
 
-			'-------------------- enter city
-			if webPasteText(inputArcsCity$, applicantCity$, "entering city") <> 0 then
-				goto nextIteration
-			endif
-			if webValidateText(inputArcsCity$, applicantCity$, "entering city") <> 0 then
-				goto nextIteration
-			endif
+		'-------------------- click next
+		if webClickElement(btnArcsNext$, "clicking next") <> 0 then
+			goto nextIteration
+		endif
+		pause 1
+		if webValidateElement(hdrArcsConfirmConsent$, "page header", "clicking next...") <> 1 then
+			goto nextIteration
+		endif
+
+'------------------------------------------------------------------------------------------------------------------------------ afffirm consent
+
+		'-------------------- click afffirm checkbox
+		if webClickElement(chkArcsConsent$, "clicking affirm checkbox") <> 0 then
+			goto nextIteration
+		endif
+		pause
+		if webValidateChecked(chkArcsConsent$, "clicking affirm checkbox") = 0 then
+			goto nextIteration
+		endif
 
 
-			'-------------------- select state
-			if webSelectItem(selArcsState$, convState$, "selecting state") <> 0 then
-				goto nextIteration
-			endif
-			if webValidateText(selArcsState$, applicantState$, "selecting state") <> 0 then
-				goto nextIteration
-			endif
+		'-------------------- click next
+		if webClickElement(btnArcsNext$, "clicking next") <> 0 then
+			goto nextIteration
+		endif
+		pause 1
 
 
-			'-------------------- enter dob
-			if webPasteText(inputArcsDOB$, applicantBDay$, "entering dob") <> 0 then
-				goto nextIteration
-			endif
-			if webValidateText(inputArcsDOB$, applicantBDay$, "entering dob") <> 0 then
-				goto nextIteration
-			endif
 
 
-			'-------------------- enter phone
-			if applicantPhone$ <> "" then
-				if webPasteText(inputArcsPhone$, applicantPhone$, "entering phone") <> 0 then
-					goto nextIteration
-				endif
-				if webValidateText(inputArcsPhone$, applicantPhone$, "entering phone") <> 0 then
-					goto nextIteration
-				endif
-			endif
+
+
+
+
+
 
 
 
@@ -273,9 +450,6 @@ repeat
 
 
 enterNewApplication:
-
-
-		endif		'/matching stages
 
 
 	endif		'/found change event

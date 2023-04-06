@@ -91,7 +91,7 @@ repeat
 		
 
 		'-------------------- invoke browser window
-		if webInvokeBrowser("CH", adobeURL$) <> 0 then
+		if webInvokeBrowser("CH", adobeReqSigsURL$) <> 0 then
 			nextScript()
 			goto nextIteration
 		endif
@@ -112,7 +112,7 @@ repeat
 		
 
 		'-------------------- enter search criteria
-		usewindow(wndAdobeHomePage$, 1)
+		usewindow(wndAdobeMainPage$, 1)
 		srcString$ = adobeCancelCompileSrcStr$("PRE")
 		if winSendKeys(srcString$, "packet search") <> 0 then
 			goto firstInterviewCancel
@@ -189,7 +189,8 @@ firstInterviewCancel:
 		endif
 
 
-		if webInvokeBrowser("CH", adobeURL$) <> 0 then
+		'-------------------- invoke browser window
+		if webInvokeBrowser("CH", adobeReqSigsURL$) <> 0 then
 			nextScript()
 			goto nextIteration
 		endif
@@ -210,7 +211,7 @@ firstInterviewCancel:
 '------------------------------------------------------------------------------------------------------------------------------ 1st int pkt search
 
 		'-------------------- enter search criteria
-		usewindow(wndAdobeHomePage$, 1)
+		usewindow(wndAdobeMainPage$, 1)
 		srcString$ = adobeCancelCompileSrcStr$("1st")
 		if winSendKeys(srcString$, "packet search") <> 0 then
 			goto secondInterviewCancel
@@ -290,7 +291,8 @@ secondInterviewCancel:
 		endif
 
 
-		if webInvokeBrowser("CH", adobeURL$) <> 0 then
+		'-------------------- invoke browser window
+		if webInvokeBrowser("CH", adobeReqSigsURL$) <> 0 then
 			nextScript()
 			goto nextIteration
 		endif
@@ -311,7 +313,7 @@ secondInterviewCancel:
 '------------------------------------------------------------------------------------------------------------------------------ 2nd int pkt search
 
 		'-------------------- enter search criteria
-		usewindow(wndAdobeHomePage$, 1)
+		usewindow(wndAdobeMainPage$, 1)
 		srcString$ = adobeCancelCompileSrcStr$("2nd")
 		if winSendKeys(srcString$, "packet search") <> 0 then
 			goto nextIteration

@@ -1,9 +1,7 @@
 '###############################################################################################################################################################
-'##  filename:                      cg-adobeDataLoaders
+'##  filename:                      cg-globalDataLoaders
 '##
 '##  purpose:                       functions that get the values of the data elements used in the script for the current row
-'##
-'##  contents:                      list
 '##
 '###############################################################################################################################################################
 
@@ -129,5 +127,51 @@ function gmsAddLegalGetData()
 	gmsLegalShield$ = arrLegalShield$(i)
 
 	gmsAddLegalGetData = 0
+endfunction
+
+'=============================================================================================================================================================
+'== function name:              arcsSubmitAppGetCurrData
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                retrieves the values of all the employment list worksheet columns needed for the current row being processed
+    '==
+    '== input parms:            none
+    '==
+    '== returns:                int:    0 - success
+    '==
+    '== notes:                  none
+    '==
+'===============================================================================================================================================================
+function arcsSubAppGetCurrData()
+
+    applicantID$ = arrApplicantID$(i)                               'worksheet row id number
+    applicantFName$ = arrApplicantFName$(i)                         'first name
+    applicantLName$ = arrApplicantLName$(i)                         'last name
+    applicantEmail$ = arrApplicantEmail$(i)                         'email address
+    backGroundChk$ = arrBackGroundChk$(i)                           'background check status column
+    applicantSSN$ = arrApplicantSSN$(i)                             'social security number
+    applicantMName$ = arrApplicantMName$(i)                         'middle name
+    applicantBDay$ = arrApplicantBDay$(i)                           'birthdate
+    applicantIDState$ = arrApplicantIDState$(i)                     'dl/id state
+    applicantIDNum$ = arrApplicantIDNum$(i)                         'dl/id number
+    applicantIDExpDate$ = arrApplicantIDExpDate$(i)                 'dl/id expiration date
+    applicantAddr1$ = arrApplicantAddr1$(i)                         'address line 1
+    applicantAddr2$ = arrApplicantAddr2$(i)                         'address line 2
+    applicantCity$ = arrApplicantCity$(i)                           'address city
+    applicantState$ = arrApplicantState$(i)                         'address state
+    applicantZip$ = arrApplicantZip$(i)                         	'address zip
+    applicantCounty$ = arrApplicantCounty$(i)                       'address county
+    applicantAlias$ = arrApplicantAlias$(i)                         'alias
+    applicantNName$ = arrApplicantNName$(i)                         'nick name
+    applicantMaidName$ = arrApplicantMaidName$(i)                   'maiden name
+    applicantPriorCity$ = arrApplicantPriorCity$(i)                 'prior city
+    applicantPriorState$ = arrApplicantPriorState$(i)               'prior state
+    applicantYrFrom$ = arrApplicantYrFrom$(i)                       'yr from
+    applicantYrTo$ = arrApplicantYrTo$(i)                           'yr to
+    applicantPhone$ = arrApplicantPhone$(i)                         'phone
+
+    arcsSubAppGetCurrData = 0
+
 endfunction
 

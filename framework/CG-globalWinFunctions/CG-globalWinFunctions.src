@@ -1,13 +1,10 @@
-/*#############################################################################################################################################################
-##  filename:						cg-globalWinfunctions
-##
-##  purpose:						library of windows-based functions for use in caregiver workflow script development in order to minimize code
-##									duplication, increase script cleanliness/readability, and reduce maintenance efforts by providing a single
-##									centralized location for changes
-##
-##  contents:						winSendKeys, winMouseLeftDblClick
-##
-#############################################################################################################################################################*/
+'###############################################################################################################################################################
+'##  filename:              cg-globalWinfunctions
+'##
+'##  purpose:				library of windows-based functions for use in caregiver workflow script development in order to minimize code duplication, 
+'##							increase script cleanliness/readability, and reduce maintenance efforts by providing a single centralized location for changes
+'##
+'###############################################################################################################################################################
 
 '/*=============================================================================================================================================================
 '== function name:           winSendKeys
@@ -48,6 +45,32 @@ function winSendKeys(key_list$, step$)
 		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + step$ + " was successful", crlf)
 		winSendKeys = 0
 	endif
+
+endfunction
+
+'=============================================================================================================================================================
+'== function name:				winMouseLeftClick
+	'==
+	'== developer:              todd busch
+	'==
+	'== purpose:                terseDescription
+	'==
+	'== input parms:            none
+	'==
+	'== returns:                int:	0 - success
+	'==									1 - failure
+	'==
+	'== notes:                  none
+	'==
+'===============================================================================================================================================================
+function winMouseLeftClick(int_x, int_y, str_step$)
+	local int_x, int_y, str_step$
+
+	clickmouse(left, down, int_x, int_y, absolute)
+	clickmouse(left, up, int_x, int_y, absolute)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + str_step$ + " was successful", crlf)
+	winMouseLeftClick = 0
+	exitfunction
 
 endfunction
 

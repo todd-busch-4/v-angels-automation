@@ -46,6 +46,7 @@ emplInquiryArchivePath$ = packagePath$ + "downloads\archive\"							'path to arc
 
 '-------------------- target application url's
 adobeURL$ = "https://acrobat.adobe.com/link/home/?isNativeFlow=true"
+adobeReqSigsURL$ = "https://acrobat.adobe.com/link/acrobat/sendforsignature/"
 zipWhipURL$ = "https://app.zipwhip.com"
 gmsURL$ = "https://gms.prismhr.com/gms/dbweb.asp?dbcgm=1"
 generationsURL$ = "https://generations.idb-sys.com/"
@@ -86,14 +87,15 @@ employmentInquiryAddr1Col$ = "AJ2:AJ5001"     											'mapping for address 1 
 employmentInquiryAddr2Col$ = "AK2:AK5001"  	    										'mapping for address 2 column
 employmentInquiryCityCol$ = "AL2:AL5001"  	    										'mapping for address 2 column
 employmentInquiryStateCol$ = "AM2:AM5001"  	    										'mapping for state column
-employmentInquiryCountyCol$ = "AN2:AN5001" 	    										'mapping for county column
-employmentInquiryAliasCol$ = "AO2:AO5001" 	    										'mapping for alias column
-employmentInquiryNNameCol$ = "AP2:AP5001" 	    										'mapping for nick name column
-employmentInquiryMaidNameCol$ = "AQ2:AQ5001" 	    									'mapping for maiden name column
-employmentInquiryPriorCityCol$ = "AR2:AR5001" 	    									'mapping for prior city column
-employmentInquiryPriorStateCol$ = "AS2:AS5001" 	    									'mapping for prior state column
-employmentInquiryYrFromCol$ = "AT2:AT5001" 	    									    'mapping for year from column
-employmentInquiryYrToCol$ = "AU2:AU5001" 	    									    'mapping for year to column
+employmentInquiryZipCol$ = "AN2:AN5001"  	    										'mapping for zip column
+employmentInquiryCountyCol$ = "AO2:AO5001" 	    										'mapping for county column
+employmentInquiryAliasCol$ = "AP2:AP5001" 	    										'mapping for alias column
+employmentInquiryNNameCol$ = "AQ2:AQ5001" 	    										'mapping for nick name column
+employmentInquiryMaidNameCol$ = "AR2:AR5001" 	    									'mapping for maiden name column
+employmentInquiryPriorCityCol$ = "AS2:AS5001" 	    									'mapping for prior city column
+employmentInquiryPriorStateCol$ = "AT2:AT5001" 	    									'mapping for prior state column
+employmentInquiryYrFromCol$ = "AU2:AU5001" 	    									    'mapping for year from column
+employmentInquiryYrToCol$ = "AV2:AV5001" 	    									    'mapping for year to column
 employmentinquiryTermedLOADateCol$ = "Z2:Z5001"                                         'mapping for termed/LOA date
 employmentInquiryLegalShieldCol$ = "P2:P5001"                                           'mapping for legal shield enrolled column
 
@@ -116,6 +118,12 @@ startDateCompany$ = datetodate$("d", 7, date$())											'7 days from current 
 legalDeductCode$ = "LEGAL"
 legalDeductAmt$ = "8.75"
 legalDeductPeriod$ = "123"
+
+'------- arcs data
+arcsPositionCatId$ = "Technical, Unlicensed Health Care"
+arcsPositionId$ = "Nurse Aide"
+arcsEmployeeTypeId$ = "Employee"
+arcsTypeOfId$ = "State Issued Driver's License"
 
 '-------------------- misc.
 basicLogHdr$ = currDate$ + "-"

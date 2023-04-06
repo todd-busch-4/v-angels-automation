@@ -5,7 +5,7 @@
 ##									duplication, increase script cleanliness/readability, and reduce maintenance efforts by providing a single
 ##									centralized location for changes
 ##
-##  contents:						webValidateText, webValidateElement, webValidateCurrPage, webWaitForText
+##  contents:						webValidateText, webValidateElement, webValidateCurrPage, webWaitForText, webValidateNotNull, webValidateObjContains
 ##
 #############################################################################################################################################################*/
 
@@ -227,4 +227,105 @@ function webValidateNotNull(object$, step$)
             webValidateNotNull = 0
        endif
 
+endfunction
+
+'=============================================================================================================================================================
+'== function name:              webValidateObjContains
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                validates that the passed text is contained in the value of the object passed
+    '==
+    '== input parms:            object$:    html descriptor of object with value to check
+    '==                         text$:      the text to look for in the object value
+    '==                         step$:		terse description of the action/step in the script (e.g. "clicking login")
+    '==
+    '== returns:                int:    0 - success
+    '==                                 1 - failure
+    '==
+    '== notes:                  none
+    '==
+'===============================================================================================================================================================
+function webValidateObjContains(object$, text$, step$)
+    local r, object$, text$, var$
+
+    r = gethtmledittext(object$, var$)
+
+    if r <> 0 then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": webValidateObjContains failed to get text", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(r) + ") msg: " + #errormsg$, crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+		hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-" + step$ + ".bmp", 1, 1)
+		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": webValidateObjContains: couldn't validate text - " + step$, crlf + crlf)
+        webValidateObjContains = 1
+        exitfunction
+    endif
+
+    if r = 0 then
+        if instr(var$, text$) = 0 then
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": expected text not found in obj value", crlf)
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": text expected [" + text$ + "]  obj value [" + var$ + "]", crlf)
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+        	hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-" + step$ + ".bmp", 1, 1)
+            write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+            write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+            write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+            write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": webValidateObjContains: text not found - " + step$, crlf + crlf)
+            webValidateObjContains = 1
+            exitfunction
+        endif
+
+        if instr(var$, text$) <> 0 then
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": expected text not found in obj value", crlf)
+           	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + step$ + " validation was successful", crlf)
+            webValidateNotNull = 0
+        endif
+    endif
+    
+endfunction
+
+'=============================================================================================================================================================
+'== function name:              webValidateChecked
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                verifies if the html checkbox or radio button is checked
+    '==
+    '== input parms:            object$:    html descriptor of object to check
+    '==                         step$:		terse description of the action/step in the script (e.g. "clicking login")
+    '==
+    '== returns:                int:    0 - not checked
+    '==                                 1 - checked
+    '==
+    '== notes:                  none
+    '==
+'===============================================================================================================================================================
+function webValidateChecked(object$, step$)
+    local r, object$, step$
+
+    r = checkedhtml(object$)
+
+    if r = 1 then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + step$ + " validation successfull", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": object was checked", crlf)
+        webValidateChecked = 1
+        exitfunction
+    endif
+
+    if r <> 1 then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + step$ + " validation failed", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": object was not checked", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+        hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-" + step$ + ".bmp", 1, 1)
+        write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+        write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+        write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+        write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": webValidateChecked: failed while " + step$, crlf + crlf)
+        webValidateChecked = 0
+        exitfunction
+    endif
+    
 endfunction
