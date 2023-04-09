@@ -29,11 +29,11 @@ function logStartScript(workflow$)
 	write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": starting scan of [" + str$(cnt) + "] rows for " + workflow$ + " change events", crlf)
 	write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": starting scan of [" + str$(cnt) + "] rows for " + workflow$ + " change events", crlf + crlf)
 	if iEnvironment = 1 then
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": using settings for environment 1", crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": settings configured for development environment", crlf)
 		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": --------------------------------------------------------", crlf)
 	endif
 	if iEnvironment = 2 then
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": using settings for environment 2", crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": settings configured for production environment", crlf)
 		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": --------------------------------------------------------", crlf)
 	endif
 	logStartScript = 0
@@ -73,7 +73,7 @@ endfunction
 	'==
 '=============================================================================================================================================================*/
 function logStageMatch()
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage: [" + curr_stage$ + "] for change event triggers workflow", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change event stage: [" + curr_stage$ + "] triggers workflow", crlf)
 	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change event for stage: [" + curr_stage$ + "] at row: [" + str$(iExcelRow) + "] triggered workflow", crlf)
 	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": getting data for current row", crlf)
 	logStageMatch = 0

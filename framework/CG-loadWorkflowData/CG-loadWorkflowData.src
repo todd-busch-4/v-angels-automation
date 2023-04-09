@@ -8,21 +8,24 @@
 ##
 #############################################################################################################################################################*/
 
-function LoadWorkflowData(script$)
+function LoadWorkflowData(str_script$)
+	local str_script$, cnt, r
 '--------------------------------------------------------------------------------------------- load global elements
 	'-------------------- record id
 	cnt = readexcel (employmentInquiryPath$, employmentInquiryIdCol$, arrApplicantID$())
 	if instr(str$(cnt), "-") <> 0 then				'look for dash which would indicate an error code
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading ID column.  error_code: " +   str$(cnt), crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading ID column.  error_code: " + str$(cnt), crlf)
 		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (id column)", crlf)
 		LoadWorkflowData = 1
 	else
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (" + str$(cnt) + ") rows read into array.", crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ==================================== " + str_script$ + " ================================", crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": retrieving data from employment inquiry list.xlsx", crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": (" + str$(cnt) + ") rows read into column arrays", crlf)
 	endif
 	'-------------------- applicant first name
 	r = readexcel (employmentInquiryPath$, employmentInquiryFNameCol$, arrApplicantFName$())	
 	if instr(str$(r), "-") <> 0 then
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading first name column.  error_code: " +   str$(r), crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading first name column.  error_code: " + str$(r), crlf)
 		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (applicant first name)", crlf)
 		LoadWorkflowData = 1
 		exitfunction
@@ -30,7 +33,7 @@ function LoadWorkflowData(script$)
 	'-------------------- applicant last name
 	r = readexcel (employmentInquiryPath$, employmentInquiryLNameCol$, arrApplicantLName$())	
 	if instr(str$(r), "-") <> 0 then
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading last name column.  error_code: " +   str$(r), crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading last name column.  error_code: " + str$(r), crlf)
 		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (applicant last name)", crlf)
 		LoadWorkflowData = 1
 		exitfunction
@@ -38,7 +41,7 @@ function LoadWorkflowData(script$)
 	'-------------------- stage
 	r = readexcel (employmentInquiryPath$, employmentInquiryStageCol$, arrCurrentStage$())
 	if instr(str$(r), "-") <> 0 then
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading stage column.  error_code: " +   str$(r), crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading stage column.  error_code: " + str$(r), crlf)
 		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (stage)", crlf)
 		LoadWorkflowData = 1
 		exitfunction
@@ -46,7 +49,7 @@ function LoadWorkflowData(script$)
 	'-------------------- change events
 	r = readexcel (employmentInquiryPath$, employmentInquiryChangeEventCol$, arrChangeEvents$())
 	if instr(str$(r), "-") <> 0 then
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading change events column.  error_code: " +   str$(r), crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading change events column.  error_code: " + str$(r), crlf)
 		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (change events)", crlf)
 		LoadWorkflowData = 1
 		exitfunction
@@ -54,11 +57,11 @@ function LoadWorkflowData(script$)
 
 
 '--------------------------------------------------------------------------------------------- load zipwhipInit elements
-	if script$ = "CG-zipwhipInitTxtMsgs" then
+	if str_script$ = "CG-zipwhipInitTxtMsgs" then
 		'-------------------- applicant email
 		r = readexcel (employmentInquiryPath$, employmentInquiryEmailCol$, arrApplicantEmail$())
 		if instr(str$(r), "-") <> 0 then
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading email column.  error_code: " +   str$(r), crlf)
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading email column.  error_code: " + str$(r), crlf)
 			write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (applicant email)", crlf)
 			LoadWorkflowData = 1
 			exitfunction
@@ -90,7 +93,7 @@ function LoadWorkflowData(script$)
 	endif
 
 '--------------------------------------------------------------------------------------------- load adobeSend elements
-	if script$ = "CG-adobeSendPackets" then
+	if str_script$ = "CG-adobeSendPackets" then
 		'-------------------- adobe packet status
 		r = readexcel (employmentInquiryPath$, employmentInquiryAdobeCol$, arrAdobePcktStatus$())
 		if instr(str$(r), "-") <> 0 then
@@ -102,7 +105,7 @@ function LoadWorkflowData(script$)
 		'-------------------- applicant email
 		r = readexcel (employmentInquiryPath$, employmentInquiryEmailCol$, arrApplicantEmail$())
 		if instr(str$(r), "-") <> 0 then
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading email column.  error_code: " +   str$(r), crlf)
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading email column.  error_code: " + str$(r), crlf)
 			write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (applicant email)", crlf)
 			LoadWorkflowData = 1
 			exitfunction
@@ -111,7 +114,7 @@ function LoadWorkflowData(script$)
 	endif
 
 '--------------------------------------------------------------------------------------------- load adobeCancel elements
-	if script$ = "CG-adobeCancelPackets" then
+	if str_script$ = "CG-adobeCancelPackets" then
 		'-------------------- adobe packet status
 		r = readexcel (employmentInquiryPath$, employmentInquiryAdobeCol$, arrAdobePcktStatus$())
 		if instr(str$(r), "-") <> 0 then
@@ -124,11 +127,11 @@ function LoadWorkflowData(script$)
 	endif
 
 '--------------------------------------------------------------------------------------------- load gmsSubmitForm elements
-	if script$ = "CG-gmsSubmitForm" then
+	if str_script$ = "CG-gmsSubmitForm" then
 		'-------------------- applicant email
 		r = readexcel (employmentInquiryPath$, employmentInquiryEmailCol$, arrApplicantEmail$())
 		if instr(str$(r), "-") <> 0 then
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading email column.  error_code: " +   str$(r), crlf)
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading email column.  error_code: " + str$(r), crlf)
 			write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (applicant email)", crlf)
 			loadEmploymentInquiryData = 1
 			exitfunction
@@ -136,7 +139,7 @@ function LoadWorkflowData(script$)
 		'-------------------- gms status
 		r = readexcel (employmentInquiryPath$, employmentInquiryGMSCol$, arrGMSStatus$())
 		if instr(str$(r), "-") <> 0 then
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading gms status column.  error_code: " +   str$(r), crlf)
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading gms status column.  error_code: " + str$(r), crlf)
 			write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (gms status)", crlf)
 			loadEmploymentInquiryData = 1
 			exitfunction
@@ -152,11 +155,11 @@ function LoadWorkflowData(script$)
 	endif
 
 '--------------------------------------------------------------------------------------------- load gmsTerminations elements
-	if script$ = "CG-gmsTerminations" then
+	if str_script$ = "CG-gmsTerminations" then
 		'-------------------- gms status
 		r = readexcel (employmentInquiryPath$, employmentInquiryGMSCol$, arrGMSStatus$())
 		if instr(str$(r), "-") <> 0 then
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading gms status column.  error_code: " +   str$(r), crlf)
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading gms status column.  error_code: " + str$(r), crlf)
 			write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (gms status)", crlf)
 			loadEmploymentInquiryData = 1
 			exitfunction
@@ -180,7 +183,7 @@ function LoadWorkflowData(script$)
 	endif
 
 '--------------------------------------------------------------------------------------------- load arcsSubmitApp elements
-	if script$ = "CG-arcsSubmitApp" then
+	if str_script$ = "CG-arcsSubmitApp" then
 		'-------------------- phone
 		r = readexcel (employmentInquiryPath$, employmentInquiryPhoneCol$, arrApplicantPhone$())
 		if instr(str$(r), "-") <> 0 then
@@ -192,7 +195,7 @@ function LoadWorkflowData(script$)
 		'-------------------- applicant email
 		r = readexcel (employmentInquiryPath$, employmentInquiryEmailCol$, arrApplicantEmail$())
 		if instr(str$(r), "-") <> 0 then
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading email column.  error_code: " +   str$(r), crlf)
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading email column.  error_code: " + str$(r), crlf)
 			write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (applicant email)", crlf)
 			loadEmploymentInquiryData = 1
 			exitfunction
@@ -360,11 +363,11 @@ function LoadWorkflowData(script$)
 	endif
 
 '--------------------------------------------------------------------------------------------- load gmsAddLegalFee elements
-	if script$ = "CG-gmsAddLegalFee" then
+	if str_script$ = "CG-gmsAddLegalFee" then
 		'-------------------- legal shield
 		r = readexcel (employmentInquiryPath$, employmentInquiryLegalShieldCol$, arrLegalShield$())
 		if r <> 5000 then
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading legal shield column.  error_code: " +   str$(r), crlf)
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading legal shield column.  error_code: " + str$(r), crlf)
 			write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (legal shield)", crlf)
 			LoadWorkflowData = 1
 			exitfunction
@@ -372,7 +375,7 @@ function LoadWorkflowData(script$)
 		'-------------------- gms status
 		r = readexcel (employmentInquiryPath$, employmentInquiryGMSCol$, arrGMSStatus$())
 		if r <> 5000 then
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading gms status column.  error_code: " +   str$(r), crlf)
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading gms status column.  error_code: " + str$(r), crlf)
 			write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": scan failed reading in data (gms status)", crlf)
 			LoadWorkflowData = 1
 			exitfunction

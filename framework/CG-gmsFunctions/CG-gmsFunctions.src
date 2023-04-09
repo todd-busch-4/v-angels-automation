@@ -217,8 +217,8 @@ function gmsTermsChkStatus()
 
 	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": checking gms status", crlf)
 	if instr(gmsStatus$, "Termed Rehire") = 0 and instr(gmsStatus$, "DO NOT HIRE Termed") = 0 then
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status not set for gms termination", crlf)
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status of column: (" + gmsStatus$ + ")", crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": current gms status: [" + gmsStatus$ + "]", crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": does NOT match trigger values for workflow", crlf)
 		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status not set for gms termination; proceeding to next change event", crlf + crlf)
 		gmsTermsChkStatus = 1
@@ -311,12 +311,12 @@ function gmsTermsErrorChk()
 		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ocrengine failed trying to capture error popup", crlf)
 		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(r) + ") msg: " + #errormsg$, crlf)
 		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": continuing though app is in unverified state", crlf)
-		gmsTermsErrorChk$ = "0"
+		gmsTermsErrorChk = 0
 		exitfunction
 	endif
 
 	'capture area error popup is typically displayed in
-	err$ = captureareaocr$(pgGMSNewHireForm$, topinstance(), 739, 467, 191, 442)
+	err$ = captureareaocr$(wndGMSTerminationForm$, topinstance(), 667, 440, 291, 674)
 
 	'exit function if no error found
 	if err$ = "" then
@@ -324,45 +324,48 @@ function gmsTermsErrorChk()
 		exitfunction
 	endif
 
-	'check for in onboarding error
-	if instr(err$, "This person is still being OnBoarded") <> 0 then
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employee is still being onboarded", crlf)
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
-		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employee in onboarding; proceeding to next change event", crlf + crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employee: " + applicantFName$ + " " + applicantLName$, crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: gmsTermsErrorCheck - employee in onboarding", crlf + crlf)
-		closebrowser()
-		gmsTermsErrorChk = 1
-		exitfunction
-	endif
+	if instr(err$, "gmsprismhicom") <> 0 then
 
-	'check for already terminated
-	if instr(err$, "already terminated") <> 0 then
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employee is already terminated", crlf)
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
-		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employee is already terminated; proceeding to next change event", crlf + crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employee: " + applicantFName$ + " " + applicantLName$, crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: gmsTermsErrorCheck - employee is already terminated", crlf + crlf)
-		closebrowser()
-		gmsTermsErrorChk = 1
-		exitfunction
-	endif
+		'check for in onboarding error
+		if instr(err$, "This person is still being OnBoarded") <> 0 then
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employee is still being onboarded", crlf)
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+			write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employee in onboarding; proceeding to next change event", crlf + crlf)
+			write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+			write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employee: " + applicantFName$ + " " + applicantLName$, crlf)
+			write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: gmsTermsErrorCheck - employee in onboarding", crlf + crlf)
+			closebrowser()
+			gmsTermsErrorChk = 1
+			exitfunction
+		endif
 
-	'catch-all for any other errors
-	if err$ <> "" then
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error was encountered entering search criteria", crlf)
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_msg: (" + err$ + ") msg: ", crlf)
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
-		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employee: " + applicantFName$ + " " + applicantLName$, crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: gmsTermsErrorCheck - src criteria error", crlf + crlf)
-		gmsTermsErrorChk = 1
-		exitfunction
-	endif
+		'check for already terminated
+		if instr(err$, "already terminated") <> 0 then
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employee is already terminated", crlf)
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+			write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employee is already terminated; proceeding to next change event", crlf + crlf)
+			write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+			write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employee: " + applicantFName$ + " " + applicantLName$, crlf)
+			write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: gmsTermsErrorCheck - employee is already terminated", crlf + crlf)
+			closebrowser()
+			gmsTermsErrorChk = 1
+			exitfunction
+		endif
 
+		'catch-all for any other errors
+		if err$ <> "" then
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error was encountered entering search criteria", crlf)
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_msg: (" + err$ + ") msg: ", crlf)
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+			write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+			write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+			write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employee: " + applicantFName$ + " " + applicantLName$, crlf)
+			write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: gmsTermsErrorCheck - src criteria error", crlf + crlf)
+			gmsTermsErrorChk = 1
+			exitfunction
+		endif
+		
+	endif
 endfunction
 
 '=============================================================================================================================================================
@@ -384,6 +387,8 @@ endfunction
 function gmsTermsEarlyDateChk()
 	local r, err$, iEnd
 
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": running check on loa/termed date", crlf)
+
 	r = useocrengine(3)
 
 	'return error if ocrengine fails
@@ -391,16 +396,16 @@ function gmsTermsEarlyDateChk()
 		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ocrengine failed trying to capture error popup", crlf)
 		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(r) + ") msg: " + #errormsg$, crlf)
 		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": continuing though app is in unverified state", crlf)
-		gmsTermsEarlyDateChk$ = "0"
+		gmsTermsEarlyDateChk = 0
 		exitfunction
 	endif
 
 	'capture area error popup is typically displayed in
-	err$ = captureareaocr$(wndGMSTerminationForm$, topinstance(), 739, 467, 191, 442)
+	err$ = captureareaocr$(wndGMSTerminationForm$, topinstance(), 667, 440, 291, 674)
 
-	'check for error text
+	'check for loa/termed date before hire date
 	if instr(err$, "is prior to employee's hire date") <> 0 then
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": termination date before hire date", crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ERROR: termination date is before the applicants hire date", crlf)
 		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": adjusting the termination date", crlf)
 
 		'extract the hire date and update term date variable
@@ -410,9 +415,33 @@ function gmsTermsEarlyDateChk()
 		termedLOADate$ = zeroPadDate$(termedLOADate$)
 		
 		'close error popup dialogbox
-		usewindow(wndWindowsDesktop$)
+		usewindow(wndGMSTerminationForm$)
 		clickmouse(left, double, 1120, 600, absolute)
 		pause 1
+
+		gmsTermsEarlyDateChk = 1
+		exitfunction
+	endif
+
+	'check for old date
+	if instr(err$, "days in the past") <> 0 then
+		'extract date age from msg
+		iLbound = instr(err$, "date is ") + 8
+		iRbound = instr(err$, " days")
+		sAge$ = mid$(err$, iLbound, iRbound - iLbound)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": WARNiNG: loa/termed date is [" + sAge$ + "] in the past", crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicking continue", crlf)
+		gmsTermsEarlyDateChk = 2
+		exitfunction
+	endif
+
+	'check for event date newer than loa/termed date
+	if instr(err$, "GREATER THAN the date") <> 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ERROR: employee event date after the loa/termed date", crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": adjusting the termination date", crlf)
+
+		'use the current date
+		termedLOADate$ = zeroPadDate$(Date$(0))
 
 		gmsTermsEarlyDateChk = 1
 		exitfunction

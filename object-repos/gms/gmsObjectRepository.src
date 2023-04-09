@@ -60,13 +60,14 @@ dtGMSRehireDate$ = "INPUT TEXT[NAME='EmployeeActionFormsR']"
 inputGMSEmployeeID$ = "SPAN[ID='label36v1']"
 selGMSRehireCode$ = "SELECT[NAME='EmployeeActionFormsRea']"
 inputGMSRHPayRate$ = "INPUT TEXT[NAME='EmployeeActionFormsRhPayR']"
-lblGMSLastNameLabel$ = "SPAN[OUTERTEXT=ID='label40v1']"
+lblGMSLastNameLabel$ = "SPAN[ID='label40v1']"
 'save button has same descriptor as on new hire page
 
 '-------------------- terminations form
 inputGMSEmployeeSrc$ = "INPUT TEXT[NAME='HrpyWorkWGlobalSearch1']"
 rowGMSSrcResults$ = "TABLE[CONTENT='Employee Matches']"
 rowGMSCurrEmplStatus$ = "SPAN[OUTERTEXT='ACTIVE']"
+rowGMSSrcResCorpID$ = "SPAN[ID='tdxrdesignbaisdropv1x2z1x1']"
 lblGMSCurrEmplStatus$ = "SPAN[OUTERTEXT='Current Employment']"
 selGMSTermStatusCode$ = "SELECT[NAME='EmployeeActionFormsT']"
 selGMSReasonCode$ = "SELECT[NAME='EmployeeActionFormsR']"
@@ -74,6 +75,8 @@ dtGMSTerminationDate$ = "INPUT TEXT[NAME='EmployeeActionFormsT']"
 selGMSRehireDesignation$ = "SELECT[NAME='EmployeeActionFormsReh']"
 btnGMSTerminationSave$ = "BUTTON[INNERTEXT='Save']"
 lblGMSReassignPendAppr$ = "SPAN[OUTERTEXT='Reassign']"
+btnGMSDateMsgPopupYes$ = "INPUT BUTTON[VALUE='Yes',ID='popup_yes']"
+btnGMSDateMsgPopupNo$ = "INPUT BUTTON[VALUE='No']"
 
 '-------------------- recurring deductions
 txtGMSRecurDedPgTitle$ = "SPAN[OUTERTEXT='Recurring']"

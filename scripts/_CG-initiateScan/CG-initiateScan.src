@@ -34,13 +34,14 @@ iHr$ = Hour$()
 iMin$ = Min$()
 
 
-write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": -------------------------------------- START OF SCAN ------------------------------------------------------------------------------", crlf + crlf)
-write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + "-------------------------------------- START OF SCAN ------------------------------------------------------------------------------", crlf + crlf)
-write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + "-------------------------------------- START OF SCAN ------------------------------------------------------------------------------", crlf + crlf)
-write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + "-------------------------------------- START OF SCAN ------------------------------------------------------------------------------", crlf + crlf)
+write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": -------------------------------------- INTERVAL SCAN START ---------------------------------------", crlf + crlf)
+write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + "-------------------------------------- INTERVAL SCAN START ---------------------------------------", crlf + crlf)
+write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + "-------------------------------------- INTERVAL SCAN START ---------------------------------------", crlf + crlf)
+write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + "-------------------------------------- INTERVAL SCAN START ---------------------------------------", crlf + crlf)
 
 
 '-------------------------------------------------------------------------------------------------------------------------------- download latest employment inquiry doc
+write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ======================================== SCAN PREP ==========================================", crlf)
 write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": downloading latest version of employment inquiry list.xlsx", crlf)
 
 
@@ -49,14 +50,14 @@ res = startbrowser("CH", employmentInquirySharePointPath$, 3)
 '------- error handling
 if res <> 0 then
 	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": unable to load employment inquiry sharepoint page", crlf)
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: [" + str$(res) + "]  msg: " + #errormsg$, crlf)
 	hardcopy(screenshotsPath$ + currScript$ + "-invoke_browser.bmp", 1, 1)
 	closebrowser()
 	criticalStop()
 endif
 '------- debug logging
 if res = 0 then
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": browser invoked and loaded sharepoint page", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": browser invoked and sharepoint page loaded", crlf)
 endif
 pause 5
 endpause
@@ -65,7 +66,7 @@ endpause
 usewindow( "CHROME.EXE|Chrome_WidgetWin_1|CareGiver Portal - WinTask Data - All Documents - Google Chrome", 1)
 clickmouse(left, down, 600, 450, absolute)
 clickmouse(left, up, 600, 450, absolute)
-logMsgStd("selected doc row")
+logMsgStd("selected document row")
 pause 2
 endpause
 
@@ -75,7 +76,7 @@ res = clickhtmlelement("SPAN[OUTERTEXT='Download', INDEX=2]")
 '------- error handling
 if res <> 0 then
 	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error clicking download link", crlf)
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: [" + str$(res) + "] msg: " + #errormsg$, crlf)
 	hardcopy(screenshotsPath$ + currScript$ + "-click_download_.bmp", 1, 1)
 	closebrowser()
 	criticalStop()
@@ -95,14 +96,14 @@ endpause
 res = filecopy(localWinUser$ + "Downloads\Employment Inquiry List.xlsx", employmentInquiryPath$, forced)
 if res <> 0 then
 	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error copying doc to package folder", crlf)
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(res) + ") msg: " + #errormsg$, crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: [" + str$(res) + "]  msg: " + #errormsg$, crlf)
 	hardcopy(screenshotsPath$ + currScript$ + "-file_copy_.bmp", 1, 1)
 	closebrowser()
 	criticalStop()
 endif
 '------- debug logging
 if res = 0 then
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": copied worksheet into automation package directory", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": worksheet copied into automation package directory", crlf)
 endif
 
 
@@ -112,7 +113,8 @@ closebrowser()
 res = kill(localWinUser$ + "Downloads\Employment Inquiry List.xlsx")
 
 
-write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": latest version download complete", crlf)
+write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": download of latest version complete", crlf + crlf)
+write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ---------------------------------------------------------------", crlf + crlf)
 
 
 '#############################################################################################################################
@@ -135,11 +137,11 @@ res = name(employmentInquiryPath$, emplInquiryArchivePath$ + "Employment Inquiry
 if res = 0 then
 	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Employment Inquiry doc archived", crlf)
 else
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Error archiving Employment Inquiry doc; error_code: (" + str$(res) + ")", crlf)	
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Error archiving Employment Inquiry doc; error_code: [" + str$(res) + "]", crlf)	
 endif
 
 
-write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": -------------------------------------- END OF SCAN ------------------------------------------------------------------------------", crlf + crlf)
-write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + "-------------------------------------- END OF SCAN ------------------------------------------------------------------------------", crlf + crlf)
-write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + "-------------------------------------- END OF SCAN ------------------------------------------------------------------------------", crlf + crlf)
-write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + "-------------------------------------- END OF SCAN ------------------------------------------------------------------------------", crlf + crlf)
+write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": -------------------------------------- INTERVAL SCAN COMPLETE ------------------------------------", crlf + crlf)
+write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + "-------------------------------------- INTERVAL SCAN COMPLETE ------------------------------------", crlf + crlf)
+write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + "-------------------------------------- INTERVAL SCAN COMPLETE ------------------------------------", crlf + crlf)
+write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + "-------------------------------------- INTERVAL SCAN COMPLETE ------------------------------------", crlf + crlf)

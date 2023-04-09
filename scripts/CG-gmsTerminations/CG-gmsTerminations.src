@@ -122,7 +122,7 @@ repeat
         if webClickElement(btnGMSLogin$, "clicking login button") <> 0 then
             goto nextIteration
         endif
-        pause 5
+        pause 2
         if webValidateElement(bmpGMSLogo$, "gms logo", "clicking login button") <> 1 then
             goto nextIteration
         endif
@@ -139,7 +139,7 @@ repeat
         if webClickElement(lnkGMSEmployeeTerm$, "clicking employee terminations link") <> 0 then
             goto nextIteration
         endif
-        pause 2
+        pause 1
         if webValidateCurrPage(pgGMSEmployeeTerminations$, "clicking employee terminations link") <> 0 then
             goto nextIteration
         endif
@@ -149,18 +149,18 @@ repeat
         if webEnterText(inputGMSEmployeeSrc$, applicantFName$ + " " + applicantLName$, "entering search criteria") <> 0 then
             goto nextIteration
         endif
-        pause 3
+        pause 2
         if webValidateElement(rowGMSSrcResults$, "search result row", "entering search criteria") <> 1 then
             goto nextIteration
         endif
 
 
         '-------------------- select employee
-        if webClickElement(rowGMSSrcResults$, "selecting employee") <> 0 then
+        if webClickElement(rowGMSSrcResCorpID$, "selecting employee") <> 0 then
             goto nextIteration
         endif
-        res = clickhtmlelement (rowGMSSrcResults$)
-        if gmsTermsErrorChk() = 1 then
+        pause 2
+       if gmsTermsErrorChk() = 1 then
             goto nextIteration
         endif
         if webValidateElement(rowGMSCurrEmplStatus$, "curr status", "selecting employee") <> 1 then
@@ -196,6 +196,17 @@ retryEnterTermDate:
         clickhtmlelement(lblGMSReassignPendAppr$)
         pause 1
         if gmsTermsEarlyDateChk() = 1 then
+            goto retryEnterTermDate
+        endif
+        if gmsTermsEarlyDateChk() = 2 then
+            if webClickElement(btnGMSDateMsgPopupYes$, "clicking continue") <> 0 then
+                goto nextIteration
+            endif
+        endif
+        if gmsTermsEarlyDateChk() = 1 then
+            if webClickElement(btnGMSDateMsgPopupNo$, "clicking no") <> 0 then
+                goto nextIteration
+            endif
             goto retryEnterTermDate
         endif
         if webValidateText(dtGMSTerminationDate$, termedLOADate$, "entering termed/loa date") <> 0 then
@@ -236,7 +247,7 @@ retryEnterTermDate:
 
 
         '-------------------- complete workflow
-        logWorkflowSuccess("termination saved successfully")
+        logWorkflowSuccess("termination workflow completed successfully")
         iProcessed = iProcessed + 1
 
 

@@ -101,7 +101,7 @@ repeat
 '------------------------------------------------------------------------------------------------------------------------------  log in
 
 		'-------------------- invoke browser
-		if webInvokeBrowser("CH", arcsURL$) = 1 then
+		if webInvokeBrowser("FF", arcsURL$) = 1 then
 			nextScript()
 			goto nextIteration
 		endif
@@ -182,7 +182,7 @@ repeat
 
 		'-------------------- determine if applicant has existing application
 		if arcsSubAppExistAppChk() = 1 then
-			goto enterNewApplication
+			goto nextIteration
 		endif
 
 '------------------------------------------------------------------------------------------------------------------------------  enter new applicant form

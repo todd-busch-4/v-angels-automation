@@ -246,13 +246,14 @@ endfunction
 function arcsSubAppExistAppChk()
 
     if existhtmlelement(btnArcsCaseNotes$) = 1 then
-        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant has existing application in arcs", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant already exists in the ARCS database", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+        write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": existing applicant; proceeding to next change event", crlf + crlf)
         arcsSubAppExistAppChk = 1
         exitfunction
     else
-        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": no application info returned for applicant", crlf)
-        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": this is a new application", crlf)
-        write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": no app found for applicant; entering new applicant form", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant search returned no results", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": proceeding with workflow", crlf)
         arcsSubAppExistAppChk = 0
         exitfunction
    endif
@@ -260,7 +261,7 @@ function arcsSubAppExistAppChk()
 endfunction
 
 '=============================================================================================================================================================
-'== function name:              funcName
+'== function name:              arcsInitRegistryChk
     '==
     '== developer:              todd busch
     '==

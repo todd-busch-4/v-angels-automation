@@ -409,12 +409,12 @@ rehireFlow:
 			endif
 
 
-			'-------------------- capture employee id						
-			res = gethtmledittext(inputGMSRHSocial$, val$)
-			applicantEmployeeID$ = val$
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employee id: (" + val$ + ") ", crlf)
-			usewindow(wndGMSRehireForm$, 1)
-			sendkeys("<tab>", noactivate)
+			'-------------------- hit enter to close popup
+			usewindow(wndGMSNewHireForm$, 1)
+			if winSendKeys("<enter>", "closing popup") <> 0 then
+				goto nextIteration
+			endif
+			pause 1
 
 
 			'-------------------- select active from rehired empl status dropdown
