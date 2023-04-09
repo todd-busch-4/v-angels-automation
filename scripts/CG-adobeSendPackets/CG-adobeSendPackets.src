@@ -1,4 +1,4 @@
-_((((((((888888888888888888,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,))))))))'###############################################################################################################################################
+'###############################################################################################################################################
 '## author:                 todd busch
 '##
 '## description:            scans the change event column in employment inquiry list.xlsx spreadsheet in package downloads folder; it will 
@@ -115,21 +115,21 @@ repeat
 			'-------------------- select 'automated' folder
 			usewindow(wndAdobeMainPage$)
 			winMouseLeftClick(835, 615, "selecting 'automated' folder")
-			pause 5
+			pause 2
 			endpause
 
 
 			'-------------------- select 'employee forms' folder
 			usewindow(wndAdobeMainPage$)
 			winMouseLeftClick(835, 615, "selecting 'employee forms' folder")
-			pause 5
+			pause 2
 			endpause
 
 
 			'-------------------- select 'applicant to new hire forms' folder
 			usewindow(wndAdobeMainPage$)
 			winMouseLeftClick(835, 615, "selecting 'applicant to new hire forms' folder")
-			pause 5
+			pause 2
 			endpause
 
 
@@ -143,7 +143,7 @@ repeat
 			'-------------------- click continue button
 			usewindow(wndAdobeMainPage$)
 			winMouseLeftClick(1275, 802, "clicking continue button")
-			pause 5
+			pause 3
 			endpause
 
 
@@ -247,21 +247,21 @@ firstInterviewSend:
 			'-------------------- select 'automated' folder
 			usewindow(wndAdobeMainPage$)
 			winMouseLeftClick(835, 615, "selecting 'automated' folder")
-			pause 5
+			pause 2
 			endpause
 
 
 			'-------------------- select 'employee forms' folder
 			usewindow(wndAdobeMainPage$)
 			winMouseLeftClick(835, 615, "selecting 'employee forms' folder")
-			pause 5
+			pause 2
 			endpause
 
 
 			'-------------------- select 'applicant to new hire forms' folder
 			usewindow(wndAdobeMainPage$)
 			winMouseLeftClick(835, 615, "selecting 'applicant to new hire forms' folder")
-			pause 5
+			pause 2
 			endpause
 
 
@@ -275,7 +275,7 @@ firstInterviewSend:
 			'-------------------- click continue button
 			usewindow(wndAdobeMainPage$)
 			winMouseLeftClick(1275, 802, "clicking continue button")
-			pause 5
+			pause 3
 			endpause
 
 
@@ -395,14 +395,14 @@ firstInterviewSend:
 			usewindow(wndAdobeMainPage$)
 			clickmouse(left, double, 835, 615, absolute)
 			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicked automated folder", crlf)			
-			pause 5
+			pause 2
 			endpause
 
 			'-------------------- select 'employee forms' folder
 			usewindow(wndAdobeMainPage$)
 			clickmouse(left, double, 835, 615, absolute)
 			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicked employee forms folder", crlf)			
-			pause 5
+			pause 2
 			endpause
 
 
@@ -410,7 +410,7 @@ firstInterviewSend:
 			usewindow(wndAdobeMainPage$)
 			clickmouse(left, double, 835, 615, absolute)
 			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicked applicant to new hire forms folder", crlf)			
-			pause 5
+			pause 2
 			endpause
 
 			'-------------------- select 2nd int packet
@@ -425,7 +425,7 @@ firstInterviewSend:
 			'-------------------- click continue button
 			usewindow(wndAdobeMainPage$)
 			winMouseLeftClick(1275, 802, "clicking continue button")
-			pause 5
+			pause 3
 			endpause
 
 
