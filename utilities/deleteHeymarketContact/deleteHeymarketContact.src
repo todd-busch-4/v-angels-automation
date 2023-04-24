@@ -1,0 +1,11 @@
+StartBrowser("FF", "https://app.heymarket.com", 3)
+
+UsePage("Chats")
+	ClickHTMLElement("A[INNERTEXT='Contacts']")
+
+UsePage("Contacts")
+	ClickHTMLElement("DIV[OUTERTEXT='(239']")
+	ClickHTMLElement("BUTTON[INNERTEXT='...']")
+	ClickHTMLElement("BUTTON[INNERTEXT='Delete',INDEX=2]")
+
+closebrowser()

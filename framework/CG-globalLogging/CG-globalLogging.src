@@ -23,11 +23,13 @@
 	'==notes:                   n/a
 	'==
 '=============================================================================================================================================================*/
-function logStartScript(workflow$)
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": starting scan for " + workflow$ + " change events", crlf)
-	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": starting scan of [" + str$(cnt) + "] rows for " + workflow$ + " change events", crlf)
-	write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": starting scan of [" + str$(cnt) + "] rows for " + workflow$ + " change events", crlf)
-	write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": starting scan of [" + str$(cnt) + "] rows for " + workflow$ + " change events", crlf + crlf)
+function logStartScript(str_workflow$)
+	local str_workflow$
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": starting scan for " + str_workflow$ + " change events", crlf)
+	write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ==================================== " + str_workflow$ + " ================================", crlf)
+	write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ==================================== " + str_workflow$ + " ================================", crlf)
+	write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": starting scan for " + str_workflow$ + " change events", crlf)
+	write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": starting scan for " + str_workflow$ + " change events", crlf + crlf)
 	if iEnvironment = 1 then
 		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": settings configured for development environment", crlf)
 		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": --------------------------------------------------------", crlf)
@@ -74,7 +76,6 @@ endfunction
 '=============================================================================================================================================================*/
 function logStageMatch()
 	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change event stage: [" + curr_stage$ + "] triggers workflow", crlf)
-	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change event for stage: [" + curr_stage$ + "] at row: [" + str$(iExcelRow) + "] triggered workflow", crlf)
 	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": getting data for current row", crlf)
 	logStageMatch = 0
 endfunction
@@ -96,6 +97,7 @@ endfunction
 function logStageBypass()
 	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage for change event at row: [" + str$(iExcelRow) + "] did not trigger workflow", crlf)
 	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+	closebrowser()
 endfunction
 
 '=============================================================================================================================================================
@@ -113,9 +115,9 @@ endfunction
 	'==
 '=============================================================================================================================================================*/
 function logDataValues()
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": starting workflow for: " + applicantFName$ + " " + applicantLName$ + " record id: " + "[" + applicantID$ + "]", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: [" + applicantID$ + "]", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: [" + applicantFName$ + " " + applicantLName$ + "]", crlf)
+	logDataValues = 0
 endfunction
 
 '=============================================================================================================================================================
@@ -133,8 +135,8 @@ endfunction
 	'==
 '=============================================================================================================================================================*/
 function logWorkflowStepSuccess(text$)
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + text$, crlf)
-	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ":  " + text$, crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + text$, crlf + crlf)
+	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ":  " + text$, crlf + crlf)
 	write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
 	write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
 	write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + text$, crlf + crlf)

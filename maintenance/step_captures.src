@@ -1,14 +1,13 @@
 
 
+'startbrowser("FF", "https://app.heymarket.com", 3)
 
-'---------------------------------------------------------------------------------------------------- gms success results
-'"BUTTON[INNERTEXT='Done']"												'done button
-
-'"TABLE[CONTENT='Update']"												'1st line of success msg "Update Progress"
-'ret = UseOCREngine(3)
-'var$ = CaptureAreaOCR$("FIREFOX.EXE|MozillaWindowClass|Group Management Services - Employee Termination — Mozilla Firefox",TopInstance(),667,440,291,674)
+'navigate("https://app.heymarket.com/contacts")
+'pause 2
 
 
 
-dtToday$ = Date$(0)
-MsgBox(dtToday$)
+
+UsePage("Chats")
+	ClickHTMLElement("DIV[OUTERTEXT='(239']")
+                     "DIV[OUTERTEXT='(239']"

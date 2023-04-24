@@ -41,7 +41,7 @@ function webInvokeBrowser(str_app$, str_url$)
 
 		if r <> 0 then
 			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error starting browser attempt #: [" + str$(iAttempt) + "]", crlf)
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(r) + "), retrying", crlf)
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: [" + str$(r) + "], retrying", crlf)
 			hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-invoke_browser-" + str$(iAttempt) + ".bmp", 1, 1)
 			closebrowser()
 			pause 1

@@ -1,0 +1,582 @@
+'###############################################################################################################################################################
+'##  filename:				cg-heyFunctions
+'##
+'##  purpose:				library of functions for use in heymarket workflow script development in order to minimize code duplication, increase script
+'##							cleanliness/readability, and reduce maintenance efforts by providing a single centralized location for changes
+'##
+'###############################################################################################################################################################
+
+'=============================================================================================================================================================
+'== function name:              heyInitStageChk
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                determines if current stage matches a trigger value
+    '==
+    '== input parms:            none
+    '==
+    '== returns:                int:    0 - success/match
+    '==                                 1 - failure/no match
+    '==
+    '== notes:                  none
+    '==
+'=============================================================================================================================================================*/
+function heyInitStageChk()
+
+    if curr_stage$ = "1st Interview" then
+        heyInitStageChk = 0
+        exitfunction
+    else
+        heyInitStageChk = 1
+        exitfunction
+    endif
+
+endfunction
+
+'=============================================================================================================================================================
+'== function name:              heyFmtFirstApptDate
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                terseDescription
+    '==
+    '== input parms:            none
+    '==
+    '== returns:                int:    0 - success
+    '==                                 1 - failure
+    '==
+    '== notes:                  none
+    '==
+'===============================================================================================================================================================
+function heyFmtFirstApptDate$(dt_date$)
+    local r, p, firstAppDate, firstAppDateOnly$, firstAppMonth$, firstAppDay$, firstAppYr$
+
+    '-------------------- dissect first app date
+    '------- month
+    'original format 1/20/2023  10:30:00 AM
+    r = instrrev(dt_date$, "/")							'find second "/" in string                                 
+    r = r + 4											'add 4 for year to find end of date                         
+    firstAppDateOnly$ = left$(dt_date$, r)				'extract just date                                          
+    firstAppDateOnly$ = rtrim$(firstAppDateOnly$)		'trim whitespace caused by single digit month/day values    
+    firstAppMonth$ = left$(dt_date$, 2)			        'extract just month                                         
+    if instr(firstAppMonth$,"/") <> 0 then				'zero pad if single digit                                  
+        firstAppMonth$ = left$(firstAppMonth$, 1) 
+        firstAppMonth$ = "0" + firstAppMonth$
+    endif
+
+    '------- day
+    p = instr(dt_date$, "/")					            'find starting point to extract day
+    firstAppDay$ = mid$(dt_date$, p + 1, 2)		        'extract just day
+    if instr(firstAppDay$,"/") <> 0 then				'zero pad if single digit
+        firstAppDay$ = left$(firstAppDay$, 1) 
+        firstAppDay$ = "0" + firstAppDay$
+    endif
+
+    '------- year
+	firstAppYr$ = right$(firstAppDateOnly$, 4)			'extract just year
+
+    firstAppDate$ = firstAppMonth$ + "/" + firstAppDay$ + "/" + firstAppYr$
+    heyFmtFirstApptDate$ = firstAppMonth$ + "/" + firstAppDay$ + "/" + firstAppYr$
+
+endfunction
+
+'=============================================================================================================================================================
+'== function name:              heyFmtDayPriorFirstAppt
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                terseDescription
+    '==
+    '== input parms:            none
+    '==
+    '== returns:                int:    0 - success
+    '==                                 1 - failure
+    '==
+    '== notes:                  none
+    '==
+'===============================================================================================================================================================
+function heyFmtDayPriorFirstAppt$(dt_date$)
+    local r, p, l, firstAppPriorDate, firstAppDateOnly$, firstAppMonth$, firstAppDay$, firstAppYr$, firstAppPriorDay
+
+    '-------------------- dissect first app date
+    '------- month
+    'original format 1/20/2023  10:30:00 AM
+    r = instrrev(dt_date$, "/")							'find second "/" in string                                 
+    r = r + 4											'add 4 for year to find end of date                         
+    firstAppDateOnly$ = left$(dt_date$, r)				'extract just date                                          
+    firstAppDateOnly$ = rtrim$(firstAppDateOnly$)		'trim whitespace caused by single digit month/day values    
+    firstAppMonth$ = left$(dt_date$, 2)			        'extract just month                                         
+    if instr(firstAppMonth$,"/") <> 0 then				'zero pad if single digit                                  
+        firstAppMonth$ = left$(firstAppMonth$, 1) 
+        firstAppMonth$ = "0" + firstAppMonth$
+    endif
+
+    '------- day
+    p = instr(dt_date$, "/")					            'find starting point to extract day
+    firstAppDay$ = mid$(dt_date$, p + 1, 2)		        'extract just day
+    if instr(firstAppDay$,"/") <> 0 then				'zero pad if single digit
+        firstAppDay$ = left$(firstAppDay$, 1) 
+        firstAppDay$ = "0" + firstAppDay$
+    endif
+
+    '------- year
+	firstAppYr$ = right$(firstAppDateOnly$, 4)			'extract just year
+
+    '------- day prior
+    firstAppPriorDay = Val(firstAppDay$) - 1			'subtract day from appt day
+
+    firstAppPriorDay$ = str$(firstAppPriorDay)			'convert to string value
+
+    l = len(firstAppPriorDay$)							'zero pad if single digit
+    if l < 2 then
+        firstAppPriorDay$ = "0" + firstAppPriorDay$
+    endif
+
+    firstAppPriorDate$ = firstAppMonth$ + "/" + firstAppPriorDay$ + "/" + firstAppYr$
+    heyFmtDayPriorFirstAppt$ = firstAppMonth$ + "/" + firstAppPriorDay$ + "/" + firstAppYr$
+
+endfunction
+
+'=============================================================================================================================================================
+'== function name:              heyFmtFirstApptTime
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                terseDescription
+    '==
+    '== input parms:            none
+    '==
+    '== returns:                int:    0 - success
+    '==                                 1 - failure
+    '==
+    '== notes:                  none
+    '==
+'===============================================================================================================================================================
+function heyFmtFirstApptTime$(dt_date$)
+    local firstAppTime, firstAppLongTime$, dayNightDes$, firstAppTimeNoSecs$, firstAppHour$, firstAppMinutes$
+
+    firstAppLongTime$ = right$(dt_date$, 11)			'extract just time (w/am-pm)
+
+    dayNightDes$ = right$(firstAppLongTime$, 2)					'extract am/pm designator
+
+    firstAppTimeNoSecs$ = left$(firstAppLongTime$, 5)			'extract time minus secs
+
+    firstAppTimeNoSecs$ = ltrim$(firstAppTimeNoSecs$)			'trim whitespace caused by single hour values
+
+    firstAppHour$ = left$(firstAppTimeNoSecs$, 2)				'extract just hour
+
+    if instr(firstAppHour$,":") <> 0 then						'zero pad if single digit
+        firstAppHour$ = left$(firstAppHour$, 1) 
+        firstAppHour$ = "0" + firstAppHour$
+    endif
+
+    firstAppMinutes$ = right$(firstAppTimeNoSecs$, 2)			'extract just minutes
+
+    firstAppTime$ = firstAppTimeNoSecs$ + dayNightDes$
+    heyFmtFirstApptTime$ = firstAppTimeNoSecs$ + dayNightDes$
+endfunction
+
+'=============================================================================================================================================================
+'== function name:              heyInitStatusChk
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                terseDescription
+    '==
+    '== input parms:            none
+    '==
+    '== returns:                int:    0 - success
+    '==                                 1 - failure
+    '==
+    '== notes:                  none
+    '==
+'===============================================================================================================================================================
+function heyInitStatusChk()
+
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": checking status of text msg column", crlf)
+
+    if textmsgStatus$ <> "" and textmsgStatus$ <> "[]" then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status field was not null", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+        heyInitStatusChk = 1
+        exitfunction
+    else
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status was null; continuing workflow", crlf)
+        heyInitStatusChk = 0
+        exitfunction
+    endif
+
+endfunction
+
+'=============================================================================================================================================================
+'== function name:              heyLogin
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                if app login page is displayed script will log in using wintask acct
+    '==
+    '== input parms:            none
+    '==
+    '== returns:                int:    0 - success
+    '==                                 1 - failure
+    '==
+    '== notes:                  none
+    '==
+'===============================================================================================================================================================
+function heyLogin()
+    local r
+
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": checking status of application", crlf)
+
+    if existhtmlelement(inputHeyAcctEmail$) <> 1 then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": account was already logged in", crlf)
+        heyLogin = 0
+        exitfunction
+    endif
+
+    if existhtmlelement(btnHeyLoginSignIn$) = 1 then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": app is currently logged out", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": logging in using automation account", crlf)
+
+        'enter acct email
+        r = writehtmlpaste(inputHeyAcctEmail$, heyAcctEmail$, delete)
+        if r <> 0 then
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error pasting email to input field", crlf)
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(r) + ") msg: " + #errormsg$, crlf)
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+            hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-paste_email.bmp", 1, 1)
+            write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+            write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+            write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - pasting email", crlf + crlf)
+            closebrowser()
+            heyLogin = 1
+            exitfunction
+        endif
+        pause 1
+        r = gethtmledittext(inputHeyAcctEmail$, var$)
+        if var$ <> heyAcctEmail$ then
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": enter email validation failed", crlf)
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": expected text did not match expected", crlf)
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": expected [" + heyAcctEmail$ + "]  actual [" + var$ + "]", crlf)
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+            hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-paste_email.bmp", 1, 1)
+            write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+            write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+            write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - pasting email", crlf + crlf)
+            closebrowser()
+            heyLogin = 1
+            exitfunction
+        endif
+
+        'click next
+        r = clickhtmlelement(btnHeyLoginNext$)
+        if r <> 0 then
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error clicking next button", crlf)
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(r) + ") msg: " + #errormsg$, crlf)
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+            hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_next_login.bmp", 1, 1)
+            write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+            write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+            write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - clicking next - login", crlf + crlf)
+            closebrowser()
+            heyLogin = 1
+            exitfunction
+        endif
+        pause 2
+        r = existhtmlelement(inputHeyPassword$)
+        if r <> 1 then
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicking next validation failed", crlf)
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": expected object [password field] was not found", crlf)
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+            hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_next_login.bmp", 1, 1)
+            write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+            write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+            write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - clicking next - login", crlf + crlf)
+            closebrowser()
+            heyLogin = 1
+            exitfunction
+        endif
+
+        'enter password
+        r = writehtmlpaste(inputHeyPassword$, heyPassword$, delete)
+        if r <> 0 then
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error pasting password to input field", crlf)
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(r) + ") msg: " + #errormsg$, crlf)
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+            hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-paste_password.bmp", 1, 1)
+            write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+            write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+            write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - pasting password", crlf + crlf)
+            closebrowser()
+            heyLogin = 1
+            exitfunction
+        endif
+        r = gethtmledittext(inputHeyPassword$, var$)
+        if var$ <> heyPassword$ then
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": pasting password validation failed", crlf)
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": expected text did not match expected", crlf)
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": expected [" + heyPassword$ + "]  actual [" + var$ + "]", crlf)
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+            hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-paste_password.bmp", 1, 1)
+            write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+            write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+            write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - pasting password", crlf + crlf)
+            closebrowser()
+            heyLogin = 1
+            exitfunction
+        endif
+
+        'click sign in
+        r = clickhtmlelement(btnHeyLoginSignIn$)
+        if r <> 0 then
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error clicking sign-in button", crlf)
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(r) + ") msg: " + #errormsg$, crlf)
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+            hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_sign-in.bmp", 1, 1)
+            write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+            write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+            write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - clicking sign-in", crlf + crlf)
+            closebrowser()
+            heyLogin = 1
+            exitfunction
+        endif
+
+    endif
+
+endfunction
+
+'=============================================================================================================================================================
+'== function name:              heyVerifyAddedContact
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                terseDescription
+    '==
+    '== input parms:            none
+    '==
+    '== returns:                int:    0 - success
+    '==                                 1 - failure
+    '==
+    '== notes:                  none
+    '==
+'===============================================================================================================================================================
+function heyVerifyAddedContact(str_pre_count$)
+    local l, sPostRaw$
+
+    'get count after save
+    gethtmlattribute(txtHeyContactCount$, "OUTERTEXT", sPostRaw$)
+
+    'extract value of pre count
+    l = len(str_pre_count$)
+    sPreRaw$ = right$(str_pre_count$, l - 15)
+    sPreRaw$ = ltrim$(sPreRaw$)
+
+    'increment value of pre count
+    iPreIncrCount = val(sPreRaw$) + 1
+
+    'extract value of post count
+    l = len(sPostRaw$)
+    sPostRaw$ = right$(sPostRaw$, l - 15)
+    sPostRaw$ = ltrim$(sPostRaw$)
+    iPostCount = val(sPostRaw$)
+
+    'compare counts
+    if iPreIncrCount = iPostCount then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": count was incremented as expected", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": contact was added successfully", crlf)
+        heyVerifyAddedContact = 0
+        exitfunction
+    endif
+
+    if iPreIncrCount <> iPostCount then
+        'check if duplicate
+        if existhtmlelement(txtHeyDupContactMsg$) <> 0 then
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": create contact validation failed", crlf)
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": phone number already exists for a contact", crlf)
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+            write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+            write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+            write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - duplicate contact" + step$, crlf + crlf)
+            heyVerifyAddedContact = 1
+            exitfunction
+        endif
+           
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": create contact validation failed", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": expected contact count did not match expected", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": expected: [" + str$(iPreIncrCount) + "]  actual: [" + str$(iPostCount), crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+        write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+        write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+        write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - heyVerifyAddedContact failed" + step$, crlf + crlf)
+        heyVerifyAddedContact = 1
+        exitfunction
+    endif
+
+endfunction
+
+'=============================================================================================================================================================
+'== function name:              heyGenDynSrcResObj$
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                terseDescription
+    '==
+    '== input parms:            none
+    '==
+    '== returns:                int:    0 - success
+    '==                                 1 - failure
+    '==
+    '== notes:                  none
+    '==
+'===============================================================================================================================================================
+function heyGenDynSrcResObj$(str_phone$)
+
+    heyGenDynSrcResObj$ = "DIV[OUTERTEXT='" + str_phone$ + "',INDEX=3]"
+
+endfunction
+
+'=============================================================================================================================================================
+'== function name:              heyInitGetData
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                get worksheet data used by script for the current row
+    '==
+    '== input parms:            none
+    '==
+    '== returns:                int:    0 - success
+    '==
+    '== notes:                  none
+    '==
+'=============================================================================================================================================================*/
+function heyInitGetData()
+    local r
+
+    '-------------------- get standard data values
+    applicantID$ = arrApplicantID$(i)
+    applicantFName$ = arrApplicantFName$(i)
+    applicantLName$ = arrApplicantLName$(i)
+    applicantEmail$ = arrApplicantEmail$(i)
+    applicantPhone$ = arrApplicantPhone$(i)
+    applicant1stApp$ = arrApplicant1stApp$(i)
+    textmsgStatus$ = arrTextmsgStatus$(i)
+    currentStage$ = arrCurrentStage$ (i)
+
+    applicantFullName$ = applicantFName$ + " " + applicantLName$
+
+    '-------------------- check for missing critical data
+    'phone number
+	if applicantPhone$ = "" or applicantPhone$ = "[]" then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant phone did not contain a value for the current row", crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": heyInitGetData: null value: [applicant phone]", crlf + crlf)
+		heyInitGetData = 1
+		exitfunction
+    endif
+
+    'ist appointment
+	if applicant1stApp$ = "" or applicant1stApp$ = "[]" then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ist appointment did not contain a value for the current row", crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": heyInitGetData: null value: [ist appointment]", crlf + crlf)
+		heyInitGetData = 1
+		exitfunction
+    endif
+
+    '-------------------- convert any data to required haymarket formatting
+    'check for sycronist formatted phone
+	r = instr(applicantPhone$, "[tel:")
+	if r <> 0 then
+		applicantPhone$ = left$(applicantPhone$, r - 1)
+	endif
+
+    'strip string of all formatting
+    applicantPhone$ = replace$(applicantPhone$, "(", "")
+    applicantPhone$ = replace$(applicantPhone$, ")", "")
+    applicantPhone$ = replace$(applicantPhone$, "-", "")
+    applicantPhone$ = replace$(applicantPhone$, " ", "")
+    if len(applicantPhone$) <> 10 then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error trying to convert phone", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": value has unknown format", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": heyInitGetData: error converting phone", crlf + crlf)
+		heyInitGetData = 1
+		exitfunction
+    endif
+
+    'extract into parts and then contruct in heymarket required format
+    sPart1$ = left$(applicantPhone$, 3)
+    sPart2$ = mid$(applicantPhone$, 4, 3)
+    sPart3$ = right$(applicantPhone$, 4)
+
+    applicantPhone$ = "(" + sPart1$ + ")" + " " + sPart2$ + "-" + sPart3$
+
+    heyInitGetData = 0
+
+endfunction
+
+'=============================================================================================================================================================
+'== function name:              heyFmtInitMsgTxt
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                terseDescription
+    '==
+    '== input parms:            none
+    '==
+    '== returns:                int:    0 - success
+    '==                                 1 - failure
+    '==
+    '== notes:                  none
+    '==
+'===============================================================================================================================================================
+function heyFmtInitMsgTxt$(fname$, appt_day$, appt_time$)
+    local fname$, appt_day$, appt_time$
+    heyFmtInitMsgTxt$ = "Hello " + fname$ + "," + crlf + "Thank you for applying to Visiting Angels. We have scheduled an interview time for you on " + appt_day$ + " at " +  appt_time$ + ". You will be receiving two emails with interview packets (Pre 1st Interview and 1st Interview). Please click the 'Review and Sign' link and provide the information requested. If you do not have internet access to get online and finish the documentation, we can provide you access to a computer in our office (you will need to know your email password). Please bring your photo ID, social security card, and proof of auto insurance. We look forward to seeing you soon!"
+endfunction
+
+'=============================================================================================================================================================
+'== function name:              heyFmtDayPriorMsgTxt
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                terseDescription
+    '==
+    '== input parms:            none
+    '==
+    '== returns:                int:    0 - success
+    '==                                 1 - failure
+    '==
+    '== notes:                  none
+    '==
+'===============================================================================================================================================================
+function heyFmtDayPriorMsgTxt$(fname$, appt_day$, appt_time$)
+    local fname$, appt_day$, appt_time$
+    heyFmtDayPriorMsgTxt$ = "Hello " + fname$ + ",<Enter>You are scheduled for an interview at Visiting Angels Grove City tomorrow " + appt_day$ + " at " +  appt_time$ + ". You should have received emails with Adobe documents to be filled out and signed electronically. It would be extremely helpful in streamlining your interview if you could complete those prior to your arrival. Also, if you have not already done so, please fill out our online application at https://generations.idb-sys.com/OnlineApplication.aspx?guid=ccfff3c9-c5ab-4bea-aeb5-9f8001115743 . Thank you and we look forward to seeing you!"
+endfunction
+
+'=============================================================================================================================================================
+'== function name:              heyFmtDayOfApptMsgTxt
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                terseDescription
+    '==
+    '== input parms:            none
+    '==
+    '== returns:                int:    0 - success
+    '==                                 1 - failure
+    '==
+    '== notes:                  none
+    '==
+'===============================================================================================================================================================
+function heyFmtDayOfApptMsgTxt$(fname$, appt_time$)
+    local fname$, appt_time$
+    heyFmtDayOfApptMsgTxt$ = "Good morning " + fname$ + ", this is Visiting Angels reminding you of your interview today at " + appt_time$ + ". Please reply to confirm as our office runs on confirmed appointments only.<Enter>Please text '1' to confirm, '2' to reschedule, or '3' to cancel.<Enter>Thank you and we look forward to seeing you."
+endfunction

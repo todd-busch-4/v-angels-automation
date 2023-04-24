@@ -1,0 +1,53 @@
+/*#############################################################################################################################################################
+##  filename:						heyObjectRepository
+##
+##  contents:						contains window and object definitions for the heymarket web application
+##
+#############################################################################################################################################################*/
+
+'======================================================================= global ================================================================================
+btnHeyHome$ = "A[HREF='https://app.heymarke']"
+btnHeyChats$ = "A[INNERTEXT='Chats']"
+btnHeyContacts$ = "A[INNERTEXT='Contacts']"
+
+'======================================================================= login =================================================================================
+urlHeyLogin$ = "https://app.heymarket.com/account/login"
+wndHeyLogin$ = "FIREFOX.EXE|MozillaWindowClass|Heymarket | Sign In — Mozilla Firefox"
+pgHeyLogin$ = "Heymarket | Sign In"
+inputHeyAcctEmail$ = "INPUT EMAIL[NAME='email']"
+btnHeyLoginNext$ = "BUTTON[INNERTEXT='Next']"
+inputHeyPassword$ = "INPUT PASSWORD[NAME='password']"
+btnHeyLoginSignIn$ = "BUTTON[INNERTEXT='Sign In']"
+
+
+'======================================================================= home (chats) ==========================================================================
+urlHeyChats$ = "https://app.heymarket.com/chats"
+wndHeyChats$ = "CHROME.EXE|Chrome_WidgetWin_1|Chats - Google Chrome"
+pgHeyChats$ = "Chats"
+btnHeyCompose$ = "BUTTON[CLASS='compose ico-compose']"
+
+'======================================================================= home (chats - search) =================================================================
+inputHeyContactSrc$ = "INPUT TEXT[NAME='contact-search-input']"
+
+'======================================================================= home (chats - compose) ================================================================
+inputHeyCompName$ = "INPUT TEXT[NAME='contact-name']"
+inputHeyCompMsgArea$ = "TEXTAREA[ID='message-textarea']"
+btnHeyCompSchedule$ = "DIV[ID='btn-send-later']"
+btnHeyCompSendNow$ = "DIV[OUTERTEXT='Send',INDEX=2]"
+
+'======================================================================= contacts ==============================================================================
+urlHeyContacts$ = "https://app.heymarket.com/contacts"
+wndHeyContacts$ = "CHROME.EXE|Chrome_WidgetWin_1|Contacts - Google Chrome"
+pgHeyContacts$ = "Contacts"
+txtHeyContactCount$ = "DIV[OUTERTEXT='Total']"
+btnHeyCreateContact$ = "A[INNERTEXT='Create Contact']"
+
+	'-------------- add contact popup form
+inputHeyName$ = "INPUT TEXT[NAME='name']"
+inputHeyPhone$ = "INPUT TEXT[NAME='phone-number']"
+inputHeyEmail$ = "INPUT TEXT[NAME='email']"
+inputHeyLists$ = "INPUT TEXT[NAME='lists-input']"
+inputHeyTags$ = "INPUT TEXT[ID='add-tag',INDEX=2]"
+btnHeySaveContact$ = "BUTTON[INNERTEXT='Save',INDEX=2]"
+txtHeyDupContactMsg$ = "DIV[OUTERTEXT='Oops',INDEX=3]"
+

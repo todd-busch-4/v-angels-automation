@@ -54,7 +54,7 @@ endfunction
 	'==
 	'== developer:              todd busch
 	'==
-	'== purpose:                adds dashes to specified ssn if it does not have them
+	'== purpose:                makes sure ssn is formatted with two dashes as the global standard
 	'==
 	'== input parms:            str_ssn$:	the ssn to be formatted
 	'==
@@ -64,20 +64,22 @@ endfunction
 	'==
 '=============================================================================================================================================================
 function formatSSN$ (str_ssn$)
-     local str_ssn$, middle$, pre$, post$
+     local str_ssn$, sMiddle$, sPre$, sPost$, sRaw$
+
+	 'strip string down to just numbers
+	 sRaw$ = replace$(str_ssn$, "-", "")
+	 sRaw$ = replace$(str_ssn$, "+", "")
+	 sRaw$ = replace$(str_ssn$, "/", "")
+	 sRaw$ = replace$(str_ssn$, "/", "")
+	 sRaw$ = replace$(str_ssn$, " ", "")
    
-    if instr(str_ssn$, "-") = 0 then
-        'divide # into parts
-        pre$ = left$(str_ssn$, 3)
-        middle$ = mid$(str_ssn$, 4, 2)
-        post$ = right$(str_ssn$, 4)
+	'divide # into parts
+	sPre$ = left$(str_ssn$, 3)
+	sMiddle$ = mid$(str_ssn$, 4, 2)
+	sPost$ = right$(str_ssn$, 4)
 
-        'assemble string    
-        formatSSN$ = pre$ + "-" + middle$ + "-" + post$
-
-    else
-        formatSSN$ = str_ssn$
-    endif
+	'assemble string    
+	formatSSN$ = pre$ + "-" + middle$ + "-" + post$
 
 endfunction
 
@@ -100,7 +102,6 @@ function nullDataElementChk(str_object$)
 	if str_object$ = "" or str_object$ = "[]" then
 		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + str_object$ + " did not contain a value for the current row", crlf)
 		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
-		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
 		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
 		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
 		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": nullDataElementChk: null value: [" + str_object$ + "]", crlf + crlf)
@@ -110,6 +111,94 @@ function nullDataElementChk(str_object$)
 		nullDataElementChk = 0
 	endif
 
+endfunction
+
+'=============================================================================================================================================================
+'== function name:				formatPhoneDashes
+	'==
+	'== developer:              todd busch
+	'==
+	'== purpose:                terseDescription
+	'==
+	'== input parms:            none
+	'==
+	'== returns:                int:	0 - success
+	'==									1 - failure
+	'==
+	'== notes:                  none
+	'==
+'===============================================================================================================================================================
+function formatPhoneDashes$(str_phone$)
+	local r, str_phone$
+
+	'check for sycronist formatted phone
+	r = instr(str_phone$, "[tel:")
+	if r <> 0 then
+		str_phone$ = left$(str_phone$, r - 1)
+	endif
+
+	'remove parentheses around area code
+	r = instr(str_phone$, ")")
+	if r <> 0 then
+		str_phone$ = replace$(str_phone$, "(", "")
+		str_phone$ = replace$(str_phone$, ")", "")
+
+		'replace space created by removal of leading parenthases
+		str_phone$ = replace$(str_phone$, " ", "-")
+	endif
+
+	'check if contains no dashes
+	r = instr(str_phone$, "-")
+	if r = 0 then
+		iPart1$ = left$(str_phone$, 3)
+		iPart2$ = mid$(str_phone$, 4, 3)
+		iPart3$ = right$(str_phone$, 4)
+		str_phone$ = iPart1$ + "-" + iPart2$ + "-" + iPart3$
+	endif
+
+
+	formatPhoneDashes$ = str_phone$
+
+
+endfunction
+
+'=============================================================================================================================================================
+'== function name:				copyFile
+	'==
+	'== developer:              todd busch
+	'==
+	'== purpose:                terseDescription
+	'==
+	'== input parms:            none
+	'==
+	'== returns:                int:	0 - success
+	'==									1 - failure
+	'==
+	'== notes:                  none
+	'==
+'===============================================================================================================================================================
+function copyFile(str_from$, str_to$)
+	local r
+
+	r = filecopy(str_from$, str_to$, forced)
+
+	if r <> 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": file copy failed", crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(r) + ") msg: " + #errormsg$, crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: file copy failed" + step$, crlf + crlf)
+		copyFile = 1
+		exitfunction
+	endif
+
+	if r = 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": file copied successfully", crlf)
+		copyFile = 0
+		exitfunction
+	endif
+	 
 endfunction
 
 '=============================================================================================================================================================
@@ -129,6 +218,7 @@ endfunction
 function convStateToName$(str_state$)
 	local str_state$
 
+	'-------------------- ohio
 	if str_state$ = "OH" then
 		convStateToName$ = "Ohio"
 		exitfunction
@@ -137,12 +227,124 @@ function convStateToName$(str_state$)
 		convStateToName$ = "Ohio"
 		exitfunction
 	endif
+	if str_state$ = "oh" then
+		convStateToName$ = "Ohio"
+		exitfunction
+	endif
 	if str_state$ = "Ohio" then
+		convStateToName$ = "Ohio"
+		exitfunction
+	endif
+	if str_state$ = "ohio" then
 		convStateToName$ = "Ohio"
 		exitfunction
 	endif
 	if str_state$ = "OHIO" then
 		convStateToName$ = "Ohio"
+		exitfunction
+	endif
+
+	'-------------------- tennessee
+	if str_state$ = "TN" then
+		convStateToCode$ = "Tennessee"
+		exitfunction
+	endif
+	if str_state$ = "Tn" then
+		convStateToCode$ = "Tennessee"
+		exitfunction
+	endif
+	if str_state$ = "tn" then
+		convStateToCode$ = "Tennessee"
+		exitfunction
+	endif
+	if str_state$ = "Tennessee" then
+		convStateToCode$ = "Tennessee"
+		exitfunction
+	endif
+	if str_state$ = "tennessee" then
+		convStateToCode$ = "Tennessee"
+		exitfunction
+	endif
+	if str_state$ = "TENNESSEE" then
+		convStateToCode$ = "Tennessee"
+		exitfunction
+	endif
+
+	'-------------------- Washington
+	if str_state$ = "WA" then
+		convStateToName$ = "Washington"
+		exitfunction
+	endif
+	if str_state$ = "Wa" then
+		convStateToName$ = "Washington"
+		exitfunction
+	endif
+	if str_state$ = "wa" then
+		convStateToName$ = "Washington"
+		exitfunction
+	endif
+	if str_state$ = "Washington" then
+		convStateToName$ = "Washington"
+		exitfunction
+	endif
+	if str_state$ = "washington" then
+		convStateToName$ = "Washington"
+		exitfunction
+	endif
+	if str_state$ = "WASHINGTON" then
+		convStateToName$ = "Washington"
+		exitfunction
+	endif
+
+	'-------------------- Pennsylvania
+	if str_state$ = "PA" then
+		convStateToName$ = "Pennsylvania"
+		exitfunction
+	endif
+	if str_state$ = "Pa" then
+		convStateToName$ = "Pennsylvania"
+		exitfunction
+	endif
+	if str_state$ = "pa" then
+		convStateToName$ = "Pennsylvania"
+		exitfunction
+	endif
+	if str_state$ = "Pennsylvania" then
+		convStateToName$ = "Pennsylvania"
+		exitfunction
+	endif
+	if str_state$ = "pennsylvania" then
+		convStateToName$ = "Pennsylvania"
+		exitfunction
+	endif
+	if str_state$ = "PENNSYLVANIA" then
+		convStateToName$ = "Pennsylvania"
+		exitfunction
+	endif
+
+	'-------------------- Indiana
+	if str_state$ = "IN" then
+		convStateToName$ = "Indiana"
+		exitfunction
+	endif
+	if str_state$ = "In" then
+		convStateToName$ = "Indiana"
+		exitfunction
+	endif
+	if str_state$ = "in" then
+		convStateToName$ = "Indiana"
+		exitfunction
+	endif
+	if str_state$ = "Indiana" then
+		convStateToName$ = "Indiana"
+		exitfunction
+	endif
+	if str_state$ = "indiana" then
+		convStateToName$ = "Indiana"
+		exitfunction
+	endif
+	if str_state$ = "INDIANA" then
+		convStateToName$ = "Indiana"
 		exitfunction
 	endif
 
@@ -174,7 +376,15 @@ function convStateToCode$(str_state$)
 		convStateToCode$ = "OH"
 		exitfunction
 	endif
+	if str_state$ = "oh" then
+		convStateToCode$ = "OH"
+		exitfunction
+	endif
 	if str_state$ = "Ohio" then
+		convStateToCode$ = "OH"
+		exitfunction
+	endif
+	if str_state$ = "ohio" then
 		convStateToCode$ = "OH"
 		exitfunction
 	endif
@@ -192,7 +402,15 @@ function convStateToCode$(str_state$)
 		convStateToCode$ = "TN"
 		exitfunction
 	endif
+	if str_state$ = "tn" then
+		convStateToCode$ = "TN"
+		exitfunction
+	endif
 	if str_state$ = "Tennessee" then
+		convStateToCode$ = "TN"
+		exitfunction
+	endif
+	if str_state$ = "tennessee" then
 		convStateToCode$ = "TN"
 		exitfunction
 	endif
@@ -201,5 +419,83 @@ function convStateToCode$(str_state$)
 		exitfunction
 	endif
 
+	'-------------------- Washington
+	if str_state$ = "WA" then
+		convStateToName$ = "WA"
+		exitfunction
+	endif
+	if str_state$ = "Wa" then
+		convStateToName$ = "WA"
+		exitfunction
+	endif
+	if str_state$ = "wa" then
+		convStateToName$ = "WA"
+		exitfunction
+	endif
+	if str_state$ = "Washington" then
+		convStateToName$ = "WA"
+		exitfunction
+	endif
+	if str_state$ = "washington" then
+		convStateToName$ = "WA"
+		exitfunction
+	endif
+	if str_state$ = "WASHINGTON" then
+		convStateToName$ = "WA"
+		exitfunction
+	endif
+
+	'-------------------- Pennsylvania
+	if str_state$ = "PA" then
+		convStateToName$ = "PA"
+		exitfunction
+	endif
+	if str_state$ = "Pa" then
+		convStateToName$ = "PA"
+		exitfunction
+	endif
+	if str_state$ = "pa" then
+		convStateToName$ = "PA"
+		exitfunction
+	endif
+	if str_state$ = "Pennsylvania" then
+		convStateToName$ = "PA"
+		exitfunction
+	endif
+	if str_state$ = "pennsylvania" then
+		convStateToName$ = "PA"
+		exitfunction
+	endif
+	if str_state$ = "PENNSYLVANIA" then
+		convStateToName$ = "PA"
+		exitfunction
+	endif
+
+	'-------------------- Indiana
+	if str_state$ = "IN" then
+		convStateToName$ = "IN"
+		exitfunction
+	endif
+	if str_state$ = "In" then
+		convStateToName$ = "IN"
+		exitfunction
+	endif
+	if str_state$ = "in" then
+		convStateToName$ = "IN"
+		exitfunction
+	endif
+	if str_state$ = "Indiana" then
+		convStateToName$ = "IN"
+		exitfunction
+	endif
+	if str_state$ = "indiana" then
+		convStateToName$ = "IN"
+		exitfunction
+	endif
+	if str_state$ = "INDIANA" then
+		convStateToName$ = "IN"
+		exitfunction
+	endif
 
 endfunction
+

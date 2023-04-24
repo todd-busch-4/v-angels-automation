@@ -26,11 +26,15 @@ gensUsername$ = "administrator@v-angels.com"											'generations username
 gensPassword$ = "0ff!ceAutomation"														'generations password
 gensAgencyID$ = "VISI5371"																'generations agency id
 arcsUsername$ = "employment"
-arcsPassword$ = "NoInsub1!"
+arcsPassword$ = "BigWin1!"
+heyAcctEmail$ = "busch.todd@yahoo.com"                                                  'heymarket user acct email
+heyUsername$ = "wintask"                                                                'heymarket username
+heyPassword$ = "Merlin430"                                                              'heymarket password
 
 
 '-------------------- automation folder paths
 employmentInquiryPath$ = packagePath$ + "downloads\Employment Inquiry List.xlsx"		'path to local copy of employment inquiry.xlsx
+bgBackupPath$ = localWinUser$ + "OneDrive - Visiting Angels\office_automation\bg-check-docs\"
 logsPath$ = packagePath$ + "logs\"
 scriptsPath$ = packagePath$ + "scripts\"
 executionLogPath$ = packagePath$ + "logs\execution_log.log"
@@ -51,6 +55,7 @@ zipWhipURL$ = "https://app.zipwhip.com"
 gmsURL$ = "https://gms.prismhr.com/gms/dbweb.asp?dbcgm=1"
 generationsURL$ = "https://generations.idb-sys.com/"
 arcsURL$ = "https://arcs.ohio.gov/BCS/"
+heyURL$ = "https://app.heymarket.com/"
 
 
 '-------------------- date/time variable definitions
@@ -121,8 +126,11 @@ legalDeductPeriod$ = "123"
 
 '------- arcs data
 arcsPositionCatId$ = "Technical, Unlicensed Health Care"
+arcsPositionCatIdCode$ = "3"
 arcsPositionId$ = "Nurse Aide"
+arcsPositionIdCode$ = "31"
 arcsEmployeeTypeId$ = "Employee"
+arcsEmployeeTypeIdCode$ = "1"
 arcsTypeOfId$ = "State Issued Driver's License"
 
 '-------------------- misc.

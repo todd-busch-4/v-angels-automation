@@ -51,18 +51,18 @@ function arcsSubAppStatusChk()
     write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": checking bg chk column for trigger value", crlf)
 
     if instr(backGroundChk$, "Needs Reviewed") <> 0 then
-        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": column status [" + backGroundChk$ + "] indicates application can be submitted", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": column status [" + backGroundChk$ + "] matches trigger value for workflow", crlf)
         arcsSubAppStatusChk = 0
         exitfunction
     endif
 
     if instr(backGroundChk$, "Needs Reviewed") = 0 then
-        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": column status [" + backGroundChk$ + "] indicates application is not ready for submission", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": column status [" + backGroundChk$ + "] does not match a trigger value for the workflow", crlf)
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
         write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ":  app not ready for submission; proceeding to next change event", crlf + crlf)
         write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
         write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-        write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: bg check column did not match trigger status", crlf + crlf)
+        write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: arcsSubAppStatusChk failed", crlf + crlf)
         arcsSubAppStatusChk = 1
         exitfunction
     endif
@@ -86,82 +86,82 @@ endfunction
 function arcsSubAppReqDataChk()
 
     if applicantFName$ = "" or applicantFName$ = "[]" then
-        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employment inquiry list did not include required [first name]", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employment inquiry list did not include required data element [first name]", crlf)
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
         write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": required data missing; proceeding to next change event", crlf + crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: missing required data [fname]", crlf + crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: [" + applicantID$ + "]", crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: [" + applicantFName$ + " " + applicantLName$ + "]", crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: result: arcsSubAppReqDataChk failed [fname]", crlf + crlf)
         arcsSubAppReqDataChk = 1
         exitfunction
     endif
     if applicantLName$ = "" or applicantLName$ = "[]" then
-        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employment inquiry list did not include required [last name]", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employment inquiry list did not include required data element [last name]", crlf)
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
         write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": required data missing; proceeding to next change event", crlf + crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: missing required data [lname]", crlf + crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: [" + applicantID$ + "]", crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: [" + applicantFName$ + " " + applicantLName$ + "]", crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: arcsSubAppReqDataChk failed [lname]", crlf + crlf)
         arcsSubAppReqDataChk = 1
         exitfunction
     endif
     if applicantSSN$ = "" or applicantSSN$ = "[]" then
-        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employment inquiry list did not include required [ssn]", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employment inquiry list did not include required data element [ssn]", crlf)
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
         write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": required data missing; proceeding to next change event", crlf + crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: missing required data [ssn]", crlf + crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: [" + applicantID$ + "]", crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: [" + applicantFName$ + " " + applicantLName$ + "]", crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: arcsSubAppReqDataChk failed [ssn]", crlf + crlf)
         arcsSubAppReqDataChk = 1
         exitfunction
     endif
     if applicantBDay$ = "" or applicantBDay$ = "[]" then
-        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employment inquiry list did not include required [dob]", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employment inquiry list did not include required data element [dob]", crlf)
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
         write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": required data missing; proceeding to next change event", crlf + crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: missing required data [bday]", crlf + crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: [" + applicantID$ + "]", crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: [" + applicantFName$ + " " + applicantLName$ + "]", crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: arcsSubAppReqDataChk failed [bday]", crlf + crlf)
         arcsSubAppReqDataChk = 1
         exitfunction
     endif
     if applicantAddr1$ = "" or applicantAddr1$ = "[]" then
-        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employment inquiry list did not include required [address line 1]", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employment inquiry list did not include required data element [address line 1]", crlf)
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
         write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": required data missing; proceeding to next change event", crlf + crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: missing required data [addr1]", crlf + crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: [" + applicantID$ + "]", crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: [" + applicantFName$ + " " + applicantLName$ + "]", crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: arcsSubAppReqDataChk failed [addr1]", crlf + crlf)
         arcsSubAppReqDataChk = 1
         exitfunction
     endif
     if applicantCity$ = "" or applicantCity$ = "[]" then
-        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employment inquiry list did not include required [city]", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employment inquiry list did not include required data element [city]", crlf)
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
         write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": required data missing; proceeding to next change event", crlf + crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: missing required data [city]", crlf + crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: [" + applicantID$ + "]", crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: [" + applicantFName$ + " " + applicantLName$ + "]", crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: arcsSubAppReqDataChk failed [city]", crlf + crlf)
         arcsSubAppReqDataChk = 1
         exitfunction
     endif
     if applicantState$ = "" or applicantState$ = "[]" then
-        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employment inquiry list did not include required [state]", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employment inquiry list did not include required data element [state]", crlf)
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
         write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": required data missing; proceeding to next change event", crlf + crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: missing required data [state]", crlf + crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: [" + applicantID$ + "]", crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: [" + applicantFName$ + " " + applicantLName$ + "]", crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: arcsSubAppReqDataChk failed [state]", crlf + crlf)
         arcsSubAppReqDataChk = 1
         exitfunction
     endif
     if applicantZip$ = "" or applicantZip$ = "[]" then
-        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employment inquiry list did not include required [zip]", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employment inquiry list did not include required data element [zip]", crlf)
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
         write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": required data missing; proceeding to next change event", crlf + crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: missing required data [zip]", crlf + crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: [" + applicantID$ + "]", crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: [" + applicantFName$ + " " + applicantLName$ + "]", crlf)
+		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: arcsSubAppReqDataChk failed [zip]", crlf + crlf)
         arcsSubAppReqDataChk = 1
         exitfunction
     endif
@@ -244,11 +244,20 @@ endfunction
     '==
 '===============================================================================================================================================================
 function arcsSubAppExistAppChk()
+    local ret, var$
 
-    if existhtmlelement(btnArcsCaseNotes$) = 1 then
+    ret = UseOCREngine(3)
+
+    var$ = CaptureAreaOCR$(wndArcsNewApplicant$, TopInstance(), 67, 512, 302, 1153)
+
+    if instr(var$, "This individual was not found in ARCS") = 0 then
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant already exists in the ARCS database", crlf)
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
         write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": existing applicant; proceeding to next change event", crlf + crlf)
+        write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: [" + applicantID$ + "]", crlf)
+        write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: [" + applicantFName$ + " " + applicantLName$ + "]", crlf)
+ 	    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: applicant exists in arcs database", crlf + crlf)
+        closebrowser()
         arcsSubAppExistAppChk = 1
         exitfunction
     else
@@ -256,12 +265,12 @@ function arcsSubAppExistAppChk()
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": proceeding with workflow", crlf)
         arcsSubAppExistAppChk = 0
         exitfunction
-   endif
+    endif
 
 endfunction
 
 '=============================================================================================================================================================
-'== function name:              arcsInitRegistryChk
+'== function name:              buildSamsSrcStr$
     '==
     '== developer:              todd busch
     '==
@@ -275,20 +284,380 @@ endfunction
     '== notes:                  none
     '==
 '===============================================================================================================================================================
-' function arcsInitRegistryChk()
-'     local r, val$
+function buildSamsSrcStr$(str_fname$, str_lname$, str_ssn$)
+    local r, str_fname$, str_lname$, str_ssn$, iPart1$, iPart2$, iPart3$, strSSNNoDashes$
 
-'     r = gethtmledittext(selArcsResultsMedicaid$, val$)
+    'check for dashes
+    r = instr(str_ssn$, "-")
 
-'     if r <> 0 then
-' 		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error getting text from object", crlf)
-' 		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(r) + ") msg: " + #errormsg$, crlf)
-' 		arcsInitRegistryChk$ = "1"
-' 		exitfunction
-'     endif
-
-'     if val$ <> "2" then
-'         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Ohio Medicaid Provider Exclusion List was not cleared", crlf)
-'     MsgBox(val$)
+    if r <> 0 then
+        'strip dashes from ssn
+        iPart1$ = left$(str_ssn$, 3)
+        iPart2$ = mid$(str_ssn$, 5, 2)
+        iPart3$ = right$(str_ssn$, 4)
+        strSSNNoDashes$ = iPart1$ + iPart2$ + iPart3$
     
-' endfunction
+        'build string
+        buildSamsSrcStr$ = str_fname$ + " " + str_lname$ + "," + strSSNNoDashes$
+        exitfunction
+    endif
+
+    if r = 0 then
+        buildSamsSrcStr$ = str_fname$ + " " + str_lname$ + "," + str_ssn$
+        exitfunction
+    endif
+
+endfunction
+
+'=============================================================================================================================================================
+'== function name:              arcsSubAppSamsChk
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                terseDescription
+    '==
+    '== input parms:            none
+    '==
+    '== returns:                int:    0 - success
+    '==                                 1 - failure
+    '==
+    '== notes:                  none
+    '==
+'===============================================================================================================================================================
+function arcsSubAppSamsChk()
+    local r
+
+    r = existhtmlelement(lblArcsSamsNoMatches$)
+
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": checking result of sams.gov search", crlf)
+
+    if r = 1 then
+        HardCopy(localWinUser$ + "Downloads\" + applicantFName$ + applicantLName$ + ".bmp", 1, 0)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": search returned no results for applicant", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": setting registry result to 'cleared'", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": screenshot saved to downloads folder", crlf)
+        arcsSubAppSamsChk = 0
+        closebrowser()
+        exitfunction
+    endif
+
+    if r <> 1 then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result was returned for sams.gov search", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+        write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
+        write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: [" + applicantID$ + "]", crlf)
+        write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: [" + applicantFName$ + " " + applicantLName$ + "]", crlf)
+        write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: arcsSubAppSamsChk - result found for sams.gov", crlf + crlf)
+        closebrowser()
+        arcsSubAppSamsChk = 1
+        exitfunction
+    endif
+    
+endfunction
+
+'===============================================================================================================================================================
+'== function name:              arcsSubAppLogStats
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                writes stats to various log files
+    '==
+    '== input parms:            none
+    '==
+    '== returns:                int:    0 - success
+    '==
+    '== notes:                  none
+    '==
+'===============================================================================================================================================================
+function arcsSubAppLogStats()
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events detected:            " + str$(iEventCnt), crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage matches detected:            " + str$(iStageCnt), crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Triggering Status Values:          " + str$(iTriggeredCnt), crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Applications Submitted:            " + str$(iCompleted), crlf)
+    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf)
+    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf)
+    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events detected:            " + str$(iEventCnt), crlf)
+    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage matches detected:            " + str$(iStageCnt), crlf)
+    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Triggering Status Values:          " + str$(iTriggeredCnt), crlf)
+    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Applications Submitted:            " + str$(iCompleted), crlf)
+    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ==================================== end workflow =======================================", crlf + crlf)
+    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ==================================== end workflow =======================================", crlf + crlf)
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ==================================== end workflow =======================================", crlf + crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ==================================== end workflow =======================================", crlf + crlf)
+    arcsSubAppLogStats = 0
+endfunction
+
+'=============================================================================================================================================================
+'== function name:              arcsSubAppGetCurrState
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                terseDescription
+    '==
+    '== input parms:            none
+    '==
+    '== returns:                int:    0 - success
+    '==                                 1 - failure
+    '==
+    '== notes:                  none
+    '==
+'===============================================================================================================================================================
+function arcsSubAppGetCurrState()
+    local r, n, s, strPageTxt$
+
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": attempting to determine exact state of applications", crlf)
+
+    '-------------------- extract page text
+    strPageTxt$ = Capture$(wndArcsPersSummary$, 1, 0)
+
+    '-------------------- check for an unsubmitted app
+    r = instr(strPageTxt$, "Not Yet Submitted")
+
+    if r <> 0 then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant has an existing application that has not been submitted", crlf)
+        arcsSubAppGetCurrState = 1
+        exitfunction
+    endif
+
+    '-------------------- check for no app
+    n = instr(strPageTxt$, "There are no Applications")
+
+    if n <> 0 then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant has no applications", crlf)
+        arcsSubAppGetCurrState = 2
+        exitfunction
+    endif
+    
+    '-------------------- check for a submitted app
+    s = instr(strPageTxt$, "Submitted")
+
+    if n = 0 and r = 0 and s <> 0 then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant has applications on record but in case of rehire there", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": is not one in a 'submitted' state indicating a recent submission", crlf)
+        arcsSubAppGetCurrState = 3
+        exitfunction
+    endif
+    
+endfunction
+
+'=============================================================================================================================================================
+'== function name:              arcsWaitAutoMatchComplete
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                terseDescription
+    '==
+    '== input parms:            none
+    '==
+    '== returns:                int:    0 - success
+    '==                                 1 - failure
+    '==
+    '== notes:                  none
+    '==
+'===============================================================================================================================================================
+function arcsWaitAutoMatchComplete()
+    local r, e, val$
+
+    'initialize flags
+    iMasterFlag = 1
+    iIterations = 1
+    iOMPECleared = 1
+    iOIGCleared = 1
+    iNNARCleared = 1
+    iODRCCleared = 1
+    iDODDCleared = 1
+    iAGOCleared = 1
+
+    while iMasterFlag = 1
+
+        'check medicaid
+        if iOMPECleared = 1 then
+            
+            e = ExistHTMLElement(selArcsResultsMedicaid$)
+
+            if e = 1 then
+                r = gethtmledittext(selArcsResultsMedicaid$, val$)
+
+                if r <> 0 then
+                    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error getting text from object", crlf)
+                    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(r) + ") msg: " + #errormsg$, crlf)
+                    arcsWaitAutoMatchComplete = 1
+                    exitfunction
+                endif
+
+                if val$ = "2" then
+                    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": OMPE completed", crlf)
+                    iOMPECleared = 0
+                endif
+            else
+                write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": OMPE still running...", crlf)    
+            endif
+
+        endif
+
+        'check OIG
+        if iOIGCleared = 1 then
+            e = ExistHTMLElement(selArcsResultsOIG$)
+
+            if e = 1 then
+                r = gethtmledittext(selArcsResultsOIG$, val$)
+
+                if r <> 0 then
+                    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error getting text from object", crlf)
+                    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(r) + ") msg: " + #errormsg$, crlf)
+                    arcsWaitAutoMatchComplete = 1
+                    exitfunction
+                endif
+
+                if val$ = "2" then
+                    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": OIG completed", crlf)
+                    iOIGCleared = 0
+                endif
+            else
+                write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": OIG still running...", crlf)    
+            endif
+        endif
+
+        'check NNAR
+        if iNNARCleared = 1 then
+            e = ExistHTMLElement(selArcsResultsNNAR$)
+
+            if e = 1 then
+                r = gethtmledittext(selArcsResultsNNAR$, val$)
+
+                if r <> 0 then
+                    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error getting text from object", crlf)
+                    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(r) + ") msg: " + #errormsg$, crlf)
+                    arcsWaitAutoMatchComplete = 1
+                    exitfunction
+                endif
+
+                if val$ = "2" then
+                    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": NNAR completed", crlf)
+                    iNNARCleared = 0
+                endif
+            else
+                write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": NNAR still running...", crlf)    
+            endif
+        endif
+
+        'check ODRC
+        if iODRCCleared = 1 then
+            e = ExistHTMLElement(selArcsResultsODRC$)
+
+            if e = 1 then
+                r = gethtmledittext(selArcsResultsODRC$, val$)
+
+                if r <> 0 then
+                    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error getting text from object", crlf)
+                    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(r) + ") msg: " + #errormsg$, crlf)
+                    arcsWaitAutoMatchComplete = 1
+                    exitfunction
+                endif
+
+                if val$ = "2" then
+                    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ODRC completed", crlf)
+                    iODRCCleared = 0
+                endif
+            else
+                write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ODRC still running...", crlf)    
+            endif
+        endif
+
+        'check DODD
+        if iDODDCleared = 1 then
+            e = ExistHTMLElement(selArcsResultsDODD$)
+
+            if e = 1 then
+                r = gethtmledittext(selArcsResultsDODD$, val$)
+
+                if r <> 0 then
+                    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error getting text from object", crlf)
+                    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(r) + ") msg: " + #errormsg$, crlf)
+                    arcsWaitAutoMatchComplete = 1
+                    exitfunction
+                endif
+
+                if val$ = "2" then
+                    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": DODD completed", crlf)
+                    iDODDCleared = 0
+                endif
+            else
+                write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": DODD still running...", crlf)    
+            endif
+        endif
+
+        'check AGO
+        if iAGOCleared = 1 then
+            e = ExistHTMLElement(selArcsResultsAGO$)
+
+            if e = 1 then
+                r = gethtmledittext(selArcsResultsAGO$, val$)
+
+                if r <> 0 then
+                    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error getting text from object", crlf)
+                    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(r) + ") msg: " + #errormsg$, crlf)
+                    arcsWaitAutoMatchComplete = 1
+                    exitfunction
+                endif
+
+                if val$ = "2" then
+                    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": AGO completed", crlf)
+                    iAGOCleared = 0
+                endif
+            else
+                write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": AGO still running...", crlf)    
+            endif
+        endif
+
+        'check if page complete
+        if iOMPECleared = 0 and iOIGCleared = 0 and iNNARCleared = 0 and iODRCCleared = 0 and iDODDCleared = 0 and iAGOCleared = 0 then
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": automatch completed for all registries", crlf)
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": check took [" + str$(iIterations) + "] iterations", crlf)
+            iMasterFlag = 0
+            exitfunction
+        else
+            pause 5
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": iteration [" + str$(iIterations) + "] complete", crlf)
+            iIterations = iIterations + 1
+        endif
+
+    wend
+
+endfunction
+
+'===============================================================================================================================================================
+'== function name:              arcsGetBackupLogStats
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                writes stats to various log files
+    '==
+    '== input parms:            none
+    '==
+    '== returns:                int:    0 - success
+    '==
+    '== notes:                  none
+    '==
+'===============================================================================================================================================================
+function arcsGetBackupLogStats()
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events detected:            " + str$(iEventCnt), crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage matches detected:            " + str$(iStageCnt), crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Triggering Status Values:          " + str$(iTriggeredCnt), crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Applications Submitted:            " + str$(iCompleted), crlf)
+    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf)
+    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf)
+    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events detected:            " + str$(iEventCnt), crlf)
+    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage matches detected:            " + str$(iStageCnt), crlf)
+    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Triggering Status Values:          " + str$(iTriggeredCnt), crlf)
+    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Applications Submitted:            " + str$(iCompleted), crlf)
+    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ==================================== end workflow =======================================", crlf + crlf)
+    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ==================================== end workflow =======================================", crlf + crlf)
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ==================================== end workflow =======================================", crlf + crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ==================================== end workflow =======================================", crlf + crlf)
+    arcsGetBackupLogStats = 0
+endfunction

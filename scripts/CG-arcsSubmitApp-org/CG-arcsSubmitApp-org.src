@@ -1,4 +1,4 @@
-'###############################################################################################################################################
+ '###############################################################################################################################################
 '## author:                 todd busch
 '##
 '## description:            scans the change event column in employment inquiry list.xlsx spreadsheet in package downloads folder; for rows
@@ -71,8 +71,7 @@ repeat
 			iStageCnt = iStageCnt + 1
 			logStageMatch()			
 		else
-			logStageBypass()
-			goto nextIteration
+			logStageBypass()	
 		endif
 
 		'-------------------- get data values for current record
@@ -133,10 +132,10 @@ repeat
 		if webClickElement(btnArcsLogin$, "clicking login") <> 0 then
 			goto nextIteration
 		endif
-		pause 3
 		if webValidateElement(imgARCSLogo$, "arcs logo", "clicking login") <> 1 then
 			goto nextIteration
 		endif
+		pause 3
 
 		'-------------------- accept end user agreement if presented
 		if arcsSubAppAcceptUsrAgree() <> 0 then
@@ -181,90 +180,14 @@ repeat
 		if webClickElement(btnArcsSearch$, "clicking search button") <> 0 then
 			goto nextIteration
 		endif
-        pause 2
 
 
-        '-------------------- if new applicant go to applicant entry
-        if currentpage$() = pgArcsNewApplicant$ then
-            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant not found; proceeding to new app entry", crlf)
-            goto enterApplicant
-        endif
-
-
-		'-------------------- if applicant exists determine exact state
-        if currentpage$() = pgArcsPersSummary$ then
-            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant record found; navigating to applications", crlf)
-
-            'click the applications tab
-            if webClickElement(tabArcsPersSummApps$, "clicking applications tab") <> 0 then
-                goto nextIteration
-            endif
-            pause 2
-
-			'analyze apps
-            n = arcsSubAppGetCurrState()
-
-            'handle unsubmitted application
-            if n = 1 then
-
-                'click link to nav to not yet submitted page for this application
-                if webClickElement(lnkAppStatus$, "clicking app status link") <> 0 then
-                    goto nextIteration
-                endif
-                pause 2
-                if webValidateCurrPage(pgArcsNotYetSubmitted$, "clicking app status link") <> 0 then
-                    goto nextIteration
-                endif
-
-                'click resume button
-                if webClickElement(btnAppResume$, "clicking resume button") <> 0 then
-                    goto nextIteration
-                endif
-                pause 2
-                if webValidateCurrPage(pgArcsProfileDemo$, "clicking resume button") <> 0 then
-                    goto nextIteration
-                endif
-
-                'click next to move to employment tab
-                if webClickElement(btnArcsNext$, "clicking next - resume profile") <> 0 then
-                    goto nextIteration
-                endif
-                pause 2
-                if webValidateCurrPage(pgArcsProfilePreEmpl$, "clicking next - resume profile") <> 0 then
-                    goto nextIteration
-                endif
-
-                goto resumeApplication
-
-            endif
-
-			'handle no applications
-			if n = 2 or n = 3 then
-
-				'click add new application
-				if webClickElement(btnArcsAddNewApplication$, "clicking add new appliation") <> 0 then
-					goto nextIteration
-				endif
-				pause 2
-
-				'click next to move to employment info tab an start application
-				if webClickElement(btnArcsNext$, "clicking next - personal summary - demo") <> 0 then
-					goto nextIteration
-				endif
-				pause 2
-				if webValidateCurrPage(pgArcsProfilePreEmpl$, "clicking next - personal summary - demo") <> 0 then
-					goto nextIteration
-				endif
-
-				'jump to employment info code to enter application
-				goto resumeApplication
-			
-			endif
-
-        endif
+		'-------------------- determine if applicant has existing application
+		if arcsSubAppExistAppChk() = 1 then
+			goto nextIteration
+		endif
 
 '------------------------------------------------------------------------------------------------------------------------------  enter new applicant form
-enterApplicant:
 
 		'-------------------- click enter new applicant
 		usepage(pgArcsNewApplicant$)
@@ -406,10 +329,8 @@ enterApplicant:
 
 
 '------------------------------------------------------------------------------------------------------------------------------ enter pre-employment
-resumeApplication:
 
 		'-------------------- select position category
-		usepage(pgArcsProfilePreEmpl$)
 		if webSelectItem(selArcsPosCategory$, arcsPositionCatId$, "selecting position cat id") <> 0 then
 			goto nextIteration
 		endif
@@ -502,15 +423,9 @@ resumeApplication:
 
 		'------------------------------------------------------------------------------------------------------------------------------ afffirm consent
 
-		'-------------------- get state of checkbox
-		r = CheckedHTML(chkArcsConsent$)
-		
-
-		'-------------------- click afffirm checkbox (if unchecked)
-		if r = 0 then
-			if webClickElement(chkArcsConsent$, "clicking affirm checkbox") <> 0 then
-				goto nextIteration
-			endif
+		'-------------------- click afffirm checkbox
+		if webClickElement(chkArcsConsent$, "clicking affirm checkbox") <> 0 then
+			goto nextIteration
 		endif
 		pause 1
 		if webValidateChecked(chkArcsConsent$, "clicking affirm checkbox") = 0 then
@@ -527,9 +442,6 @@ resumeApplication:
 		if webValidateCurrPage(pgArcsRegistryChk$, "clicking next - affirm consent") <> 0 then
 			goto nextIteration
 		endif
-
-        '------------------------------------------------------------------------------------------------------------------------------ wait for automatch to complete
-        arcsWaitAutoMatchComplete()        
 
 		'------------------------------------------------------------------------------------------------------------------------------ search sams.gov
 
@@ -598,7 +510,7 @@ resumeApplication:
 		closebrowser()
 
 
-		iCompleted = iCompleted + 1
+		iSubmitted = iSubmitted + 1
 
 	endif
 
@@ -609,7 +521,7 @@ nextIteration:
 i = i + 1
 
 
-until i = 5000	'iterate through all rows in array
+until i = 25	'iterate through all rows in array
 
 '###############################################################################################################################################
 '##   													script end

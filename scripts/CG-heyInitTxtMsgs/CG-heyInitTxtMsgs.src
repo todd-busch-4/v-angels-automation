@@ -1,0 +1,260 @@
+'###############################################################################################################################################
+'##
+'## author:                 todd busch
+'##
+'## description:            iterates wintask change event col in employment inquiry list.xlsx. Rows with a 'yes' that also have a 'stage' 
+'##							value of '1st Interview' and a null or no status in the 'Text Msgs' col trigger the workflow. A contact record
+'##							is created in heymarket, an initial greeting msg is sent, and appt confirmation texts are scheduled for the day 
+'##							before and the morning of the 1st Appointment date
+'##
+'## run in:					firefox
+'##
+'## notes:                  day before confirm is skipped if the current day (today) IS the day before;
+'##							
+'###############################################################################################################################################
+
+'###############################################################################################################################################
+'##   													script prep																			  
+'###############################################################################################################################################
+include "C:\v-angels-automation\framework\CG-globalDimDeclarations\CG-globalDimDeclarations.src"
+include "C:\v-angels-automation\framework\CG-loadWorkflowData\CG-loadWorkflowData.src"
+include "C:\v-angels-automation\framework\CG-heyFunctions\CG-heyFunctions.src"
+include "C:\v-angels-automation\framework\CG-globalDataLoaders\CG-globalDataLoaders.src"
+include "C:\v-angels-automation\framework\CG-globalFunctions\CG-globalFunctions.src"
+include "c:\v-angels-automation\framework\CG-globalWinFunctions\CG-globalWinFunctions.src"
+include "c:\v-angels-automation\framework\CG-globalWebFunctions\CG-globalWebFunctions.src"
+include "c:\v-angels-automation\framework\CG-globalWebValidations\CG-globalWebValidations.src"
+include "C:\v-angels-automation\framework\CG-globalLogging\CG-globalLogging.src"
+include "C:\v-angels-automation\framework\CG-globalSubDefinitions\CG-globalSubDefinitions.src"
+include "C:\v-angels-automation\framework\CG-globalVariables\CG-globalVariables.src"
+include "C:\v-angels-automation\object-repos\heymarket\heyObjectRepository.src"
+
+
+currScript$ = "CG-heyInitTxtMsgs"
+
+
+#ignoreerrors = 1					'turn off errors
+
+
+'-------------------------------------------------------------------------------------------------------------------------------- read in data from employment inquiry doc
+if LoadWorkflowData(currScript$) = 1 then
+	criticalStop()
+endif
+
+
+'###############################################################################################################################################
+'##   													script start																			  
+'###############################################################################################################################################
+
+
+logStartScript("heyInitTxtMsgs")
+
+
+'-------------------------------------------------------------------------------------------------------------------------------- begin iterating through change event column
+
+i = 0
+
+
+repeat
+
+
+	'-------------------- get change event status for current row
+	curr_status$ = arrChangeEvents$(i)
+
+
+	if curr_status$ = "Yes" then
+		iChangeCnt = iChangeCnt + 1
+		iExcelRow = i + 2
+		logEventFound()
+
+'------------------------------------------------------------------------------------------------------------------------------ stage check
+
+		'-------------------- get stage of current change event
+		curr_stage$ = arrCurrentStage$(i)
+
+
+		if heyInitStageChk() = 0 then
+			iStageCnt = iStageCnt + 1
+			logStageMatch()
+		else
+			logStageBypass()
+			goto nextIteration
+		endif
+
+
+		'-------------------- get data values for current row
+		heyInitGetData()
+		logDataValues()
+
+
+		'-------------------- prep dates in app format
+		dtFirstApptDate$ = heyFmtFirstApptDate$(applicant1stApp$)
+		dtDayBefore$ = heyFmtDayPriorFirstAppt$(applicant1stApp$)
+		dtFirstApptTime$ = heyFmtFirstApptTime$(applicant1stApp$)
+
+'------------------------------------------------------------------------------------------------------------------------------ status check
+
+		'-------------------- check txt messages status column
+		if heyInitStatusChk() = 1 then
+			goto nextIteration
+		endif
+
+'------------------------------------------------------------------------------------------------------------------------------ log in
+
+		'-------------------- invoke browser
+		if webInvokeBrowser("FF", heyURL$) = 1 then
+			nextScript()
+			goto nextIteration
+		endif
+
+
+		'-------------------- check if logged in
+		if heyLogin() = 1 then
+			nextScript()
+			goto nextIteration
+		endif
+
+'------------------------------------------------------------------------------------------------------------------------------ create contact
+		'-------------------- navigate to contacts page
+		if webNavigate(urlHeyContacts$, "contacts") <> 0 then
+			goto nextIteration
+		endif
+		pause 2
+		if webValidateCurrPage(pgHeyContacts$, "navigating to contacts") <> 0 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- get contact count
+		gethtmlattribute(txtHeyContactCount$, "OUTERTEXT", preCount$)
+
+
+		'-------------------- click 'add contact' button
+		if webClickElement(btnHeyCreateContact$, "clicking create contact") <> 0 then
+			goto nextIteration
+		endif
+		pause 1
+		if webValidateElement(inputHeyName$, "name textfield", "clicking create contact") <> 1 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- enter applicant name
+		if webPasteText(inputHeyName$, applicantFName$ + " " + applicantLName$, "entering contact name") <> 0 then
+			goto nextIteration
+		endif
+		pause 1
+
+
+		'-------------------- enter phone
+		if webPasteText(inputHeyPhone$, applicantPhone$, "entering contact phone") <> 0 then
+			goto nextIteration
+		endif
+		pause 1
+
+
+		'-------------------- enter email
+		if webPasteText(inputHeyEmail$, applicantEmail$, "entering contact email") <> 0 then
+			goto nextIteration
+		endif
+		pause 1
+
+
+		'-------------------- save contact
+		if webClickElement(btnHeySaveContact$, "clicking save contact") <> 0 then
+			goto nextIteration
+		endif
+		pause 2
+		navigate(urlHeyContacts$)
+		pause 3
+		if heyVerifyAddedContact(preCount$) = 1 then
+			closebrowser()
+			goto nextIteration
+		endif
+
+'------------------------------------------------------------------------------------------------------------------------------ send initial text
+
+		'-------------------- navigate to chats
+		if webNavigate(urlHeyChats$, "chats") <> 0 then
+			goto nextIteration
+		endif
+		pause 2
+		if webValidateCurrPage(pgHeyChats$, "navigating to chats") <> 0 then
+			goto nextIteration
+		endif
+
+		'-------------------- click compose button
+		if webClickElement(btnHeyCompose$, "clicking compose") <> 0 then
+			goto nextIteration
+		endif
+		pause 2
+
+
+		'-------------------- enter search criteria
+		if webPasteText(inputHeyContactSrc$, applicantPhone$, "entering phone for search") <> 0 then
+			goto nextIteration
+		endif
+		pause 2
+
+
+		'-------------------- select returned contact
+		rowHeySrcResult$ = heyGenDynSrcResObj$(applicantPhone$)
+		if webClickElement(rowHeySrcResult$, "selecting contact") <> 0 then
+			goto nextIteration
+		endif
+		pause 2
+		if webValidateElement(inputHeyCompName$, "row in result table", "selecting returned contact record") <> 1 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- format initial msg template
+		initMsg$ = heyFmtInitMsgTxt$(applicantFName$, firstAppDate$, firstAppTime$)
+
+
+		'-------------------- compose initial text
+		if webPasteText(inputHeyCompMsgArea$, initMsg$, "composing inital text") <> 0 then
+			goto nextIteration
+		endif
+		pause 2
+
+
+		'-------------------- click send now
+		if webClickElement(btnHeyCompSendNow$, "clicking send") <> 0 then
+			goto nextIteration
+		endif
+		pause 2
+		
+
+
+
+
+		
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	endif
+
+nextIteration:
+
+
+i = i + 1
+
+
+until i = 5000
+
+
+'##############################################################
+'##   			script end									 ##
+'##############################################################

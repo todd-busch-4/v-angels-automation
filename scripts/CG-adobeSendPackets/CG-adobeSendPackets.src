@@ -162,12 +162,13 @@ repeat
 
 
 			'-------------------- set focus to corporate email field
-			if winSendKeys("<tab>", "set focus on corp email") <> 0 then
+			if winSendKeys("<esc>", "clear email tooltip in applicant email inputfield") <> 0 then
 				goto nextIteration
 			endif
 			pause 1
-			clickmouse(left, down, 660, 495, absolute)
-			clickmouse(left, up, 660, 495, absolute)
+			if winSendKeys("<tab><tab><tab><tab>", "set focus on corp email") <> 0 then
+				goto nextIteration
+			endif
 			pause 2
 
 			'-------------------- enter corp email
@@ -178,8 +179,14 @@ repeat
 			endpause
 
 
+			'-------------------- set focus to message title field
+			if winSendKeys("<tab><tab><tab><tab><tab><tab><left>", "set focus to message title input field") <> 0 then
+				goto nextIteration
+			endif
+			pause 2
+
+
 			'-------------------- add applicant name to message box
-			winMouseLeftClick(540, 660, "setting focus to message title bar")
 			if winSendKeys(applicantFName$ + " " + applicantLName$ + " ", "adding applicant name to msgbox") <> 0 then
 				goto nextIteration
 			endif
@@ -294,14 +301,14 @@ firstInterviewSend:
 
 
 			'-------------------- set focus to corporate email field
-			if winSendKeys("<tab>", "set focus on corp email") <> 0 then
+			if winSendKeys("<esc>", "clear email tooltip in applicant email inputfield") <> 0 then
 				goto nextIteration
 			endif
 			pause 1
-			clickmouse(left, down, 660, 495, absolute)
-			clickmouse(left, up, 660, 495, absolute)
+			if winSendKeys("<tab><tab><tab><tab>", "set focus on corp email") <> 0 then
+				goto nextIteration
+			endif
 			pause 2
-
 
 			'-------------------- enter corp email
 			if winSendKeys(corpEmail$, "entering corp email") <> 0 then
@@ -311,8 +318,14 @@ firstInterviewSend:
 			endpause
 
 
+			'-------------------- set focus to message title field
+			if winSendKeys("<tab><tab><tab><tab><tab><tab><left>", "set focus to message title input field") <> 0 then
+				goto nextIteration
+			endif
+			pause 2
+
+
 			'-------------------- add applicant name to message box
-			winMouseLeftClick(535, 660, "setting focus to message title bar")
 			if winSendKeys(applicantFName$ + " " + applicantLName$ + " ", "adding applicant name to msgbox") <> 0 then
 				goto nextIteration
 			endif
@@ -444,14 +457,14 @@ firstInterviewSend:
 
 
 			'-------------------- set focus to corporate email field
-			if winSendKeys("<tab>", "set focus on corp email") <> 0 then
+			if winSendKeys("<esc>", "clear email tooltip in applicant email inputfield") <> 0 then
 				goto nextIteration
 			endif
 			pause 1
-			clickmouse(left, down, 660, 495, absolute)
-			clickmouse(left, up, 660, 495, absolute)
+			if winSendKeys("<tab><tab><tab><tab>", "set focus on corp email") <> 0 then
+				goto nextIteration
+			endif
 			pause 2
-
 
 			'-------------------- enter corp email
 			if winSendKeys(corpEmail$, "entering corp email") <> 0 then
@@ -461,8 +474,14 @@ firstInterviewSend:
 			endpause
 
 
+			'-------------------- set focus to message title field
+			if winSendKeys("<tab><tab><tab><tab><tab><tab><left>", "set focus to message title input field") <> 0 then
+				goto nextIteration
+			endif
+			pause 2
+
+
 			'-------------------- add applicant name to message box
-			winMouseLeftClick(540, 660, "setting focus to message title bar")
 			if winSendKeys(applicantFName$ + " " + applicantLName$ + " ", "adding applicant name to msgbox") <> 0 then
 				goto nextIteration
 			endif

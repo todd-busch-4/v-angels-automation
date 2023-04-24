@@ -88,7 +88,7 @@ repeat
 			startDateCompany$ = zeroPadDate$(startDateCompany$)
 		            	
 			
-			'------- add dashes to ssn's that don't have them
+			'------- make sure ssn is formatted properly
 			applicantSSN$ = formatSSN$(applicantSSN$)
 
 '------------------------------------------------------------------------------------------------------------------------------ status check

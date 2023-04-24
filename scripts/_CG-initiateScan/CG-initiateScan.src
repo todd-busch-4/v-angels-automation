@@ -59,7 +59,7 @@ endif
 if res = 0 then
 	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": browser invoked and sharepoint page loaded", crlf)
 endif
-pause 5
+pause 10
 endpause
 
 '-------------------- select employment inquiry doc
@@ -120,12 +120,14 @@ write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ----------
 '#############################################################################################################################
 '##   													scan start									 						##
 '#############################################################################################################################
-run(scriptsPath$ + "CG-adobeSendPackets\CG-adobeSendPackets.rob")
-run(scriptsPath$ + "CG-adobeCancelPackets\CG-adobeCancelPackets.rob")
 run(scriptsPath$ + "CG-zipwhipInitTxtMsgs\CG-zipwhipInitTxtMsgs.rob")
+run(scriptsPath$ + "CG-adobeSendPackets\CG-adobeSendPackets.rob")
 run(scriptsPath$ + "CG-gmsSubmitForm\CG-gmsSubmitForm.rob")
-run(scriptsPath$ + "CG-gmsTerminations\CG-gmsTerminations.rob")
+run(scriptsPath$ + "CG-arcsSubmitApp\CG-arcsSubmitApp.rob")
+run(scriptsPath$ + "CG-adobeCancelPackets\CG-adobeCancelPackets.rob")
 run(scriptsPath$ + "CG-gmsAddLegalFee\CG-gmsAddLegalFee.rob")
+run(scriptsPath$ + "CG-arcsGetBackup\CG-arcsGetBackup.rob")
+run(scriptsPath$ + "CG-gmsTerminations\CG-gmsTerminations.rob")
 
 
 '#############################################################################################################################

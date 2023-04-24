@@ -4,10 +4,6 @@
     '##  purpose:					library of functions for use in zipwhip workflow script development in order to minimize code duplication, increase script
     '##								cleanliness/readability, and reduce maintenance efforts by providing a single centralized location for changes
     '##
-    '##  contents:					zwInitStageChk, zwInitGetData, zwNonStdPhoneFormatChk, zwFmtFirstApptDate, zwFmtDayPriorFirstAppt, zwFmtFirstApptTime,
-    '##								zwInitStatusChk, zwLoginChk, zwAddContactErrorChk, zwFmtInitMsgTxt, zwFmtDayPriorMsgTxt, zwFmtDayOfApptMsgTxt, 
-    '##								zwPriorDayChk, zwInitLogState
-    '##
 '###############################################################################################################################################################
 
 '=============================================================================================================================================================

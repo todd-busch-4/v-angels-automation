@@ -175,3 +175,29 @@ function arcsSubAppGetCurrData()
 
 endfunction
 
+'=============================================================================================================================================================
+'== function name:              arcsGetBackupGetCurrData
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                retrieves the values of all the employment list worksheet columns needed for the current row being processed
+    '==
+    '== input parms:            none
+    '==
+    '== returns:                int:    0 - success
+    '==
+    '== notes:                  none
+    '==
+'===============================================================================================================================================================
+function arcsGetBackupGetCurrData()
+
+    applicantID$ = arrApplicantID$(i)                               'worksheet row id number
+    applicantFName$ = arrApplicantFName$(i)                         'first name
+    applicantLName$ = arrApplicantLName$(i)                         'last name
+    applicantSSN$ = arrApplicantSSN$(i)                             'social security number
+    backGroundChk$ = arrBackGroundChk$(i)                           'background check status column
+
+    arcsGetBackupGetCurrData = 0
+
+endfunction
+

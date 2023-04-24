@@ -1,12 +1,18 @@
-/*#############################################################################################################################################################
-##  filename:						adobeObjectRepository
-##
-##  contents:						contains window and object definitions for the arcs web application
-##
-#############################################################################################################################################################*/
+'##############################################################################################################################################################
+'##  filename:						adobeObjectRepository
+'##
+'##  contents:						contains window and object definitions for the arcs web application
+'##
+'###############################################################################################################################################################
+
+'-------------------- external applications
+wndFireFoxSaveAs$ = "FIREFOX.EXE|FloatNotifySink|Save As|1"
+wndFireFoxSaveAsBtn$ = "FIREFOX.EXE|#32770|Save As"
+wndFireFoxFinalResultsPDF$ = "FIREFOX.EXE|MozillaWindowClass|CORE FinalRegistryResults - Final Registry Results.pdf — Mozilla Firefox"
+
 '-------------------- login page
-urlArcsLogin$ = "https://arcs.ohio.gov/BCS/Auth?ReturnUrl=%2fBCS%2fHome"
-wndArcsLogin$ = "CHROME.EXE|Chrome_WidgetWin_1|Login - Google Chrome"
+urlArcsLogin$ = "https://arcs.ohio.gov/BCS/"
+wndArcsLogin$ = "FIREFOX.EXE|MozillaWindowClass|Login — Mozilla Firefox"
 pgArcsLogin$ = "Login"
 inputArcsUsername$ = "INPUT TEXT[NAME='UserName']"
 inputArcsPassword$ = "INPUT PASSWORD[NAME='Password']"
@@ -14,33 +20,45 @@ btnArcsLogin$ = "BUTTON[INNERTEXT='Login']"
 
 '-------------------- home page
 urlArcsHomePage$ = "https://arcs.ohio.gov/BCS/Home"
-wndArcsHomePage$ = "CHROME.EXE|Chrome_WidgetWin_1|ARCS Home - Google Chrome"
+wndArcsHomePage$ = "FIREFOX.EXE|MozillaWindowClass|ARCS Home — Mozilla Firefox"
 pgArcsHome$ = "ARCS Home"
 imgARCSLogo$ = "IMG[SRC='https://arcs.ohio.go']"
 lnkArcsNewApp$ = "A[INNERTEXT='Add New']"
-
+				 
 '-------------------- end user agreement
 chkArcsAccepted$ = "INPUT CHECKBOX[NAME='Accepted']"
 btnArcsSubmit$ = "BUTTON[INNERTEXT='Submit']"
 
 '-------------------- new applicant search
 urlArcsNewScreening$ = "https://arcs.ohio.gov/BCS/NewScreening"
-wndArcsNewApplicant$ = "CHROME.EXE|Chrome_WidgetWin_1|ARCS New Applicant - Google Chrome"
+wndArcsNewApplicant$ = "FIREFOX.EXE|MozillaWindowClass|ARCS New Applicant — Mozilla Firefox"
 pgArcsNewApplicant$ = "ARCS New Applicant"
 inputArcsSSN$ = "INPUT TEXT[NAME='Ssn']"
 inputArcsLName$ = "INPUT TEXT[NAME='LastName']"
 btnArcsSearch$ = "BUTTON[INNERTEXT='Search']"
 btnArcsAddNewApplicant$ = "BUTTON[INNERTEXT='Add New Applicant']"
 
-'-------------------- person summary page
-wndArcsPersSummary$ = "CHROME.EXE|Chrome_WidgetWin_1|ARCS Person Summary - Google Chrome"
+'-------------------- person search
+urlArcsPersonSrc$ = "https://arcs.ohio.gov/BCS/PersonSearch"
+wndArcsPersonSrc$ = "FIREFOX.EXE|MozillaWindowClass|ARCS Person Search — Mozilla Firefox"
+pgArcsPersonSrc$ = "ARCS Person Search"
+inputArcsSSN$ = "INPUT TEXT[NAME='Ssn']"
+inputArcsLName$ = "INPUT TEXT[NAME='LastName']"
+btnArcsSearch$ = "BUTTON[INNERTEXT='Search']"
+
+'-------------------- person summary page | profile tab
+wndArcsPersSummary$ = "FIREFOX.EXE|MozillaWindowClass |ARCS Person Summary — Mozilla Firefox"
 pgArcsPersSummary$ = "ARCS Person Summary"
 btnArcsEdit$ = "BUTTON[INNERTEXT='Edit']"
 btnArcsAddNewApplication$ = "BUTTON[INNERTEXT='Add New Application']"
 btnArcsCaseNotes$ = "BUTTON[INNERTEXT='Case Notes']"
+tabArcsPersSummApps$ = "A[INNERTEXT='Applications',INDEX=2]"
 
-'-------------------- new applicant form - profile - personal & demographic
-wndArcsProfileDemo$ = "CHROME.EXE|Chrome_WidgetWin_1|ARCS Create Applicant Profile - Google Chrome"
+'-------------------- person summary page | applications tab
+lnkAppStatus$ = "A[INNERTEXT='Not Yet Submitted',INDEX=2]"
+
+'-------------------- new applicant form | profile - personal & demographic
+wndArcsProfileDemo$ = "FIREFOX.EXE|MozillaWindowClass|ARCS Create Applicant Profile - — Mozilla Firefox"
 pgArcsProfileDemo$ = "ARCS Create Applicant Profile"
 hdrArcsProfile$ = "H1[CONTENT='Profile']"
 inputArcsFName$ = "INPUT TEXT[NAME='FirstName']"
@@ -59,9 +77,10 @@ btnArcsAddAlias$ = "BUTTON[INNERTEXT='Add Alias']"
 btnArcsAddPriorAddr$ = "BUTTON[INNERTEXT='Add Prior Address']"
 btnArcsNext$ = "BUTTON[INNERTEXT='Next']"
 
-'-------------------- new applicant form - profile - pre-employment
-wndArcsProfilePreEmpl$ = "CHROME.EXE|Chrome_WidgetWin_1|ARCS Pre-Employment Information - Google Chrome"
+'-------------------- new applicant form | pre-employment
+wndArcsProfilePreEmpl$ = "FIREFOX.EXE|MozillaWindowClass|ARCS Pre-Employment Information - — Mozilla Firefox"
 pgArcsProfilePreEmpl$ = "ARCS Pre-Employment Information"
+hdrArcsProfilePreEmpl$ = "H1[CONTENT='Pre']"
 selArcsPosCategory$ = "SELECT[NAME='PositionCategoryId']"
 selArcsPosition$ = "SELECT[NAME='PositionId']"
 selArcsEmplType$ = "SELECT[NAME='EmployeeTypeId']"
@@ -70,8 +89,8 @@ btnArcsBack$ = "BUTTON[INNERTEXT='Back']"
 btnArcsNext$ = "BUTTON[INNERTEXT='Next']"
 btnArcsLicClose$ = "BUTTON[INNERTEXT='Close Due to Invalid']"
 
-'-------------------- new applicant form - profile - verify identity
-wndArcsProfileVerifyID$ = "CHROME.EXE|Chrome_WidgetWin_1|ARCS Verify Identity - Google Chrome"
+'-------------------- new applicant form | verify identity
+wndArcsProfileVerifyID$ = "FIREFOX.EXE|MozillaWindowClass|ARCS Verify Identity - — Mozilla Firefox"
 pgArcsProfileVerifyID$ = "ARCS Verify Identity"
 selArcsIDType$ = "SELECT[NAME='ADocId']"
 inputArcsIssueAuth$ = "INPUT TEXT[NAME='AIssuingAuthority']"
@@ -81,8 +100,8 @@ btnArcsSaveClose$ = "BUTTON[INNERTEXT='Save and Close']"
 btnArcsUploadDoc$ = "BUTTON[INNERTEXT='Upload Document']"
 btnArcsNext$ = "BUTTON[INNERTEXT='Next']"
 
-'-------------------- new applicant form - profile - confirm consent
-wndArcsProfileConsent$ = "CHROME.EXE|Chrome_WidgetWin_1|ARCS - Google Chrome"
+'-------------------- new applicant form | affirm consent
+wndArcsProfileConsent$ = "FIREFOX.EXE|MozillaWindowClass|ARCS — Mozilla Firefox"
 pgArcsProfileConsent$ = "ARCS"
 hdrArcsConfirmConsent$ = "H1[CONTENT='Confirm']"
 chkArcsConsent$ = "INPUT CHECKBOX[NAME='consentIds']"
@@ -91,8 +110,9 @@ btnArcsBack$ = "BUTTON[INNERTEXT='Back']"
 btnArcsNext$ = "BUTTON[INNERTEXT='Next']"
 
 '-------------------- research registries
-wndArcsRegistryChk$ = "CHROME.EXE|Chrome_WidgetWin_1|ARCS Registry Check - Google Chrome"
+wndArcsRegistryChk$ = "FIREFOX.EXE|MozillaWindowClass|ARCS Registry Check — Mozilla Firefox"
 pgArcsRegistryChk$ = "ARCS Registry Check"
+hdrArcsResearchRegs$ = "H1[CONTENT='Research']"
 btnArcsSaveClose$ = "BUTTON[INNERTEXT='Save and Close']"
 selArcsResultsMedicaid$ = "SELECT[NAME='ko_unique_1']"
 selArcsResultsOIG$ = "SELECT[NAME='ko_unique_2']"
@@ -103,9 +123,28 @@ selArcsResultsAGO$ = "SELECT[NAME='ko_unique_6']"
 lnkArcsExclPartiesList$ = "A[INNERTEXT='Excluded Parties Lis']"
 selArcsExclPartiesList$ = "SELECT[NAME='ko_unique_7']"
 
+'-------------------- data review
+wndArcsDataReview$ = "FIREFOX.EXE|MozillaWindowClass|ARCS Data Review — Mozilla Firefox"
+pgArcsDataReview$ = "ARCS Data Review"
+hdrArcsDataReview$ = "H1[CONTENT='Data']"
+btnArcsSubmitApp$ = "BUTTON[INNERTEXT='Submit']"
 
+'-------------------- success confirmation
+wndArcsApplicantConfirm$ = "FIREFOX.EXE|MozillaWindowClass|ARCS Applicant Confirmation — Mozilla Firefox"
+pgArcsApplicantConfirm$ = "ARCS Applicant Confirmation"
+hdrArcsApplicantConfirm$ = "H1[CONTENT='Confirmation']"
+txtArcsSuccessMsg$ = "H2[CLASS='successMessage']"
+lnkArcsFinalResult$ = "A[INNERTEXT='Final Registry Resul']"
+
+'-------------------- applications - not yet submitted
+urlArcsNotYetSubmitted$ = "https://arcs.ohio.gov/BCS/Screenings/NotYetSubmitted"
+wndArcsNotYetSubmitted$ = "FIREFOX.EXE|MozillaWindowClass|ARCS Applications Not Yet Submitted — Mozilla Firefox"
+pgArcsNotYetSubmitted$ = "ARCS Applications Not Yet Submitted"
+btnAppResume$ = "BUTTON[INNERTEXT='Resume']"
 
 '-------------------- sams.gov
+pgArcsSamsHome$ = "SAM.gov | Exclusions"
 inputSamsSrc$ = "INPUT SEARCH[NAME='search']"
 btnSamsSrc$ = "BUTTON[CLASS='usa-button ng-star-i']"
-
+txtArcsSamsNoMatches$ = "DIV[OUTERTEXT='No matches',INDEX=5]"
+lblArcsSamsNoMatches$ = "H1[CLASS='sds-card__title',CONTENT='No']"

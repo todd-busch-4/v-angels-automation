@@ -74,7 +74,6 @@ endfunction
 	'== notes:                  none
 	'==
 '=============================================================================================================================================================*/
-
 function gmsSubmitChkStatus()
 
 	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": checking gms status", crlf)
@@ -489,12 +488,14 @@ endfunction
 	'==
 '=============================================================================================================================================================*/
 function gmsAddLegalStatusChk()
+	local r, s
+
 	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": checking gms connect & legal shield for triggering values", crlf)
-	if instr(gmsStatus$, "Active") <> 0 or instr(gmsStatus$, "I-9 ready for review") <> 0 and gmsLegalShield$ = "-1" then
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": values are set for deduction entry", crlf)
-		gmsAddLegalStatusChk = 0
-		exitfunction
-	else
+
+	r = instr(gmsStatus$, "Active")
+	s = instr(gmsStatus$, "I-9 ready for review")
+
+	if r = 0 and s = 0 then
 		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": statuses not set for deduction entry", crlf)
 		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status of gms connect column: (" + gmsStatus$ + ")", crlf)
 		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status of legal shield column: (" + gmsLegalShield$ + ")", crlf)
@@ -506,6 +507,14 @@ function gmsAddLegalStatusChk()
 		gmsAddLegalStatusChk = 1
 		exitfunction
 	endif
+
+
+	if instr(gmsStatus$, "Active") <> 0 or instr(gmsStatus$, "I-9 ready for review") <> 0 and gmsLegalShield$ = "-1" then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": values are set to trigger workflow", crlf)
+		gmsAddLegalStatusChk = 0
+		exitfunction
+	endif
+	
 endfunction
 
 '=============================================================================================================================================================
