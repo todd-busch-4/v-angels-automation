@@ -101,6 +101,11 @@ repeat
 			goto nextIteration
 		endif
 
+
+		'-------------------- verify ssn is formatted properly
+		applicantSSN$ = formatSSN$(applicantSSN$)
+
+
 '------------------------------------------------------------------------------------------------------------------------------  log in
 
 		'-------------------- invoke browser
@@ -261,6 +266,12 @@ repeat
 			
 			endif
 
+			'handle submitted app
+			if n = 4 then
+				goto nextIteration
+				pause 2
+			endif
+			
         endif
 
 '------------------------------------------------------------------------------------------------------------------------------  enter new applicant form

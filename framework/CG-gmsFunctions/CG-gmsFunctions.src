@@ -215,7 +215,7 @@ endfunction
 function gmsTermsChkStatus()
 
 	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": checking gms status", crlf)
-	if instr(gmsStatus$, "Termed Rehire") = 0 and instr(gmsStatus$, "DO NOT HIRE Termed") = 0 then
+	if instr(gmsStatus$, "Termed Rehire") = 0 and instr(gmsStatus$, "DO NOT HIRE Termed") = 0 and instr(gmsStatus$, "Leave of Absence") = 0 then
 		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": current gms status: [" + gmsStatus$ + "]", crlf)
 		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": does NOT match trigger values for workflow", crlf)
 		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)

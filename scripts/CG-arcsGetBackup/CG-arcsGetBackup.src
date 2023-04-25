@@ -80,6 +80,10 @@ repeat
 		logDataValues()
 
 
+		'-------------------- verify ssn is formatted properly
+		applicantSSN$ = formatSSN$(applicantSSN$)
+
+
 '------------------------------------------------------------------------------------------------------------------------------ status check
 
 		'-------------------- verify background check is ready to be submitted

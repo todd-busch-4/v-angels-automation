@@ -433,13 +433,20 @@ function arcsSubAppGetCurrState()
     '-------------------- check for a submitted app
     s = instr(strPageTxt$, "Submitted")
 
-    if n = 0 and r = 0 and s <> 0 then
-        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant has applications on record but in case of rehire there", crlf)
+    if n = 0 and r = 0 and s = 0 then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant has applications on record but in case its a rehire there", crlf)
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": is not one in a 'submitted' state indicating a recent submission", crlf)
         arcsSubAppGetCurrState = 3
         exitfunction
     endif
-    
+
+    if s <> 0 then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant has an application in a submitted state indicating an app", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": has already been entered for this change event", crlf)
+        arcsSubAppGetCurrState = 4
+        exitfunction
+    endif
+
 endfunction
 
 '=============================================================================================================================================================

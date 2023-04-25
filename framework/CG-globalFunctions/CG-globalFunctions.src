@@ -63,23 +63,25 @@ endfunction
 	'== notes:                  n/a
 	'==
 '=============================================================================================================================================================
-function formatSSN$ (str_ssn$)
-     local str_ssn$, sMiddle$, sPre$, sPost$, sRaw$
+function formatSSN$(str_ssn$)
+    local str_ssn$, sMiddle$, sPre$, sPost$, sRaw$, sFormatted$
 
-	 'strip string down to just numbers
-	 sRaw$ = replace$(str_ssn$, "-", "")
-	 sRaw$ = replace$(str_ssn$, "+", "")
-	 sRaw$ = replace$(str_ssn$, "/", "")
-	 sRaw$ = replace$(str_ssn$, "/", "")
-	 sRaw$ = replace$(str_ssn$, " ", "")
-   
+	'strip string down to just numbers
+	sRaw$ = replace$(str_ssn$, "-", "")
+	sRaw$ = replace$(sRaw$, "+", "")
+	sRaw$ = replace$(sRaw$, "/", "")
+	sRaw$ = replace$(sRaw$, "/", "")
+	sRaw$ = replace$(sRaw$, " ", "")
+
 	'divide # into parts
-	sPre$ = left$(str_ssn$, 3)
-	sMiddle$ = mid$(str_ssn$, 4, 2)
-	sPost$ = right$(str_ssn$, 4)
+	sPre$ = left$(sRaw$, 3)
+	sMiddle$ = mid$(sRaw$, 4, 2)
+	sPost$ = right$(sRaw$, 4)
 
-	'assemble string    
-	formatSSN$ = pre$ + "-" + middle$ + "-" + post$
+	'assemble string
+	sFormatted$ = sPre$ + "-" + sMiddle$ + "-" + sPost$
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant ssn: [" + sFormatted$ + "]", crlf)
+	formatSSN$ = sFormatted$
 
 endfunction
 
