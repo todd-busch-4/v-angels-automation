@@ -1,13 +1,27 @@
 
 
-'startbrowser("FF", "https://app.heymarket.com", 3)
-
-'navigate("https://app.heymarket.com/contacts")
-'pause 2
 
 
+UsePage("ARCS Hiring Decision")
+	ClickHTMLElement("BUTTON[INNERTEXT='Enter Fingerprint In']")
 
 
-UsePage("Chats")
-	ClickHTMLElement("DIV[OUTERTEXT='(239']")
-                     "DIV[OUTERTEXT='(239']"
+
+
+"FIREFOX.EXE|MozillaWindowClass|ARCS Hiring Decision — Mozilla Firefox"
+
+"INPUT TEXT[NAME='FingerprintDate']"
+
+"BUTTON[INNERTEXT='Save']"
+
+
+UsePage("ARCS Hiring Decision")
+	ClickHTMLElement("BUTTON[INNERTEXT='Save']")
+
+
+"DIV[OUTERTEXT='Warnings: Fingerprint']"
+
+
+"BUTTON[INNERTEXT='Hire Provisionally']"
+
+"BUTTON[INNERTEXT='Hire Permanently']"

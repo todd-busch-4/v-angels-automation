@@ -31,13 +31,11 @@ function adobeSendStatusChk(str_status$, str_name$)
         if str_status$ = "Pre 1st Pkt" then
             write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status indicates " + str_name$ + " packet has already been sent", crlf)
             write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": skipping to 1st int pkt", crlf)
-            write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + str_name$ + " packet has been sent; skipping to 1st int pkt", crlf)
             adobeSendStatusChk = 1
             exitfunction
         else
             write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status indicates " + str_name$ + " packet has already been sent", crlf)
             write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
-            write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + str_name$ + " packet has been sent; proceeding to next chg event", crlf + crlf)
             adobeSendStatusChk = 1
             exitfunction           
         endif
@@ -68,10 +66,16 @@ endfunction
 '===============================================================================================================================================================
 function adobeCancelStageChk()
 
-    if curr_stage$ = "1st interview Cancelled" or curr_stage$ = "1st Interview NCNS" or curr_stage$ = "2nd Interview Cancelled" or curr_stage$ = "2nd Interview NCNS" then
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": checking stage for triggering value", crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage: [" + curr_stage$ + "]", crlf)
+
+   if curr_stage$ = "1st interview Cancelled" or curr_stage$ = "1st Interview NCNS" or curr_stage$ = "2nd Interview Cancelled" or curr_stage$ = "2nd Interview NCNS" or curr_stage$ = "Onboard Incomplete/Cancelled" then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage value does trigger the wrokflow", crlf)
         adobeCancelStageChk = 0
         exitfunction
     else
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage value does not trigger workflow", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
         adobeCancelStageChk = 1
         exitfunction
     endif
@@ -99,23 +103,18 @@ function adobeCancelStatusChk(str_packet$)
 
     if str_packet$ = "pre 1st" then
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": checking status of pre 1st interview packet", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": adobe status: [" + adobePcktStatus$ + "]", crlf)
+
         if instr(adobePcktStatus$, "Pre 1st Pkt Complete") <> 0 then
             write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": pre 1st packet has 'complete' status and can't be cancelled", crlf)
             write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": skipping to 1st interview packet", crlf)
-            write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": pre 1st packet has 'complete' status and can't be cancelled", crlf)
-            write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-		    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-		    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": adobeCancelStatusChk - pre 1st pkt has complete status", crlf + crlf)
             adobeCancelStatusChk = 1
             exitfunction
         endif
+
         if instr(adobePcktStatus$, "Pre 1st Pkt Canceled") <> 0 then
             write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": pre 1st packet has already been cancelled", crlf)
             write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": skipping to 1st interview packet", crlf)
-            write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": pre 1st packet has already been cancelled", crlf)
-            write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-		    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-		    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": adobeCancelStatusChk - pre 1st pkt has cancelled status", crlf + crlf)
             adobeCancelStatusChk = 1
             exitfunction
         endif
@@ -127,25 +126,32 @@ function adobeCancelStatusChk(str_packet$)
 
     if str_packet$ = "1st" then
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": checking status of 1st interview packet", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": adobe status: [" + adobePcktStatus$ + "]", crlf)
+
         if instr(adobePcktStatus$, "1st Int Pkt Complete") <> 0 then
             write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 1st Int Pkt has 'complete' status and can't be cancelled", crlf)
-            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
-            write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 1st int pkt has 'complete' status and can't be cancelled", crlf + crlf)
-            write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-		    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-		    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": adobeCancelStatusChk - 1st int pkt has complete status", crlf + crlf)
-            adobeCancelStatusChk = 1
-            exitfunction
+            if instr(curr_stage$, "1st") <> 0 then
+                write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+                adobeCancelStatusChk = 1
+                exitfunction
+            else
+                write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": skipping to 2nd interview packet", crlf)
+                adobeCancelStatusChk = 2
+                exitfunction
+            endif        
         endif
+
         if instr(adobePcktStatus$, "1st Int Pkt Canceled") <> 0 then
             write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 1st Int Pkt has already been cancelled", crlf)
-            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
-            write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 1st int pkt has already been cancelled", crlf + crlf)
-            write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-		    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-		    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": adobeCancelStatusChk - 1st int pkt has cancelled status", crlf + crlf)
-            adobeCancelStatusChk = 1
-            exitfunction
+            if instr(curr_stage$, "1st") <> 0 then
+                write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+                adobeCancelStatusChk = 1
+                exitfunction
+            else
+                write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": skipping to 2nd interview packet", crlf)
+                adobeCancelStatusChk = 2
+                exitfunction
+            endif        
         endif
             
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status indicates packet can be cancelled", crlf)
@@ -155,23 +161,18 @@ function adobeCancelStatusChk(str_packet$)
 
     if str_packet$ = "2nd" then
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": checking status of 2nd interview packet", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": adobe status: [" + adobePcktStatus$ + "]", crlf)
+
         if instr(adobePcktStatus$, "2nd Int Pkt Complete") <> 0 then
             write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 2nd Int Pkt has 'complete' status and can't be cancelled", crlf)
             write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
-            write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 2nd int pkt has 'complete' status and can't be cancelled", crlf + crlf)
-            write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-		    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-		    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": adobeCancelStatusChk - 2nd int pkt has complete status", crlf + crlf)
             adobeCancelStatusChk = 1
             exitfunction
         endif
+
         if instr(adobePcktStatus$, "2nd Int Pkt Canceled") <> 0 then
             write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 2nd Int Pkt has already been cancelled", crlf)
             write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
-            write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 2nd int pkt has already been cancelled", crlf + crlf)
-            write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-		    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-		    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": adobeCancelStatusChk - 2nd int pkt has cancelled status", crlf + crlf)
             adobeCancelStatusChk = 1
             exitfunction
         endif
@@ -270,7 +271,6 @@ function adobeClickSearchIcon()
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(r) + "); msg: " + #errormsg$, crlf)
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
         hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_search_" + str$(iAttempt) + ".bmp", 1, 1)
-        write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ":  workflow failed; proceeding to next change event", crlf + crlf)
         write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
         write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
         write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error -  clicking search icon", crlf + crlf)
@@ -305,7 +305,6 @@ function adobeInvalidEmailChk()
     if instr(sVal$, "Email provided is invalid") <> 0 then
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": email provided is invalid; resuming scan for next change event", crlf + crlf)
         hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-invalid_email.bmp", 1, 1)
-        write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
         write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
         write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
         write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: invalid email", crlf + crlf)
@@ -358,7 +357,6 @@ function adobeNoResultsErrorChk(str_pkt$)
             write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + str_pkt$ + " int pkt search returned no results", crlf)
             write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": skipping to 1st interview packet", crlf)
             hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pre-cancel_no_search_results.bmp", 1, 1)
-            write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": search for pre 1st int pkt returned no results", crlf)
             write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
             write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
             write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error; no pre 1st pkt search results", crlf + crlf)
@@ -369,7 +367,6 @@ function adobeNoResultsErrorChk(str_pkt$)
             write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + str_pkt$ + " int pkt search returned no results", crlf)
             write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf)
             hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + str_pkt$ + "_cancel_no_search_results.bmp", 1, 1)
-            write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": search for " + str_pkt$ + " int pkt returned no results", crlf)
             write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
             write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
             write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error; no " + str_pkt$ + " pkt search results", crlf + crlf)
@@ -410,7 +407,6 @@ function adobeChkPktForCancelStatus(str_packet$)
         if str_packet$ = "pre 1st" then
             write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": skipping to 1st interview packet", crlf)
             hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-pkt_cancel_check.bmp", 1, 1)
-            write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + str_packet$ + " pkt is already cancelled", crlf)
             write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
             write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
             write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + str_packet$ + " pkt already cancelled", crlf + crlf)
@@ -420,7 +416,6 @@ function adobeChkPktForCancelStatus(str_packet$)
       else
             write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
             hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "cancel_check.bmp", 1, 1)
-            write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + str_packet$ + " pkt is already cancelled", crlf)
             write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
             write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
             write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + str_packet$ + " pkt already cancelled", crlf + crlf)
@@ -480,7 +475,6 @@ function adobeClickCancel(str_packet$)
             write(debuglogpath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(r) + ") msg: " + #errormsg$, crlf)
             write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": skipping to 1st interview packet", crlf)
             hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_cancel_button-" + str$(iAttempt) + ".bmp", 1, 1)
-            write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": cancel " + str_packet$ + " failed", crlf)
             write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
             write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
             write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: cancel " + str_packet$ + " pkt failed clicking cancel button", crlf + crlf)
@@ -492,7 +486,6 @@ function adobeClickCancel(str_packet$)
             write(debuglogpath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_code: (" + str$(r) + ") msg: " + #errormsg$, crlf)
             write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
             hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_cancel_button-" + str$(iAttempt) + ".bmp", 1, 1)
-            write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ":  workflow failed; proceeding to next change event", crlf + crlf)
             write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
             write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
             write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: cancel " + str_packet$ + " pkt failed clicking cancel button", crlf + crlf)
@@ -552,18 +545,28 @@ function adobeCancelLogStats()
     write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Pre First Cancels completed:       " + str$(iPreCompl), crlf)
     write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": First Int Cancels completed:       " + str$(iFirstCompl), crlf)
     write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Second Int Cancels completed:      " + str$(iSecondCompl), crlf)
-    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf)
-    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf)
-    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events detected:            " + str$(iEventCnt), crlf)
-    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage matches detected:            " + str$(iStageCnt), crlf)
-    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Pre First Cancels completed:       " + str$(iPreCompl), crlf)
-    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": First Int Cancels completed:       " + str$(iFirstCompl), crlf)
-    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Second Int Cancels completed:      " + str$(iSecondCompl), crlf)
     write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ==================================== end workflow =======================================", crlf + crlf)
-    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ==================================== end workflow =======================================", crlf + crlf)
+
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf)
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf)
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events detected:            " + str$(iEventCnt), crlf)
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage matches detected:            " + str$(iStageCnt), crlf)
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Pre First Cancels completed:       " + str$(iPreCompl), crlf)
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": First Int Cancels completed:       " + str$(iFirstCompl), crlf)
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Second Int Cancels completed:      " + str$(iSecondCompl), crlf)
     write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ==================================== end workflow =======================================", crlf + crlf)
+
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events detected:            " + str$(iEventCnt), crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage matches detected:            " + str$(iStageCnt), crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Pre First Cancels completed:       " + str$(iPreCompl), crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": First Int Cancels completed:       " + str$(iFirstCompl), crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Second Int Cancels completed:      " + str$(iSecondCompl), crlf)
     write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ==================================== end workflow =======================================", crlf + crlf)
+
     adobeCancelLogStats = 0
+
 endfunction
 
 '===============================================================================================================================================================
@@ -589,15 +592,7 @@ function adobeSendLogStats()
     write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 1st interview packets sent:                " + str$(iFirstCompl), crlf)
     write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events with '2nd interview' stage:  " + str$(iSecondCnt), crlf)
     write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 2nd interview packets sent:                " + str$(iSecondCompl), crlf)
-    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf)
-    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf)
-    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change event rows detected:                " + str$(iEventCnt), crlf)
-    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": events with '1st interview' stage:         " + str$(iFirstCnt), crlf)
-    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 1st interview packets sent:                " + str$(iFirstCompl), crlf)
-    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events with '2nd interview' stage:  " + str$(iSecondCnt), crlf)
-    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 2nd interview packets sent:                " + str$(iSecondCompl), crlf)
     write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ==================================== end workflow =======================================", crlf + crlf)
-    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ==================================== end workflow =======================================", crlf + crlf)
     write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ==================================== end workflow =======================================", crlf + crlf)
     write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ==================================== end workflow =======================================", crlf + crlf)
 

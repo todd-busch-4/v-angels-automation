@@ -35,7 +35,6 @@ iMin$ = Min$()
 
 
 write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": -------------------------------------- INTERVAL SCAN START ---------------------------------------", crlf + crlf)
-write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + "-------------------------------------- INTERVAL SCAN START ---------------------------------------", crlf + crlf)
 write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + "-------------------------------------- INTERVAL SCAN START ---------------------------------------", crlf + crlf)
 write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + "-------------------------------------- INTERVAL SCAN START ---------------------------------------", crlf + crlf)
 
@@ -128,6 +127,8 @@ run(scriptsPath$ + "CG-adobeCancelPackets\CG-adobeCancelPackets.rob")
 run(scriptsPath$ + "CG-gmsAddLegalFee\CG-gmsAddLegalFee.rob")
 run(scriptsPath$ + "CG-arcsGetBackup\CG-arcsGetBackup.rob")
 run(scriptsPath$ + "CG-gmsTerminations\CG-gmsTerminations.rob")
+run(scriptsPath$ + "CG-arcsCloseApp\CG-arcsCloseApp.rob")
+run(scriptsPath$ + "CG-arcsEnterFPrintDate\CG-arcsEnterFPrintDate.rob")
 
 
 '#############################################################################################################################
@@ -144,6 +145,5 @@ endif
 
 
 write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": -------------------------------------- INTERVAL SCAN COMPLETE ------------------------------------", crlf + crlf)
-write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + "-------------------------------------- INTERVAL SCAN COMPLETE ------------------------------------", crlf + crlf)
 write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + "-------------------------------------- INTERVAL SCAN COMPLETE ------------------------------------", crlf + crlf)
 write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + "-------------------------------------- INTERVAL SCAN COMPLETE ------------------------------------", crlf + crlf)

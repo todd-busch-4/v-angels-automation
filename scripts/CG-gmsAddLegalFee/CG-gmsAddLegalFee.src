@@ -10,12 +10,10 @@
 '## notes:                  none
 '##
 '###############################################################################################################################################
-include "C:\v-angels-automation\framework\CG-globalDimDeclarations\CG-globalDimDeclarations.src"
-include "C:\v-angels-automation\framework\CG-gmsAddLegalFunctions\CG-gmsAddLegalFunctions.src"
-include "C:\v-angels-automation\framework\CG-globalDataLoaders\CG-globalDataLoaders.src"
 include "C:\v-angels-automation\framework\CG-loadWorkflowData\CG-loadWorkflowData.src"
 include "C:\v-angels-automation\framework\CG-globalFunctions\CG-globalFunctions.src"
 include "C:\v-angels-automation\framework\CG-gmsFunctions\CG-gmsFunctions.src"
+include "C:\v-angels-automation\framework\CG-gmsAddLegalFunctions\CG-gmsAddLegalFunctions.src"
 include "c:\v-angels-automation\framework\CG-globalWinFunctions\CG-globalWinFunctions.src"
 include "c:\v-angels-automation\framework\CG-globalWebFunctions\CG-globalWebFunctions.src"
 include "c:\v-angels-automation\framework\CG-globalWebValidations\CG-globalWebValidations.src"
@@ -93,34 +91,37 @@ repeat
         endif
 
 
-        '-------------------- enter username
-        usepage(pgGMSLogin$)
-        if webEnterText(inputGMSUsername$, gmsUsername$, "entering username") <> 0 then
-            goto nextIteration
-        endif
-        if webValidateText(inputGMSUsername$, gmsUsername$, "entering username") <> 0 then
-            goto nextIteration
-        endif
+		if existhtmlelement(inputGMSUsername$) = 1 then
+
+			'-------------------- enter username
+			usepage(pgGMSLogin$)
+			if webEnterText(inputGMSUsername$, gmsUsername$, "entering username") <> 0 then
+				goto nextIteration
+			endif
+			if webValidateText(inputGMSUsername$, gmsUsername$, "entering username") <> 0 then
+				goto nextIteration
+			endif
 
 
-        '-------------------- enter password
-        usepage(pgGMSLogin$)
-        if webEnterText(inputGMSPassword$, gmsPassword$, "entering password") <> 0 then
-            goto nextIteration
-        endif
-        if webValidateText(inputGMSPassword$, gmsPassword$, "entering password") <> 0 then
-            goto nextIteration
-        endif
+			'-------------------- enter password
+			usepage(pgGMSLogin$)
+			if webEnterText(inputGMSPassword$, gmsPassword$, "entering password") <> 0 then
+				goto nextIteration
+			endif
+			if webValidateText(inputGMSPassword$, gmsPassword$, "entering password") <> 0 then
+				goto nextIteration
+			endif
 
 
-        '-------------------- click 'sign in' button
-        if webClickElement(btnGMSLogin$, "clicking login button") <> 0 then
-            goto nextIteration
-        endif
-        pause 5
-        if webValidateElement(bmpGMSLogo$, "gms logo", "clicking login button") <> 1 then
-            goto nextIteration
-        endif
+			'-------------------- click 'sign in' button
+			if webClickElement(btnGMSLogin$, "clicking login button") <> 0 then
+				goto nextIteration
+			endif
+			pause 5
+			if webValidateElement(bmpGMSLogo$, "gms logo", "clicking login button") <> 1 then
+				goto nextIteration
+			endif
+	    endif
 
 
         '-------------------- ensure correct company is active
@@ -151,14 +152,14 @@ repeat
 
 
         '-------------------- select employee
-        if webClickElement(rowGMSSrcResults$, "selecting employee") <> 0 then
+        if webClickElement(rowGMSSrcResCorpID$, "selecting employee") <> 0 then
             goto nextIteration
         endif
-        res = clickhtmlelement (rowGMSSrcResults$)
         pause 2
         if webValidateNotNull(inputGMSDeductsSrc$, "selecting employee") = 1 then
             goto nextIteration
         endif
+
 
         '-------------------- get index of next row added
         rowIndex = gmsAddLegalGetNextIndex()

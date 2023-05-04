@@ -45,6 +45,7 @@ function zeroPadDate$(dt_date$)
 	endif
 
 	'reassmble date parts
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": reformatted date: [" + dtDay$ + "/" + dtMo$ + "/" + dtYr$ + "]", crlf)
 	zeroPadDate$ = dtDay$ + "/" + dtMo$ + "/" + dtYr$
 
 endfunction
@@ -80,7 +81,7 @@ function formatSSN$(str_ssn$)
 
 	'assemble string
 	sFormatted$ = sPre$ + "-" + sMiddle$ + "-" + sPost$
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant ssn: [" + sFormatted$ + "]", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": formatted ssn: [" + sFormatted$ + "]", crlf)
 	formatSSN$ = sFormatted$
 
 endfunction
@@ -202,6 +203,54 @@ function copyFile(str_from$, str_to$)
 	endif
 	 
 endfunction
+
+'=============================================================================================================================================================
+'== function name:              fmtDateTimeToDate$
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                terseDescription
+    '==
+    '== input parms:            none
+    '==
+    '== returns:                int:    0 - success
+    '==                                 1 - failure
+    '==
+    '== notes:                  none
+    '==
+'===============================================================================================================================================================
+function fmtDateTimeToDate$(dtDate$)
+    local r, p, dtDateOnly$, dtMonth$, dtDay$, dtYr$
+
+    '-------------------- dissect date
+    '------- month
+    'original format 1/20/2023  10:30:00 AM
+    r = instrrev(dtDate$, "/")							'find second "/" in string                                 
+    r = r + 4											'add 4 for year to find end of date                         
+    dtDateOnly$ = left$(dtDate$, r)						'extract just date                                          
+    dtDateOnly$ = rtrim$(dtDateOnly$)					'trim whitespace caused by single digit month/day values    
+    dtMonth$ = left$(dtDate$, 2)			        	'extract just month                                         
+    if instr(dtMonth$,"/") <> 0 then					'zero pad if single digit                                  
+        dtMonth$ = left$(dtMonth$, 1) 
+        dtMonth$ = "0" + dtMonth$
+    endif
+
+    '------- day
+    p = instr(dtDate$, "/")					            'find starting point to extract day
+    dtDay$ = mid$(dtDate$, p + 1, 2)		        	'extract just day
+    if instr(dtDay$,"/") <> 0 then						'zero pad if single digit
+        dtDay$ = left$(dtDay$, 1) 
+        dtDay$ = "0" + dtDay$
+    endif
+
+    '------- year
+	dtYr$ = right$(dtDateOnly$, 4)						'extract just year
+
+    dtFormattedDate$ = dtMonth$ + "/" + dtDay$ + "/" + dtYr$
+    fmtDateTimeToDate$ = dtMonth$ + "/" + dtDay$ + "/" + dtYr$
+
+endfunction
+
 
 '=============================================================================================================================================================
 '== function name:           	convStateToName$

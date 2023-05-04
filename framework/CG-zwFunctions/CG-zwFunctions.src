@@ -256,7 +256,6 @@ function zwInitStatusChk()
     if textmsgStatus$ <> "" then
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status field was not null", crlf)
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
-        write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status field not null, proceeding to next change event", crlf + crlf)
         zwInitStatusChk = 1
         exitfunction
     else
@@ -318,7 +317,6 @@ function zwLoginChk()
             write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": expected: [" + pgZWMainDan$ + "] actual: [" + res$ + "]", crlf)
             write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
             hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-login_error.bmp", 1, 1)
-            write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
             write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
             write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
             write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: script error - logging in", crlf + crlf)
@@ -367,7 +365,6 @@ function zwAddContactErrorChk()
             if result_string$ = "Invalid Phone Number" then
                 write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": phone number is invalid", crlf)
                 write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
-                write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": phone number is invalid; proceeding to next change event", crlf + crlf)
                 write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
                 write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
                 write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: invalid phone number", crlf + crlf)
@@ -378,7 +375,6 @@ function zwAddContactErrorChk()
             if result_string$ = "Contact already exists" then
                 write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": contact already exists", crlf)
                 write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
-                write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": contact already exists; proceeding to next change event", crlf + crlf)
                 write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
                 write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
                 write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: duplicate contact", crlf + crlf)
@@ -389,7 +385,6 @@ function zwAddContactErrorChk()
         endif
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
         hardcopy(screenshotsPath$ + currScript$ + "-" + applicantLName$ + "-click_save_contact.bmp", 1, 1)
-        write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed, proceeding to next change event", crlf + crlf)
         write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
         write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
         write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - save contact", crlf + crlf)	
@@ -400,7 +395,6 @@ function zwAddContactErrorChk()
 
     if res = 1 then
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": contact saved successfully", crlf)
-        write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": contact saved successfully", crlf)
     endif
 
 endfunction
@@ -484,7 +478,6 @@ function zwPriorDayChk()
 
     if day$() >= firstAppPriorDay$ then
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": day before appt is today or before; skipping schedule prior day confirm text", crlf)
-        write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": day before appt is today or before; skipping schedule prior day confirm text", crlf)
         zwPriorDayChk = 1
         exitfunction
     endif
@@ -513,12 +506,7 @@ function zwInitLogState()
     write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events detected:            " + str$(iChangeCnt), crlf)
     write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": events with '1st interview' stage: " + str$(iStageCnt), crlf)
     write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": records msgs sent for:             " + str$(iCompleted), crlf)
-    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf)
-    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change event rows detected: " + str$(iChangeCnt), crlf)
-    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 1st Interview events:       " + str$(iStageCnt), crlf)
-    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": records msgs sent for:      " + str$(iCompleted), crlf)
     write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
-    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
     write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
     write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
 

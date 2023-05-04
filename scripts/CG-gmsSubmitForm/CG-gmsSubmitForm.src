@@ -1,4 +1,4 @@
-'###############################################################################################################################################
+ '###############################################################################################################################################
 '## author:                 todd busch
 '##
 '## description:            iterates wintask change event col in employment inquiry list.xlsx in packages downloads folder, rows flagged with
@@ -14,9 +14,7 @@
 '###############################################################################################################################################
 '##   													script prep																			  
 '###############################################################################################################################################
-include "C:\v-angels-automation\framework\CG-globalDimDeclarations\CG-globalDimDeclarations.src"
 include "C:\v-angels-automation\framework\CG-loadWorkflowData\CG-loadWorkflowData.src"
-include "C:\v-angels-automation\framework\CG-globalDataLoaders\CG-globalDataLoaders.src"
 include "C:\v-angels-automation\framework\CG-globalFunctions\CG-globalFunctions.src"
 include "C:\v-angels-automation\framework\CG-gmsFunctions\CG-gmsFunctions.src"
 include "c:\v-angels-automation\framework\CG-globalWinFunctions\CG-globalWinFunctions.src"
@@ -73,49 +71,57 @@ repeat
 
 
 		if curr_stage$ = "On-board" then
-			iOnboardCnt = iOnboardCnt + 1
+			iStageCnt = iStageCnt + 1
 			logStageMatch()
+		else
+			iBypassedCnt = iBypassedCnt + 1
+			logStageBypass()
+			goto nextiteration
+		endif
 
 
-			'-------------------- get data values for current record
-			if gmsSubmitGetData() = 1 then
-				goto nextIteration
-			endif
-			logDataValues()
+		'-------------------- get data values for current record
+		if gmsSubmitGetData() <> 0 then
+			goto nextIteration
+		endif
 
 
-			'------- add leading zeroes to single char day/month in company start date
-			startDateCompany$ = zeroPadDate$(startDateCompany$)
-		            	
-			
-			'------- make sure ssn is formatted properly
-			applicantSSN$ = formatSSN$(applicantSSN$)
+		'------- add leading zeroes to single char day/month in company start date
+		startDateCompany$ = zeroPadDate$(startDateCompany$)
+					
+		
+		'------- make sure ssn is formatted properly
+		applicantSSN$ = formatSSN$(applicantSSN$)
 
 '------------------------------------------------------------------------------------------------------------------------------ status check
 
-			'-------------------- check status for value to trigger form submission
-			if gmsSubmitChkStatus() = 1 then
-				goto nextIteration
-			endif
+		'-------------------- check status for value to trigger form submission
+		if gmsSubmitChkStatus() = 1 then
+			goto nextIteration
+		else
+			iTriggeredCnt = iTriggeredCnt + 1
+		endif
 
 '------------------------------------------------------------------------------------------------------------------------------ log in
 
-			'-------------------- invoke browser
-			if webInvokeBrowser("FF", gmsURL$) <> 0 then
-				nextScript()
-				goto nextIteration
-			endif
+		'-------------------- invoke browser
+		if webInvokeBrowser("FF", gmsURL$) <> 0 then
+			nextScript()
+			goto nextIteration
+		endif
 
+
+		if existhtmlelement(inputGMSUsername$) = 1 then
 
 			'-------------------- enter username
 			usepage(pgGMSLogin$)
 			if webEnterText(inputGMSUsername$, gmsUsername$, "entering username") <> 0 then
 				goto nextIteration
 			endif
-			if webValidateText(inputGMSUsername$, gmsUsername$, "entering text") <> 0 then
+			if webValidateText(inputGMSUsername$, gmsUsername$, "entering username") <> 0 then
 				goto nextIteration
-			endif																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																																												
-																																																																																																																																																																																																																																																																																																																			
+			endif
+
 
 			'-------------------- enter password
 			usepage(pgGMSLogin$)
@@ -135,359 +141,356 @@ repeat
 			if webValidateElement(bmpGMSLogo$, "gms logo", "clicking login button") <> 1 then
 				goto nextIteration
 			endif
+	    endif
 
 
-			'-------------------- ensure correct company is active
-			if gmsCompanyChk = 1 then
-				goto nextiteration
-			endif
+		'-------------------- ensure correct company is active
+		if gmsCompanyChk = 1 then
+			goto nextiteration
+		endif
 
 
-			'-------------------- click 'new hire' link
-			usepage(pgGMSEnhancedDashboard$)
-			if webClickElement(lnkGMSNewHire$, "clicking new hire link") <> 0 then
-				goto nextIteration
-			endif
-			pause 2
-			if webValidateElement(inputGMSWorkLoc$, "work loc textfield", "clicking 'new hire' link") <> 1 then
-				goto nextIteration
-			endif
+		'-------------------- click 'new hire' link
+		usepage(pgGMSEnhancedDashboard$)
+		if webClickElement(lnkGMSNewHire$, "clicking new hire link") <> 0 then
+			goto nextIteration
+		endif
+		pause 2
+		if webValidateElement(inputGMSWorkLoc$, "work loc textfield", "clicking 'new hire' link") <> 1 then
+			goto nextIteration
+		endif
 
 '------------------------------------------------------------------------------------------------------------------------------ enter form details
 
-			'-------------------- enter work location
-			usepage(pgGMSNewHireForm$)
-			clickhtmlelement(inputGMSWorkLoc$)
-			if webEnterText(inputGMSWorkLoc$, "1", "entering work loc") <> 0 then
-				goto nextIteration
-			endif
-			pause 2
-			if webValidateText(inputGMSWorkLoc$, "1", "entering work loc") <> 0 then
-				goto nextIteration
-			endif
-
-
-			'-------------------- enter social security number
-			clickhtmlelement(inputGMSSocial$)			
-			if webEnterText(inputGMSSocial$, applicantSSN$, "entering ssn") <> 0 then
-				goto nextIteration
-			endif
-			if webValidateText(inputGMSSocial$, applicantSSN$, "entering ssn") <> 0 then
-				goto nextIteration
-			endif
-
-
-			'-------------------- shift focus from ssn field to fire check
-			usewindow(wndGMSNewHireForm$, 1)
-			if winSendKeys("<tab>", "shift focus off ssn") <> 0 then
-				goto nextIteration
-			endif
-			pause 1
-			
-			
-			'-------------------- check for popup error
-			iStatus = gmsSubmitPopupChk()
-			if iStatus = 2 then
-				goto rehireFlow
-			endif
-			if iStatus = 1 then
-				goto nextiteration
-			endif
-
-
-			'-------------------- enter first name
-			clickhtmlelement(inputGMSFirstName$)
-			if webEnterText(inputGMSFirstName$, applicantFName$, "entering first name") <> 0 then
-				goto nextIteration
-			endif
-			pause 1
-			if webValidateText(inputGMSFirstName$, applicantFName$, "entering first name") <> 0 then
-				goto nextIteration
-			endif
-
-
-			'-------------------- enter last name
-			clickhtmlelement(inputGMSLastName$)
-			if webEnterText(inputGMSLastName$, applicantLName$, "entering last name") <> 0 then
-				goto nextIteration
-			endif
-			pause 1
-			if webValidateText(inputGMSLastName$, applicantLName$, "entering last name") <> 0 then
-				goto nextIteration
-			endif
-
-
-			'-------------------- enter email
-			clickhtmlelement(inputGMSEmail$)
-			if webEnterText(inputGMSEmail$, applicantEmail$, "entering email") <> 0 then
-				goto nextIteration
-			endif
-			pause 1
-			if webValidateText(inputGMSEmail$, applicantEmail$, "entering email") <> 0 then
-				goto nextIteration
-			endif
-
-
-			'-------------------- enter company start date
-			clickhtmlelement(dtGMSCompanyStartDt$)
-			if webEnterText(dtGMSCompanyStartDt$, startDateCompany$, "entering company start date") <> 0 then
-				goto nextIteration
-			endif
-			pause 1
-			if webValidateText(dtGMSCompanyStartDt$, startDateCompany$, "entering company start date") <> 0 then
-				goto nextIteration
-			endif
-			pause 1
-
-
-			'-------------------- close date picker control
-			usewindow(wndGMSNewHireForm$, 1)
-			if winSendKeys("<tab><tab>", "closing date picker control") <> 0 then
-				goto nextIteration
-			endif
-			pause 1
-
-
-			'-------------------- enter position
-			clickhtmlelement(inputGMSPosition$)
-			if webEnterText(inputGMSPosition$, position$, "entering position") <> 0 then
-				goto nextIteration
-			endif
-			pause 1
-			if webValidateText(inputGMSPosition$, position$, "entering position") <> 0 then
-				goto nextIteration
-			endif
-
-
-			'-------------------- enter status
-			clickhtmlelement(inputGMSEmployStatus$)
-			if webEnterText(inputGMSEmployStatus$, employStatus$, "entering status") <> 0 then
-				goto nextIteration
-			endif
-			pause 1
-			if webValidateText(inputGMSEmployStatus$, employStatus$, "entering status") <> 0 then
-				goto nextIteration
-			endif
-
-
-			'-------------------- enter type
-			clickhtmlelement(inputGMSEmployType$)
-			if webEnterText(inputGMSEmployType$, employType$, "entering type") <> 0 then
-				goto nextIteration
-			endif
-			pause 1
-			if webValidateText(inputGMSEmployType$, employType$, "entering type") <> 0 then
-				goto nextIteration
-			endif
-
-
-			'-------------------- enter benefit group
-			clickhtmlelement(inputGMSBenefitGrp$)
-			if webEnterText(inputGMSBenefitGrp$, benefitGroup$, "entering benefit group") <> 0 then
-				goto nextIteration
-			endif
-			pause 1
-			if webValidateText(inputGMSBenefitGrp$, benefitGroup$, "entering benefit group") <> 0 then
-				goto nextIteration
-			endif
-
-
-			'-------------------- enter pay group
-			clickhtmlelement(inputGMSPayGrp$)
-			if webEnterText(inputGMSPayGrp$, payGroup$, "entering pay group") <> 0 then
-				goto nextIteration
-			endif
-			pause 1
-			if webValidateText(inputGMSPayGrp$, payGroup$, "entering pay group") <> 0 then
-				goto nextIteration
-			endif
-
-
-			'-------------------- select pay method
-			if webSelectItem(selGMSPayMethod$, payMethod$, "selecting pay method") <> 0 then
-				goto nextIteration
-			endif
-			pause 1
-			if webValidateText(selGMSPayMethod$, "H", "selecting pay method") <> 0 then
-				goto nextIteration
-			endif
-
-
-			'-------------------- enter pay rate
-			'usewindow(wndGMSNewHireForm$, 1)
-			if winSendKeys("<tab>", "set focus to pay rate") <> 0 then
-				goto nextIteration
-			pause 1
-			endif
-			clickhtmlelement(inputGMSPayRate$)
-			if winSendKeys(payRate$, "entering pay rate") <> 0 then
-				goto nextIteration
-			endif
-			pause 1
-			usepage(pgGMSNewHireForm$)
-			if webValidateText(inputGMSPayRate$, payRate$, "entering pay rate") <> 0 then
-				goto nextIteration
-			endif
-
-
-			'-------------------- enter std hours
-			clickhtmlelement(inputGMSStdHours$)
-			if webEnterText(inputGMSStdHours$, stdHours$, "entering std hours") <> 0 then
-				goto nextIteration
-			endif
-			pause 1
-			if webValidateText(inputGMSStdHours$, stdHours$, "entering std hours") <> 0 then
-				goto nextIteration
-			endif
-
-
-			'-------------------- click save
-			if webClickElement(btnGMSSave$, "clicking new hire save") <> 0 then
-				goto nextIteration
-			endif
-			pause 20
-			if webValidateElement(btnGMSDone$, "done button", "clicking new hire save") <> 1 then
-				goto nextIteration
-			endif
-			logWorkflowSuccess("new hire form successfully submitted")
-
-
-			iOnboardCompl = iOnboardCompl + 1
-
-
-			closebrowser()
-
-
+		'-------------------- enter work location
+		usepage(pgGMSNewHireForm$)
+		clickhtmlelement(inputGMSWorkLoc$)
+		if webEnterText(inputGMSWorkLoc$, "1", "entering work loc") <> 0 then
 			goto nextIteration
+		endif
+		pause 2
+		if webValidateText(inputGMSWorkLoc$, "1", "entering work loc") <> 0 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- enter social security number
+		clickhtmlelement(inputGMSSocial$)			
+		if webEnterText(inputGMSSocial$, applicantSSN$, "entering ssn") <> 0 then
+			goto nextIteration
+		endif
+		if webValidateText(inputGMSSocial$, applicantSSN$, "entering ssn") <> 0 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- shift focus from ssn field to fire check
+		usewindow(wndGMSNewHireForm$, 1)
+		if winSendKeys("<tab>", "shift focus off ssn") <> 0 then
+			goto nextIteration
+		endif
+		pause 1
+		
+		
+		'-------------------- check for popup error
+		iStatus = gmsSubmitPopupChk()
+		if iStatus = 2 then
+			goto rehireFlow
+		endif
+		if iStatus = 1 then
+			goto nextiteration
+		endif
+
+
+		'-------------------- enter first name
+		clickhtmlelement(inputGMSFirstName$)
+		if webEnterText(inputGMSFirstName$, applicantFName$, "entering first name") <> 0 then
+			goto nextIteration
+		endif
+		pause 1
+		if webValidateText(inputGMSFirstName$, applicantFName$, "entering first name") <> 0 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- enter last name
+		clickhtmlelement(inputGMSLastName$)
+		if webEnterText(inputGMSLastName$, applicantLName$, "entering last name") <> 0 then
+			goto nextIteration
+		endif
+		pause 1
+		if webValidateText(inputGMSLastName$, applicantLName$, "entering last name") <> 0 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- enter email
+		clickhtmlelement(inputGMSEmail$)
+		if webEnterText(inputGMSEmail$, applicantEmail$, "entering email") <> 0 then
+			goto nextIteration
+		endif
+		pause 1
+		if webValidateText(inputGMSEmail$, applicantEmail$, "entering email") <> 0 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- enter company start date
+		clickhtmlelement(dtGMSCompanyStartDt$)
+		if webEnterText(dtGMSCompanyStartDt$, startDateCompany$, "entering company start date") <> 0 then
+			goto nextIteration
+		endif
+		pause 1
+		if webValidateText(dtGMSCompanyStartDt$, startDateCompany$, "entering company start date") <> 0 then
+			goto nextIteration
+		endif
+		pause 1
+
+
+		'-------------------- close date picker control
+		usewindow(wndGMSNewHireForm$, 1)
+		if winSendKeys("<tab><tab>", "closing date picker control") <> 0 then
+			goto nextIteration
+		endif
+		pause 1
+
+
+		'-------------------- enter position
+		clickhtmlelement(inputGMSPosition$)
+		if webEnterText(inputGMSPosition$, position$, "entering position") <> 0 then
+			goto nextIteration
+		endif
+		pause 1
+		if webValidateText(inputGMSPosition$, position$, "entering position") <> 0 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- enter status
+		clickhtmlelement(inputGMSEmployStatus$)
+		if webEnterText(inputGMSEmployStatus$, employStatus$, "entering status") <> 0 then
+			goto nextIteration
+		endif
+		pause 1
+		if webValidateText(inputGMSEmployStatus$, employStatus$, "entering status") <> 0 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- enter type
+		clickhtmlelement(inputGMSEmployType$)
+		if webEnterText(inputGMSEmployType$, employType$, "entering type") <> 0 then
+			goto nextIteration
+		endif
+		pause 1
+		if webValidateText(inputGMSEmployType$, employType$, "entering type") <> 0 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- enter benefit group
+		clickhtmlelement(inputGMSBenefitGrp$)
+		if webEnterText(inputGMSBenefitGrp$, benefitGroup$, "entering benefit group") <> 0 then
+			goto nextIteration
+		endif
+		pause 1
+		if webValidateText(inputGMSBenefitGrp$, benefitGroup$, "entering benefit group") <> 0 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- enter pay group
+		clickhtmlelement(inputGMSPayGrp$)
+		if webEnterText(inputGMSPayGrp$, payGroup$, "entering pay group") <> 0 then
+			goto nextIteration
+		endif
+		pause 1
+		if webValidateText(inputGMSPayGrp$, payGroup$, "entering pay group") <> 0 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- select pay method
+		if webSelectItem(selGMSPayMethod$, payMethod$, "selecting pay method") <> 0 then
+			goto nextIteration
+		endif
+		pause 1
+		if webValidateText(selGMSPayMethod$, "H", "selecting pay method") <> 0 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- enter pay rate
+		'usewindow(wndGMSNewHireForm$, 1)
+		if winSendKeys("<tab>", "set focus to pay rate") <> 0 then
+			goto nextIteration
+		pause 1
+		endif
+		clickhtmlelement(inputGMSPayRate$)
+		if winSendKeys(payRate$, "entering pay rate") <> 0 then
+			goto nextIteration
+		endif
+		pause 1
+		usepage(pgGMSNewHireForm$)
+		if webValidateText(inputGMSPayRate$, payRate$, "entering pay rate") <> 0 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- enter std hours
+		clickhtmlelement(inputGMSStdHours$)
+		if webEnterText(inputGMSStdHours$, stdHours$, "entering std hours") <> 0 then
+			goto nextIteration
+		endif
+		pause 1
+		if webValidateText(inputGMSStdHours$, stdHours$, "entering std hours") <> 0 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- click save
+		if webClickElement(btnGMSSave$, "clicking new hire save") <> 0 then
+			goto nextIteration
+		endif
+		pause 20
+		if webValidateElement(btnGMSDone$, "done button", "clicking new hire save") <> 1 then
+			goto nextIteration
+		endif
+
+
+		logWorkflowSuccess("new hire form successfully submitted")
+
+
+		iCompletedCnt = iCompletedCnt + 1
+
+
+		closebrowser()
+
+
+		goto nextIteration
 
 '------------------------------------------------------------------------------------------------------------------------------ enter rehire form
 
 rehireFlow:
-			gmsSubmitErrorChk$ = ""
+		gmsSubmitErrorChk$ = ""
 
-			'-------------------- hit enter to close popup
-			usewindow(wndGMSNewHireForm$, 1)
-			if winSendKeys("<enter>", "closing popup") <> 0 then
-				goto nextIteration
-			endif
-			pause 1
-
-
-			'-------------------- return to dashboard
-			usepage(pgGMSNewHireForm$)
-			if webClickElement(bmpGMSLogo$, "nav to dashboard") <> 0 then                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
-				goto nextIteration
-			endif
-			pause 2
-			if webValidateCurrPage(pgGMSEnhancedDashboard$, "nav to dashboard") <> 0 then
-				goto nextIteration
-			endif
-
-
-			'-------------------- click rehire link
-			usepage(pgGMSEnhancedDashboard$)
-			if webClickElement(lnkGMSRehire$, "clicking rehire link") <> 0 then
-				goto nextIteration
-			endif
-			pause 2
-			if webValidateCurrPage(pgGMSRehireForm$, "clicking rehire link") <> 0 then
-				goto nextIteration
-			endif
-
-
-			'-------------------- enter ssn
-			usepage(pgGMSRehireForm$)
-			if webEnterText(inputGMSRHSocial$, applicantSSN$, "entering ssn") <> 0 then
-				goto nextIteration
-			endif
-			pause 1
-			if gmsSubmitPopupChk() = 1 then
-				goto nextIteration
-			endif
-			if webValidateElement(lblGMSLastNameLabel$, "last name label", "entering ssn") <> 1 then
-				goto nextIteration
-			endif
-
-
-			'-------------------- hit enter to close popup
-			usewindow(wndGMSNewHireForm$, 1)
-			if winSendKeys("<enter>", "closing popup") <> 0 then
-				goto nextIteration
-			endif
-			pause 1
-
-
-			'-------------------- select active from rehired empl status dropdown
-			usepage(pgGMSRehireForm$)
-			if webSelectItem(selGMSRehireStatus$, gmsRehireStatus$, "selecting rehire status") <> 0 then
-				goto nextIteration
-			endif
-			if webValidateText(selGMSRehireStatus$, "A", "selecting rehire status") <> 0 then
-				goto nextIteration
-			endif
-
-
-			'-------------------- select 'pb' from rehired employment type dropdown
-			if webSelectItem(selGMSRehireType$, gmsRehireType$, "selecting rehire type") <> 0 then
-				goto nextIteration
-			endif
-			if webValidateText(selGMSRehireType$, gmsRehireType$, "selecting rehire type") <> 0 then
-				goto nextIteration
-			endif
-
-
-			'-------------------- enter rehire date
-			currDate$ = zeroPadDate$(currDate$)
-			if webEnterText(dtGMSRehireDate$, currDate$, "entering rehire date") <> 0 then
-				goto nextIteration
-			endif
-			clickhtmlelement(txtEmployeeID$)	'to get focus off field
-			if webValidateText(dtGMSRehireDate$, currDate$, "entering rehire date") <> 0 then
-				goto nextIteration
-			endif
-
-
-			'-------------------- select 'rehire' reason code
-			if webSelectItem(selGMSRehireCode$, gmsReasonCode$, "selecting rehire reason code") <> 0 then
-				goto nextIteration
-			endif
-			if webValidateText(selGMSRehireCode$, gmsReasonCode$, "selecting rehire reason code") <> 0 then
-				goto nextIteration
-			endif
-
-
-			'-------------------- enter pay rate
-			if webEnterText(inputGMSRHPayRate$, gmsPayRate$, "entering pay rate") <> 0 then
-				goto nextIteration
-			endif
-			if webValidateText(inputGMSRHPayRate$, gmsPayRate$, "entering pay rate") <> 0 then
-				goto nextIteration
-			endif
-
-
-			'-------------------- click save
-			if webClickElement(btnGMSSave$, "clicking rehire save") <> 0 then
-				goto nextIteration
-			endif
-			pause 20
-			if webValidateText(inputGMSRHSocial$, "", "clicking rehire save") <> 0 then
-				goto nextIteration
-			endif
-			logWorkflowSuccess("rehire form successfully submitted")
-
-
-			iOnboardCompl = iOnboardCompl + 1
-
-
-			closebrowser()
-
-
-		endif		'end of on-board stage
-
-
-		if curr_stage$ <> "On-board" then
-			logStageBypass()
+		'-------------------- hit enter to close popup
+		usewindow(wndGMSNewHireForm$, 1)
+		if winSendKeys("<enter>", "closing popup") <> 0 then
+			goto nextIteration
 		endif
+		pause 1
+
+
+		'-------------------- return to dashboard
+		usepage(pgGMSNewHireForm$)
+		if webClickElement(bmpGMSLogo$, "nav to dashboard") <> 0 then                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
+			goto nextIteration
+		endif
+		pause 2
+		if webValidateCurrPage(pgGMSEnhancedDashboard$, "nav to dashboard") <> 0 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- click rehire link
+		usepage(pgGMSEnhancedDashboard$)
+		if webClickElement(lnkGMSRehire$, "clicking rehire link") <> 0 then
+			goto nextIteration
+		endif
+		pause 2
+		if webValidateCurrPage(pgGMSRehireForm$, "clicking rehire link") <> 0 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- enter ssn
+		usepage(pgGMSRehireForm$)
+		if webEnterText(inputGMSRHSocial$, applicantSSN$, "entering ssn") <> 0 then
+			goto nextIteration
+		endif
+		pause 1
+		if gmsSubmitPopupChk() = 1 then
+			goto nextIteration
+		endif
+		if webValidateElement(lblGMSLastNameLabel$, "last name label", "entering ssn") <> 1 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- hit enter to close popup
+		usewindow(wndGMSNewHireForm$, 1)
+		if winSendKeys("<enter>", "closing popup") <> 0 then
+			goto nextIteration
+		endif
+		pause 1
+
+
+		'-------------------- select active from rehired empl status dropdown
+		usepage(pgGMSRehireForm$)
+		if webSelectItem(selGMSRehireStatus$, gmsRehireStatus$, "selecting rehire status") <> 0 then
+			goto nextIteration
+		endif
+		if webValidateText(selGMSRehireStatus$, "A", "selecting rehire status") <> 0 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- select 'pb' from rehired employment type dropdown
+		if webSelectItem(selGMSRehireType$, gmsRehireType$, "selecting rehire type") <> 0 then
+			goto nextIteration
+		endif
+		if webValidateText(selGMSRehireType$, gmsRehireType$, "selecting rehire type") <> 0 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- enter rehire date
+		currDate$ = zeroPadDate$(currDate$)
+		if webEnterText(dtGMSRehireDate$, currDate$, "entering rehire date") <> 0 then
+			goto nextIteration
+		endif
+		clickhtmlelement(txtEmployeeID$)	'to get focus off field
+		if webValidateText(dtGMSRehireDate$, currDate$, "entering rehire date") <> 0 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- select 'rehire' reason code
+		if webSelectItem(selGMSRehireCode$, gmsReasonCode$, "selecting rehire reason code") <> 0 then
+			goto nextIteration
+		endif
+		if webValidateText(selGMSRehireCode$, gmsReasonCode$, "selecting rehire reason code") <> 0 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- enter pay rate
+		if webEnterText(inputGMSRHPayRate$, gmsPayRate$, "entering pay rate") <> 0 then
+			goto nextIteration
+		endif
+		if webValidateText(inputGMSRHPayRate$, gmsPayRate$, "entering pay rate") <> 0 then
+			goto nextIteration
+		endif
+
+
+		'-------------------- click save
+		if webClickElement(btnGMSSave$, "clicking rehire save") <> 0 then
+			goto nextIteration
+		endif
+		pause 20
+		if webValidateText(inputGMSRHSocial$, "", "clicking rehire save") <> 0 then
+			goto nextIteration
+		endif
+
+		
+		logWorkflowSuccess("rehire form successfully submitted")
+
+
+		iCompletedCnt = iCompletedCnt + 1
+
+
+		closebrowser()
 
 
 	endif		'end of yes change event

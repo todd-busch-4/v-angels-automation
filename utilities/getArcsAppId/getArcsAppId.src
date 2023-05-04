@@ -1,0 +1,9 @@
+strPageTxt$ = Capture$("FIREFOX.EXE|MozillaWindowClass|ARCS Person Summary — Mozilla Firefox", 1, 0)
+
+r = Write("C:\v-angels-automation\maintenance\arcs-apps-page-text.txt", strPageTxt$, CRLF)
+
+p = instr(strPageTxt$, "Submitted")
+
+appID$ = mid$(strPageTxt$, p - 7, 6)
+
+msgbox(appID$)

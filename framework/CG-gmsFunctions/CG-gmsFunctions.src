@@ -77,19 +77,15 @@ endfunction
 function gmsSubmitChkStatus()
 
 	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": checking gms status", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": gmsStatus: [" + gmsStatus$ + "]", crlf)
+
 	if instr(gmsStatus$, "New Hire Invited") = 0 then
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status not set for gms entry", crlf)
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status of column: (" + gmsStatus$ + ")", crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status does not trigger workflow", crlf)
 		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
-		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status not set for gms entry; proceeding to next change event", crlf + crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": SSN: " + applicantSSN$, crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: status not set for gms entry", crlf + crlf)
 		gmsSubmitChkStatus = 1
 		exitfunction
 	else
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant set for gms entry", crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": gms connect status does trigger this workflow", crlf)
 		gmsSubmitChkStatus = 0
 		exitfunction
 	endif
@@ -151,7 +147,6 @@ function gmsSubmitPopupChk()
 		if instr(err$, "You may not perform a Rehire on an employee with a status of") <> 0 then
 			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ssn belongs to current employee with status 'A'", crlf)
 			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
-			write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
 			write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
 			write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
 			write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: validation error - status 'a' employee", crlf + crlf)
@@ -171,7 +166,6 @@ function gmsSubmitPopupChk()
 		if instr(err$, "onboarding") <> 0 then
 			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ssn belongs to applicant in onboarding", crlf)
 			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
-			write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ssn belongs to applicant in onboarding; proceeding to next change event", crlf + crlf)
 			write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
 			write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
 			write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: gmsSubmitPopupChk - applicant in onboarding", crlf + crlf)
@@ -185,7 +179,6 @@ function gmsSubmitPopupChk()
 		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": an unknown error occurred", crlf)
 		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + err$, crlf)
 		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
-		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
 		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
 		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
 		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: gmsSubmitNoRehireChk - " + err$, crlf + crlf)
@@ -219,7 +212,6 @@ function gmsTermsChkStatus()
 		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": current gms status: [" + gmsStatus$ + "]", crlf)
 		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": does NOT match trigger values for workflow", crlf)
 		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
-		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status not set for gms termination; proceeding to next change event", crlf + crlf)
 		gmsTermsChkStatus = 1
 	else
 		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status set for gms termination", crlf)
@@ -272,12 +264,7 @@ function gmsTermsLogStats()
 	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events detected:                    " + str$(iEventCnt), crlf)
 	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": events w/qualifying stages:                " + str$(iStageCnt), crlf)
 	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": terminations processed:                    " + str$(iProcessed), crlf)
-	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf)
-	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events detected:                    " + str$(iEventCnt), crlf)
-	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": events w/qualifying stages:                " + str$(iStageCnt), crlf)
-	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": terminations processed:                    " + str$(iProcessed), crlf)
 	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
-	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
 	write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
 	write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
 
@@ -329,7 +316,6 @@ function gmsTermsErrorChk()
 		if instr(err$, "This person is still being OnBoarded") <> 0 then
 			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employee is still being onboarded", crlf)
 			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
-			write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employee in onboarding; proceeding to next change event", crlf + crlf)
 			write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
 			write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employee: " + applicantFName$ + " " + applicantLName$, crlf)
 			write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: gmsTermsErrorCheck - employee in onboarding", crlf + crlf)
@@ -342,7 +328,6 @@ function gmsTermsErrorChk()
 		if instr(err$, "already terminated") <> 0 then
 			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employee is already terminated", crlf)
 			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
-			write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employee is already terminated; proceeding to next change event", crlf + crlf)
 			write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
 			write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employee: " + applicantFName$ + " " + applicantLName$, crlf)
 			write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: gmsTermsErrorCheck - employee is already terminated", crlf + crlf)
@@ -356,7 +341,6 @@ function gmsTermsErrorChk()
 			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error was encountered entering search criteria", crlf)
 			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error_msg: (" + err$ + ") msg: ", crlf)
 			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
-			write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
 			write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
 			write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employee: " + applicantFName$ + " " + applicantLName$, crlf)
 			write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: gmsTermsErrorCheck - src criteria error", crlf + crlf)
@@ -491,27 +475,22 @@ function gmsAddLegalStatusChk()
 	local r, s
 
 	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": checking gms connect & legal shield for triggering values", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status of gms connect column: (" + gmsStatus$ + ")", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status of legal shield column: (" + gmsLegalShield$ + ")", crlf)
 
 	r = instr(gmsStatus$, "Active")
 	s = instr(gmsStatus$, "I-9 ready for review")
 
-	if r = 0 and s = 0 then
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": statuses not set for deduction entry", crlf)
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status of gms connect column: (" + gmsStatus$ + ")", crlf)
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status of legal shield column: (" + gmsLegalShield$ + ")", crlf)
+	if gmsLegalShield$ = "-1" then
+		if instr(gmsStatus$, "Active") <> 0 or instr(gmsStatus$, "I-9 ready for review") <> 0 then
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": values are set to trigger workflow", crlf)
+			gmsAddLegalStatusChk = 0
+			exitfunction
+		endif
+	else
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status values are not set to trigger workflow", crlf)
 		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
-		write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status not set for deduction entry; proceeding to next change event", crlf + crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employee: " + applicantFName$ + " " + applicantLName$, crlf)
-		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: gmsAddLegalStatusChk - non-triggering value", crlf + crlf)
 		gmsAddLegalStatusChk = 1
-		exitfunction
-	endif
-
-
-	if instr(gmsStatus$, "Active") <> 0 or instr(gmsStatus$, "I-9 ready for review") <> 0 and gmsLegalShield$ = "-1" then
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": values are set to trigger workflow", crlf)
-		gmsAddLegalStatusChk = 0
 		exitfunction
 	endif
 	
@@ -536,12 +515,7 @@ function gmsAddLegalLogStats()
 	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events detected:                    " + str$(iEventCnt), crlf)
 	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": events w/qualifying stages:                " + str$(iStageCnt), crlf)
 	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": deductions added:                          " + str$(iCompleted), crlf)
-	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf)
-	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events detected:                    " + str$(iEventCnt), crlf)
-	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": events w/qualifying stages:                " + str$(iStageCnt), crlf)
-	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": deductions added:                          " + str$(iCompleted), crlf)
 	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
-	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
 	write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
 	write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
 
@@ -564,20 +538,35 @@ endfunction
 '=============================================================================================================================================================*/
 function gmsSubmitFormLogStats()
 
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf)
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events detected:               " + str$(iEventCnt), crlf)
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events with 'On-board' stage:  " + str$(iOnboardCnt), crlf)
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": gms forms submitted:                  " + str$(iOnboardCompl), crlf)
-	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf)
-	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events detected:               " + str$(iEventCnt), crlf)
-	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events with 'On-board' stage:  " + str$(iOnboardCnt), crlf)
-	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": gms forms submitted:                  " + str$(iOnboardCompl), crlf)
-	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
-	write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
-	write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
-	write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events detected:            " + str$(iEventCnt), crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage matches detected:            " + str$(iStageCnt), crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Triggering change events:          " + str$(iTriggeredCnt), crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Stage/Status bypassed:             " + str$(iBypassedCnt), crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Applications closed:               " + str$(iCompletedCnt), crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ==================================== end workflow =======================================", crlf + crlf)
+
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf)
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf)
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events detected:            " + str$(iEventCnt), crlf)
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage matches detected:            " + str$(iStageCnt), crlf)
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Triggering change events:          " + str$(iTriggeredCnt), crlf)
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Stage/Status bypassed:             " + str$(iBypassedCnt), crlf)
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Applications closed:               " + str$(iCompletedCnt), crlf)
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ==================================== end workflow =======================================", crlf + crlf)
+    
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events detected:            " + str$(iEventCnt), crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage matches detected:            " + str$(iStageCnt), crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Triggering change events:          " + str$(iTriggeredCnt), crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Stage/Status bypassed:             " + str$(iBypassedCnt), crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Applications closed:               " + str$(iCompletedCnt), crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ==================================== end workflow =======================================", crlf + crlf)
 
 	gmsSubmitFormLogStats = 0
+	
 endfunction
 
 function gmsTermsFmtDates$()

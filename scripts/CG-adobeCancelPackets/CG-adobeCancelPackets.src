@@ -15,9 +15,7 @@
 '###############################################################################################################################################
 '##   													script prep																			  
 '###############################################################################################################################################
-include "C:\v-angels-automation\framework\CG-globalDimDeclarations\CG-globalDimDeclarations.src"
 include "C:\v-angels-automation\framework\CG-loadWorkflowData\CG-loadWorkflowData.src"
-include "C:\v-angels-automation\framework\CG-globalDataLoaders\CG-globalDataLoaders.src"
 include "C:\v-angels-automation\framework\CG-globalFunctions\CG-globalFunctions.src"
 include "C:\v-angels-automation\framework\CG-adobeFunctions\CG-adobeFunctions.src"
 include "c:\v-angels-automation\framework\CG-globalWinFunctions\CG-globalWinFunctions.src"
@@ -71,16 +69,14 @@ repeat
 
 		if adobeCancelStageChk() = 0 then
 			iStageCnt = iStageCnt + 1
-			logStageMatch()
 		else
-			logStageBypass()
+			iBypassedCnt = iBypassedCnt + 1
 			goto nextIteration
 		endif
 
 
 		'-------------------- get data values for current record from employment inquiry
 		adobeCancelGetData()
-		logDataValues()
 
 '-------------------------------------------------------------------------------------------------------------------------------- pre 1st pkt start workflow
 
@@ -173,6 +169,7 @@ repeat
 			goto firstInterviewCancel
 		else
 			iPreCompl = iPreCompl + 1
+			logWorkflowStepSuccess("pre 1st packet cancel workflow completed successfully")
 		endif
 
 
@@ -184,7 +181,11 @@ firstInterviewCancel:
 '-------------------------------------------------------------------------------------------------------------------------------- 1st int pkt start workflow
 
 		'-------------------- check packet status
-		if adobeCancelStatusChk("1st") = 1 then
+		n = adobeCancelStatusChk("1st") 
+		if n = 1 then
+			goto nextIteration
+		endif
+		if n = 2 then
 			goto secondInterviewCancel
 		endif
 
@@ -273,11 +274,20 @@ firstInterviewCancel:
 		endif
 
 
+		'-------------------- log message
+		if instr(curr_stage$, "1st") <> 0 then
+			logWorkflowSuccess("1st int packet cancel workflow completed successfully")
+		else
+			logWorkflowStepSuccess("1st int packet cancel workflow completed successfully")
+		endif
+		
+
 		closebrowser()
+
+'-------------------------------------------------------------------------------------------------------------------------------- 2nd int pkt start workflow
 
 secondInterviewCancel:
 
-'-------------------------------------------------------------------------------------------------------------------------------- 2nd int pkt start workflow
 
 		'-------------------- bypass if 1st interview
 		if instr(curr_stage$, "1st") <> 0 then
@@ -372,6 +382,7 @@ secondInterviewCancel:
 			goto nextIteration
 		else
 			iSecondCompl = iSecondCompl + 1
+			logWorkflowSuccess("workflow completed successfully; all eligible packets were cancelled")
 		endif
 
 

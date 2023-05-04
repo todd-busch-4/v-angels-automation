@@ -1,16 +1,12 @@
 '###############################################################################################################################################
 '## developer:				todd busch
 '##
-'## description:            processes change events in employment inquiry list. for rows with triggering stage/column status values it logs
-'##							into arcs and enters a new applicant and application and conducts the manual sams.gov search.
+'## description:            processes change events in employment inquiry list. for rows with triggering stage/column status values it performs
+'##							the appropriate appropriate action to move applicant out of the 'hiring decision' stage.
 '##
 '## run in:					firefox
 '##
-'## notes:                  if the applicant is already in arcs but has no applications it will enter a new application. if they have an app
-'##							in a 'not yet submitted' state it completes the application. if they have applications in any other state it will
-'##							look at the statuses and enter a new application unless one is found in a 'Submitted' state.
-'##							A screenshot is taken of the sams.gov search result that is placed in the visiting angels onedrive folder of the
-'##							localWinUser$ defined in cg-globalvariables.
+'## notes:                  none
 '##							
 '###############################################################################################################################################
 
@@ -29,10 +25,11 @@ include "C:\v-angels-automation\framework\CG-globalVariables\CG-globalVariables.
 include "C:\v-angels-automation\object-repos\arcs\arcsObjectRepository.src"
 
 
-currScript$ = "CG-arcsGetBackup"
+currScript$ = "CG-arcsEnterFPrintDate"
 
 
 #IgnoreErrors = 1
+
 
 '------------------------------------------------------------------------------------------------------------------------------  read in columns from employment inquiry doc
 if LoadWorkflowData(currScript$) = 1 then
@@ -44,7 +41,6 @@ endif
 '##   													script start																		  
 '###############################################################################################################################################
 logStartScript(currScript$)
-
 
 '------------------------------------------------------------------------------------------------------------------------------ begin iterating through change event column
 
@@ -69,31 +65,30 @@ repeat
 		curr_stage$ = arrCurrentStage$(i)
 
 
-		if arcsSubAppStageChk() = 0 then
+		if arcsEnterFPrintStageChk() = 0 then
 			iStageCnt = iStageCnt + 1
-			logStageMatch()			
 		else
-			logStageBypass()
+			iBypassedCnt = iBypassedCnt + 1
 			goto nextIteration
 		endif
 
+
 		'-------------------- get data values for current record
-		arcsGetBackupGetCurrData()
-		logDataValues()
+		arcsEnterFPrintGetCurrData()
 
 
 		'-------------------- verify ssn is formatted properly
 		applicantSSN$ = formatSSN$(applicantSSN$)
 
-
 '------------------------------------------------------------------------------------------------------------------------------ status check
 
-		'-------------------- verify background check is ready to be submitted
-		if arcsSubAppStatusChk() = 1 then
+		'-------------------- check status for trigger value
+		if arcsEnterFPrintStatusChk() <> 0 then
+			iBypassedCnt = iBypassedCnt + 1
 			goto nextIteration
+		else
+			iTriggeredCnt = iTriggeredCnt + 1
 		endif
-		iTriggeredCnt = iTriggeredCnt + 1
-
 
 '------------------------------------------------------------------------------------------------------------------------------  log in
 
@@ -138,7 +133,7 @@ repeat
 			goto nextIteration
 		endif
 
-'------------------------------------------------------------------------------------------------------------------------------ search for applicant
+'------------------------------------------------------------------------------------------------------------------------------ applicant search
 
 		'-------------------- navigate to person search page
 		if webNavigate(urlArcsPersonSrc$, "nav to person search") <> 0 then
@@ -180,7 +175,7 @@ repeat
             goto nextIteration
         endif
 
-'------------------------------------------------------------------------------------------------------------------------------ download pdf
+'------------------------------------------------------------------------------------------------------------------------------ enter fingerprint date
 
         '--------------------click the applications tab
         if webClickElement(tabArcsPersSummApps$, "clicking applications tab") <> 0 then
@@ -192,69 +187,65 @@ repeat
         endif
 
 
-        '-------------------- click final results link
-        if webClickElement(lnkArcsFinalResult$, "clicking final results link") <> 0 then
+		'-------------------- click link to open application
+		if webClickElement(lnkArcsSubmittedApp$, "clicking app status link") <> 0 then
+            goto nextIteration
+        endif
+        pause 2
+		if webValidateElement(btnArcsCloseNoHire$, "close button", "clicking app status link") <> 1 then
+			goto nextIteration
+		endif
+
+
+        '-------------------- click enter fingerprint info button
+        if webClickElement(btnArcsEnterFingerPrint$, "clicking enter fingerprint info button") <> 0 then
+            goto nextIteration
+        endif
+        pause 2
+        if webValidateElement(inputArcsFPrintDate$, "fingerprint date input field", "clicking enter fingerprint info button") <> 1 then
+            goto nextIteration
+        endif
+
+
+        '-------------------- get date to use
+        fPrintDate$ = arcsGetFPrintDate$()
+        if fPrintDate$ = "1" then
+            closebrowser()
+            goto nextIteration
+        endif
+        
+
+        '-------------------- enter date
+        if webPasteText(inputArcsFPrintDate$, fPrintDate$, "entering fingerprint date") <> 0 then
             goto nextIteration
         endif
         pause 2
 
 
-        '-------------------- click download button
-        usewindow(wndFireFoxFinalResultsPDF$, 1)
-        winMouseLeftClick(1800, 100, "clicking download button")
+        '-------------------- click save
+        if webClickElement(btnArcsSave$, "clicking save button") <> 0 then
+            goto nextIteration
+        endif
         pause 2
+        if webValidateElement(btnArcsHireProv$, "hire provisionally button", "clicking save button") <> 1 then
+            goto nextIteration
+        endif
 
 
-        '-------------------- name file
-        UseWindow(wndFireFoxSaveAs$, 1)
-    	WriteCombo("1", applicantFName$ + " " + applicantLName$)
-
-
-        '-------------------- save file
-        UseWindow(wndFireFoxSaveAsBtn$, 1)
-	    click(button, "&Save")
-		pause 3
-
-
-		'-------------------- check for overwrite
-		n = existw(wndFireFoxSaveAsConfirm$, 1)
-
-		if n = 1 then
-			usewindow(wndFireFoxOverwriteConfirm$, 1)
-			click(button,"&Yes")
-		endif
-		
-'------------------------------------------------------------------------------------------------------------------------------ move docs to onedrive
-
-		'-------------------- shorten name/path for aesthetic purposes
-		sDocName$ = applicantFName$ + " " + applicantLName$
-
-
-		'-------------------- move screenshot
-		copyFile(localWinUser$ + "downloads\" + sDocName$ + ".bmp", bgBackupPath$ + sDocName$ + ".bmp")
-
-
-		'-------------------- move pdf
-		copyFile(localWinUser$ + "downloads\" + sDocName$ + ".pdf", bgBackupPath$ + sDocName$ + ".pdf")
-		
-		
+        '-------------------- log message
         closebrowser()
-
-        usePage(pgArcsPersSummary$)
-        closebrowser()
-
-		logWorkflowSuccess("workflow completed, pdf successfully downloaded")
-
-        iCompleted = iCompleted + 1
-
-    endif
+        logWorkflowSuccess("workflow completed; fingerprint date entered successfully")
+        iCompletedCnt = iCompletedCnt + 1
 
 
+	endif
+	
+	
 nextIteration:
 
 
 i = i + 1
-
+	
 
 until i = 5000	'iterate through all rows in array
 
@@ -262,7 +253,4 @@ until i = 5000	'iterate through all rows in array
 '##   													script end
 '###############################################################################################################################################
 
-arcsGetBackupLogStats()
-
-
-
+arcsEnterFPrintLogStats()

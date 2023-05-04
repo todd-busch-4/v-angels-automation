@@ -5,11 +5,11 @@
 ##
 #############################################################################################################################################################*/
 
+Dim arrApplicantID$(5000)
 Dim arrApplicantEmail$(5000)
 Dim arrApplicantFName$(5000)
 Dim arrApplicantLName$(5000)
 Dim arrApplicantPhone$(5000)
-Dim arrApplicantID$(5000)
 Dim arrApplicant1stApp$(5000)
 Dim arrAdobePcktStatus$(5000)
 Dim arrCurrentStage$(5000)
@@ -38,3 +38,7 @@ Dim arrApplicantYrFrom$(5000)
 Dim arrApplicantYrTo$(5000)
 Dim arrTermedLOADate$(5000)
 Dim arrLegalShield$(5000)
+Dim arr2ndApptTime$(5000)
+Dim arrResched2ndApptTime$(5000)
+Dim arrIntroApptTime$(5000)
+Dim tablearr$(50)

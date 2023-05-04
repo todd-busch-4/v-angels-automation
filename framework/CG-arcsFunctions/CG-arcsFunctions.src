@@ -22,7 +22,7 @@
 '===============================================================================================================================================================
 function arcsSubAppStageChk()
 
-    if curr_stage$ = "2nd Interview" or curr_stage$ = "2nd Interview Rescheduled" or curr_stage$ = "On-board" then
+    if curr_stage$ = "2nd Interview" or curr_stage$ = "2nd Interview Rescheduled" or curr_stage$ = "On-board" or curr_stage$ = "On-board INTRO" or curr_stage$ = "Active Employee" or curr_stage$ = "Active INTRO" then
         arcsSubAppStageChk = 0
         exitfunction
     else
@@ -59,7 +59,6 @@ function arcsSubAppStatusChk()
     if instr(backGroundChk$, "Needs Reviewed") = 0 then
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": column status [" + backGroundChk$ + "] does not match a trigger value for the workflow", crlf)
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
-        write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ":  app not ready for submission; proceeding to next change event", crlf + crlf)
         write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
         write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
         write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: arcsSubAppStatusChk failed", crlf + crlf)
@@ -82,13 +81,12 @@ endfunction
     '==
     '== notes:                  none
     '==
-'===============================================================================================================================================================
+'==========================
 function arcsSubAppReqDataChk()
 
     if applicantFName$ = "" or applicantFName$ = "[]" then
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employment inquiry list did not include required data element [first name]", crlf)
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
-        write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": required data missing; proceeding to next change event", crlf + crlf)
 		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: [" + applicantID$ + "]", crlf)
 		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: [" + applicantFName$ + " " + applicantLName$ + "]", crlf)
 		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: result: arcsSubAppReqDataChk failed [fname]", crlf + crlf)
@@ -98,7 +96,6 @@ function arcsSubAppReqDataChk()
     if applicantLName$ = "" or applicantLName$ = "[]" then
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employment inquiry list did not include required data element [last name]", crlf)
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
-        write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": required data missing; proceeding to next change event", crlf + crlf)
 		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: [" + applicantID$ + "]", crlf)
 		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: [" + applicantFName$ + " " + applicantLName$ + "]", crlf)
 		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: arcsSubAppReqDataChk failed [lname]", crlf + crlf)
@@ -108,7 +105,6 @@ function arcsSubAppReqDataChk()
     if applicantSSN$ = "" or applicantSSN$ = "[]" then
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employment inquiry list did not include required data element [ssn]", crlf)
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
-        write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": required data missing; proceeding to next change event", crlf + crlf)
 		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: [" + applicantID$ + "]", crlf)
 		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: [" + applicantFName$ + " " + applicantLName$ + "]", crlf)
 		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: arcsSubAppReqDataChk failed [ssn]", crlf + crlf)
@@ -118,7 +114,6 @@ function arcsSubAppReqDataChk()
     if applicantBDay$ = "" or applicantBDay$ = "[]" then
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employment inquiry list did not include required data element [dob]", crlf)
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
-        write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": required data missing; proceeding to next change event", crlf + crlf)
 		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: [" + applicantID$ + "]", crlf)
 		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: [" + applicantFName$ + " " + applicantLName$ + "]", crlf)
 		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: arcsSubAppReqDataChk failed [bday]", crlf + crlf)
@@ -128,7 +123,6 @@ function arcsSubAppReqDataChk()
     if applicantAddr1$ = "" or applicantAddr1$ = "[]" then
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employment inquiry list did not include required data element [address line 1]", crlf)
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
-        write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": required data missing; proceeding to next change event", crlf + crlf)
 		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: [" + applicantID$ + "]", crlf)
 		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: [" + applicantFName$ + " " + applicantLName$ + "]", crlf)
 		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: arcsSubAppReqDataChk failed [addr1]", crlf + crlf)
@@ -138,7 +132,6 @@ function arcsSubAppReqDataChk()
     if applicantCity$ = "" or applicantCity$ = "[]" then
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employment inquiry list did not include required data element [city]", crlf)
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
-        write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": required data missing; proceeding to next change event", crlf + crlf)
 		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: [" + applicantID$ + "]", crlf)
 		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: [" + applicantFName$ + " " + applicantLName$ + "]", crlf)
 		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: arcsSubAppReqDataChk failed [city]", crlf + crlf)
@@ -148,7 +141,6 @@ function arcsSubAppReqDataChk()
     if applicantState$ = "" or applicantState$ = "[]" then
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employment inquiry list did not include required data element [state]", crlf)
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
-        write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": required data missing; proceeding to next change event", crlf + crlf)
 		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: [" + applicantID$ + "]", crlf)
 		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: [" + applicantFName$ + " " + applicantLName$ + "]", crlf)
 		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: arcsSubAppReqDataChk failed [state]", crlf + crlf)
@@ -158,7 +150,6 @@ function arcsSubAppReqDataChk()
     if applicantZip$ = "" or applicantZip$ = "[]" then
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": employment inquiry list did not include required data element [zip]", crlf)
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
-        write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": required data missing; proceeding to next change event", crlf + crlf)
 		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: [" + applicantID$ + "]", crlf)
 		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: [" + applicantFName$ + " " + applicantLName$ + "]", crlf)
 		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: arcsSubAppReqDataChk failed [zip]", crlf + crlf)
@@ -253,7 +244,6 @@ function arcsSubAppExistAppChk()
     if instr(var$, "This individual was not found in ARCS") = 0 then
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant already exists in the ARCS database", crlf)
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
-        write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": existing applicant; proceeding to next change event", crlf + crlf)
         write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: [" + applicantID$ + "]", crlf)
         write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: [" + applicantFName$ + " " + applicantLName$ + "]", crlf)
  	    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: applicant exists in arcs database", crlf + crlf)
@@ -332,7 +322,7 @@ function arcsSubAppSamsChk()
     write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": checking result of sams.gov search", crlf)
 
     if r = 1 then
-        HardCopy(localWinUser$ + "Downloads\" + applicantFName$ + applicantLName$ + ".bmp", 1, 0)
+        HardCopy(localWinUser$ + "Downloads\" + applicantFName$ + " " + applicantLName$ + ".bmp", 1, 0)
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": search returned no results for applicant", crlf)
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": setting registry result to 'cleared'", crlf)
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": screenshot saved to downloads folder", crlf)
@@ -344,7 +334,6 @@ function arcsSubAppSamsChk()
     if r <> 1 then
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result was returned for sams.gov search", crlf)
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
-        write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow failed; proceeding to next change event", crlf + crlf)
         write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: [" + applicantID$ + "]", crlf)
         write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: [" + applicantFName$ + " " + applicantLName$ + "]", crlf)
         write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": result: arcsSubAppSamsChk - result found for sams.gov", crlf + crlf)
@@ -376,14 +365,6 @@ function arcsSubAppLogStats()
     write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage matches detected:            " + str$(iStageCnt), crlf)
     write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Triggering Status Values:          " + str$(iTriggeredCnt), crlf)
     write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Applications Submitted:            " + str$(iCompleted), crlf)
-    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf)
-    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf)
-    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events detected:            " + str$(iEventCnt), crlf)
-    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage matches detected:            " + str$(iStageCnt), crlf)
-    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Triggering Status Values:          " + str$(iTriggeredCnt), crlf)
-    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Applications Submitted:            " + str$(iCompleted), crlf)
-    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ==================================== end workflow =======================================", crlf + crlf)
-    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ==================================== end workflow =======================================", crlf + crlf)
     write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ==================================== end workflow =======================================", crlf + crlf)
     write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ==================================== end workflow =======================================", crlf + crlf)
     arcsSubAppLogStats = 0
@@ -652,19 +633,316 @@ endfunction
 function arcsGetBackupLogStats()
     write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf)
     write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events found:            " + str$(iEventCnt), crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": events w/stage matches:         " + str$(iStageCnt), crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": events w/status triggers:       " + str$(iTriggeredCnt), crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": pdf's downloaded:               " + str$(iCompleted), crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ==================================== end workflow =======================================", crlf + crlf)
+
+    write(scanFailurePsath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf)
+    write(scanFailurePsath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf)
+    write(scanFailurePsath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events found:            " + str$(iEventCnt), crlf)
+    write(scanFailurePsath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": events w/stage matches:         " + str$(iStageCnt), crlf)
+    write(scanFailurePsath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": events w/status triggers:       " + str$(iTriggeredCnt), crlf)
+    write(scanFailurePsath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": pdf's downloaded:               " + str$(iCompleted), crlf)
+    write(scanFailurePsath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ==================================== end workflow =======================================", crlf + crlf)
+    
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events found:            " + str$(iEventCnt), crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": events w/stage matches:         " + str$(iStageCnt), crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": events w/status triggers:       " + str$(iTriggeredCnt), crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": pdf's downloaded:               " + str$(iCompleted), crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ==================================== end workflow =======================================", crlf + crlf)
+
+    arcsGetBackupLogStats = 0
+
+endfunction
+
+'===============================================================================================================================================================
+'== function name:              arcsCloseAppStageChk
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                checks the stage column of current row for triggering values
+    '==
+    '== input parms:            none
+    '==
+    '== returns:                int:    0 - success/match
+    '==                                 1 - failure/no match
+    '==
+    '== notes:                  none
+    '==
+'===============================================================================================================================================================
+function arcsCloseAppStageChk()
+
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": checking stage for triggering value", crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage: [" + curr_stage$ + "]", crlf)
+
+    if curr_stage$ = "Onboard Incomplete/Cancelled" or curr_stage$ = "2nd Interview Cancelled" or curr_stage$ = "2nd Interview NCNS" then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage value does trigger the wrokflow", crlf)
+        arcsCloseAppStageChk = 0
+        exitfunction
+    else
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage value does not trigger workflow", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+        arcsCloseAppStageChk = 1
+        exitfunction
+    endif
+
+endfunction
+
+'=============================================================================================================================================================
+'== function name:              arcsCloseAppStatusChk
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                terseDescription
+    '==
+    '== input parms:            none
+    '==
+    '== returns:                int:    0 - success
+    '==                                 1 - failure
+    '==
+    '== notes:                  none
+    '==
+'===============================================================================================================================================================
+function arcsCloseAppStatusChk()
+
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": checking background check for a triggering value", crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": bg check: [" + backGroundChk$ + "]", crlf)
+
+    if instr(backGroundChk$, "Canceled") = 0 and instr(background$, "Sent") = 0 and instr(background$, "Needs Reviewed") = 0 then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status does not trigger this workflow", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+        arcsCloseAppStatusChk = 1
+        exitfunction
+    endif
+
+    if instr(backGroundChk$, "Canceled") <> 0 or instr(background$, "Sent") <> 0 or instr(background$, "Needs Reviewed") <> 0 then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status does trigger the close w/o hiring workflow", crlf)
+        arcsCloseAppStatusChk = 0
+        exitfunction
+    endif
+
+endfunction
+
+'=============================================================================================================================================================
+'== function name:              arcsCloseAppLogStats
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                terseDescription
+    '==
+    '== input parms:            none
+    '==
+    '== returns:                int:    0 - success
+    '==                                 1 - failure
+    '==
+    '== notes:                  none
+    '==
+'===============================================================================================================================================================
+function arcsCloseAppLogStats()
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf)
     write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events detected:            " + str$(iEventCnt), crlf)
     write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage matches detected:            " + str$(iStageCnt), crlf)
-    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Triggering Status Values:          " + str$(iTriggeredCnt), crlf)
-    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Applications Submitted:            " + str$(iCompleted), crlf)
-    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf)
-    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf)
-    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events detected:            " + str$(iEventCnt), crlf)
-    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage matches detected:            " + str$(iStageCnt), crlf)
-    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Triggering Status Values:          " + str$(iTriggeredCnt), crlf)
-    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Applications Submitted:            " + str$(iCompleted), crlf)
-    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ==================================== end workflow =======================================", crlf + crlf)
-    write(executionLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ==================================== end workflow =======================================", crlf + crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Triggering change events:          " + str$(iTriggeredCnt), crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Stage/Status bypassed:             " + str$(iBypassedCnt), crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Applications closed:               " + str$(iCompletedCnt), crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ==================================== end workflow =======================================", crlf + crlf)
+
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf)
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf)
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events detected:            " + str$(iEventCnt), crlf)
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage matches detected:            " + str$(iStageCnt), crlf)
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Triggering change events:          " + str$(iTriggeredCnt), crlf)
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Stage/Status bypassed:             " + str$(iBypassedCnt), crlf)
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Applications closed:               " + str$(iCompletedCnt), crlf)
     write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ==================================== end workflow =======================================", crlf + crlf)
+    
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events detected:            " + str$(iEventCnt), crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage matches detected:            " + str$(iStageCnt), crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Triggering change events:          " + str$(iTriggeredCnt), crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Stage/Status bypassed:             " + str$(iBypassedCnt), crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Applications closed:               " + str$(iCompletedCnt), crlf)
     write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ==================================== end workflow =======================================", crlf + crlf)
-    arcsGetBackupLogStats = 0
+
+    arcsCloseAppLogStats = 0
+
+endfunction
+
+'===============================================================================================================================================================
+'== function name:              arcsEnterFPrintStageChk
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                checks the stage column of current row for triggering values
+    '==
+    '== input parms:            none
+    '==
+    '== returns:                int:    0 - success/match
+    '==                                 1 - failure/no match
+    '==
+    '== notes:                  none
+    '==
+'===============================================================================================================================================================
+function arcsEnterFPrintStageChk()
+
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": checking stage for triggering value", crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage: [" + curr_stage$ + "]", crlf)
+
+    if curr_stage$ = "On-board" or curr_stage$ = "On-board INTRO" then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage value does trigger the wrokflow", crlf)
+        arcsEnterFPrintStageChk = 0
+        exitfunction
+    else
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage value does not trigger workflow", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+        arcsEnterFPrintStageChk = 1
+        exitfunction
+    endif
+
+endfunction
+
+'=============================================================================================================================================================
+'== function name:              arcsEnterFPrintStatusChk
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                terseDescription
+    '==
+    '== input parms:            none
+    '==
+    '== returns:                int:    0 - success
+    '==                                 1 - failure
+    '==
+    '== notes:                  none
+    '==
+'===============================================================================================================================================================
+function arcsEnterFPrintStatusChk()
+
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": checking background check for a triggering value", crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": bg check: [" + backGroundChk$ + "]", crlf)
+
+    if instr(backGroundChk$, "Sent") = 0 and instr(background$, "Free Check ARCS") = 0 then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status does not trigger this workflow", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+        arcsEnterFPrintStatusChk = 1
+        exitfunction
+    endif
+
+    if instr(backGroundChk$, "Sent") <> 0 or instr(background$, "Free Check ARCS") <> 0 then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status does trigger the enter fingerprint date workflow", crlf)
+        arcsEnterFPrintStatusChk = 0
+        exitfunction
+    endif
+
+endfunction
+
+'=============================================================================================================================================================
+'== function name:              arcsGetFPrintDate
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                terseDescription
+    '==
+    '== input parms:            none
+    '==
+    '== returns:                int:    0 - success
+    '==                                 1 - failure
+    '==
+    '== notes:                  none
+    '==
+'===============================================================================================================================================================
+function arcsGetFPrintDate$()
+
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": call to: arcsGetFPrintDate$", crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": calculating fingerprint date to use", crlf)
+
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": 2nd appt datetime: [" + secApptTime$ + "]", crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": rescheduled 2nd appt datetime: [" + Resched2ndApptTime$ + "]", crlf)
+
+    'make sure at least one date
+    if secApptTime$ = "" then
+        if Resched2ndApptTime$ = "" then
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error: 2nd appt and rescheduled 2nd appt columns are null", crlf)
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": there is no date to use", crlf)
+            write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+            arcsGetFPrintDate$ = "1"
+            exitfunction
+        endif
+    endif
+
+    'reformat column value to just date
+    secApptDate$ = fmtDateTimeToDate$(secApptTime$)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": formatted 2nd date: [" + secApptDate$ + "]", crlf)
+
+    'if no rescheduled date then 2nd appt is date to use
+    if Resched2ndApptTime$ = "" then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": there is no rescheduled 2nd appt date", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": fingerprint date set to 2nd appt date", crlf)
+        arcsGetFPrintDate$ = secApptDate$
+        exitfunction
+    endif
+
+    'if there is rescheduled 2nd date it will be later than 2nd appt so use that date
+    if Resched2ndApptTime$ <> "" then
+        secReschedApptDate$ = fmtDateTimeToDate$(Resched2ndApptTime$)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": formatted rescheduled 2nd date: [" + secReschedApptDate$ + "]", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": rescheduled appt date is later than 2nd appt date", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": fingerprint date set to rescheduled 2nd appt date", crlf)
+        arcsGetFPrintDate$ = secReschedApptDate$
+        exitfunction
+    endif
+
+endfunction
+
+'=============================================================================================================================================================
+'== function name:              arcsEnterFPrintLogStats
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                terseDescription
+    '==
+    '== input parms:            none
+    '==
+    '== returns:                int:    0 - success
+    '==                                 1 - failure
+    '==
+    '== notes:                  none
+    '==
+'===============================================================================================================================================================
+function arcsEnterFPrintLogStats()
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events detected:            " + str$(iEventCnt), crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage matches detected:            " + str$(iStageCnt), crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflows triggered:               " + str$(iTriggeredCnt), crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage/status bypassed:             " + str$(iBypassedCnt), crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": fingerprint dates added:           " + str$(iCompletedCnt), crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ==================================== end workflow =======================================", crlf + crlf)
+
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf)
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf)
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events detected:            " + str$(iEventCnt), crlf)
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage matches detected:            " + str$(iStageCnt), crlf)
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflows triggered:               " + str$(iTriggeredCnt), crlf)
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage/status bypassed:             " + str$(iBypassedCnt), crlf)
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": fingerprint dates added:           " + str$(iCompletedCnt), crlf)
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ==================================== end workflow =======================================", crlf + crlf)
+    
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events detected:            " + str$(iEventCnt), crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage matches detected:            " + str$(iStageCnt), crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflows triggered:               " + str$(iTriggeredCnt), crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage/status bypassed:             " + str$(iBypassedCnt), crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": fingerprint dates added:           " + str$(iCompletedCnt), crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ==================================== end workflow =======================================", crlf + crlf)
+
+    arcsEnterFPrintLogStats = 0
+
 endfunction
