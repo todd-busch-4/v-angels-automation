@@ -1,0 +1,327 @@
+'###############################################################################################################################################
+'## developer:				todd busch
+'##
+'## description:            processes change events in employment inquiry list. for rows with triggering stage/column status values it performs
+'##							the appropriate appropriate action to move applicant out of the 'hiring decision' stage (hire permanently)
+'##
+'## run in:					firefox
+'##
+'## notes:                  none
+'##							
+'###############################################################################################################################################
+
+'###############################################################################################################################################
+'##   													script prep																			  
+'###############################################################################################################################################
+include "C:\v-angels-automation\framework\CG-loadWorkflowData\CG-loadWorkflowData.src"
+include "C:\v-angels-automation\framework\CG-globalFunctions\CG-globalFunctions.src"
+include "C:\v-angels-automation\framework\CG-arcsFunctions\CG-arcsFunctions.src"
+include "c:\v-angels-automation\framework\CG-globalWinFunctions\CG-globalWinFunctions.src"
+include "c:\v-angels-automation\framework\CG-globalWebFunctions\CG-globalWebFunctions.src"
+include "c:\v-angels-automation\framework\CG-globalWebValidations\CG-globalWebValidations.src"
+include "C:\v-angels-automation\framework\CG-globalLogging\CG-globalLogging.src"
+include "C:\v-angels-automation\framework\CG-globalSubDefinitions\CG-globalSubDefinitions.src"
+include "C:\v-angels-automation\framework\CG-globalVariables\CG-globalVariables.src"
+include "C:\v-angels-automation\object-repos\arcs\arcsObjectRepository.src"
+
+
+currScript$ = "CG-arcsHirePerm"
+
+
+#IgnoreErrors = 1
+
+
+'------------------------------------------------------------------------------------------------------------------------------  read in columns from employment inquiry doc
+if LoadWorkflowData(currScript$) = 1 then
+	criticalStop()
+endif
+
+
+'###############################################################################################################################################
+'##   													script start																		  
+'###############################################################################################################################################
+logStartScript("hire provisionally")
+
+'------------------------------------------------------------------------------------------------------------------------------ begin iterating through change event column
+
+i = 0
+
+
+repeat
+
+
+	'-------------------- get change status of current row
+	curr_status$ = arrChangeEvents$(i)
+
+
+	if curr_status$ = "Yes" then
+		iEventCnt = iEventCnt + 1
+		iExcelRow = i + 2
+		logEventFound()
+    else
+        goto nextIteration
+    endif
+
+'------------------------------------------------------------------------------------------------------------------------------ stage check
+
+    '-------------------- get stage for current change event
+    curr_stage$ = arrCurrentStage$(i)
+
+
+    if arcsHirePermStageChk() = 0 then
+        iStageCnt = iStageCnt + 1
+    else
+        iBypassedCnt = iBypassedCnt + 1
+        goto nextIteration
+    endif
+
+
+	'-------------------- get data values for current record
+	arcsHirePermGetData()
+
+
+    	'-------------------- verify ssn is formatted properly
+	applicantSSN$ = formatSSN$(applicantSSN$)
+
+
+    '-------------------- verify hire date was set and format
+    if nullDataElementChk("introApptTime$") = 1 then
+        closebrowser()
+        goto nextIteration
+    endif
+    introApptTime$ = fmtDateTimeToDate$(introApptTime$)
+
+
+'------------------------------------------------------------------------------------------------------------------------------ status check
+
+	'-------------------- check status for trigger value
+	if arcsHirePermStatusChk() <> 0 then
+		iBypassedCnt = iBypassedCnt + 1
+		goto nextIteration
+	else
+		iTriggeredCnt = iTriggeredCnt + 1
+	endif
+
+
+'------------------------------------------------------------------------------------------------------------------------------  log in
+
+	'-------------------- invoke browser
+	if webInvokeBrowser("FF", arcsURL$) = 1 then
+		nextScript()
+		goto nextIteration
+	endif
+
+
+	'-------------------- enter username
+	usepage(pgArcsLogin$)
+	if webEnterText(inputArcsUsername$, arcsUsername$, "entering username") <> 0 then
+		goto nextIteration
+	endif
+	if webValidateText(inputArcsUsername$, arcsUsername$, "entering username") <> 0 then
+		goto nextIteration
+	endif
+
+			
+	'-------------------- enter password
+	if webEnterText(inputArcsPassword$, arcsPassword$, "entering password") <> 0 then
+		goto nextIteration
+	endif
+	if webValidateText(inputArcsPassword$, arcsPassword$, "entering password") <> 0 then
+		goto nextIteration
+	endif
+
+			
+	'-------------------- click login button
+	if webClickElement(btnArcsLogin$, "clicking login") <> 0 then
+		goto nextIteration
+	endif
+	if webValidateElement(imgARCSLogo$, "arcs logo", "clicking login") <> 1 then
+		goto nextIteration
+	endif
+	pause 3
+
+	'-------------------- accept end user agreement if presented
+	if arcsSubAppAcceptUsrAgree() <> 0 then
+		nextScript()
+		goto nextIteration
+	endif
+
+'------------------------------------------------------------------------------------------------------------------------------ applicant search
+
+	'-------------------- navigate to person search page
+	if webNavigate(urlArcsPersonSrc$, "nav to person search") <> 0 then
+		goto nextIteration
+	endif
+	pause 2
+	if webValidateCurrPage(pgArcsPersonSrc$, "nav to person search") <> 0 then
+		goto nextIteration
+	endif
+
+
+	'-------------------- enter ssn
+	usepage(pgArcsPersonSrc$)
+	if webPasteText(inputArcsSSN$, applicantSSN$, "entering ssn") <> 0 then
+		goto nextIteration
+	endif
+	pause 2
+	if webValidateText(inputArcsSSN$, applicantSSN$, "entering ssn") <> 0 then
+		goto nextIteration
+	endif
+
+
+	'-------------------- enter last name
+	if webPasteText(inputArcsLName$, applicantLName$, "entering last name") <> 0 then
+		goto nextIteration
+	endif
+	pause 2
+	if webValidateText(inputArcsLName$, applicantLName$, "entering last name") <> 0 then
+		goto nextIteration
+	endif
+
+
+	'-------------------- click search button
+	if webClickElement(btnArcsSearch$, "clicking search button") <> 0 then
+		goto nextIteration
+	endif
+	pause 2
+	if webValidateCurrPage(pgArcsPersSummary$, "clicking search button") <> 0 then
+		goto nextIteration
+	endif
+
+'------------------------------------------------------------------------------------------------------------------------------ process hire
+
+	'--------------------click the employment tab
+	if webClickElement(tabArcsPersSummEmpl$, "clicking employment tab") <> 0 then
+		goto nextIteration
+	endif
+	pause 2
+
+
+	'-------------------- check if provisionally hired
+	if existhtmlelement(btnArcsEmplEdit$) <> 1 then
+		goto newHire
+	endif
+
+'------------------------------------------------------------------------------------------------------------------------------ provisional employee
+
+    '-------------------- click edit button
+    if webClickElement(btnArcsEmplEdit$, "clicking edit") <> 0 then
+        goto nextIteration
+    endif
+    pause 2
+    if webValidateElement(inputArcsEmplPermHireDate$, "perm hire date field", "clicking edit") <> 1 then
+        goto nextIteration
+    endif
+
+
+    '-------------------- select permanent
+    if webSelectItem(selArcsEmplStatus$, "permanent", "select status") <> 0 then
+        goto nextIteration
+    endif
+    pause 2
+    if webValidateText(selArcsEmplStatus$, "2", "select status") <> 0 then
+        goto nextIteration
+    endif
+
+
+	'-------------------- enter hire date
+	if webPasteText(inputArcsEmplPermHireDate$, introApptTime$, "entering hire date") <> 0 then
+		goto nextIteration
+	endif
+	pause 2
+
+
+    '-------------------- click save
+	usewindow(wndArcsPersSummary$, 1)
+	movemouse(560, 690, absolute)
+	clickmouse(left, double, 560, 690, absolute)
+    pause 2
+
+
+    logWorkflowSuccess("workflow completed; applicant set to permanent employee successfully")
+    iCompletedCnt = iCompletedCnt + 1
+    closebrowser()
+
+
+	'-------------------- this ends the workflow for this row
+	goto nextIteration
+
+'------------------------------------------------------------------------------------------------------------------------------ new hire
+
+newHire:
+
+	'--------------------click the applications tab
+	usepage(pgArcsPersSummary$)
+	if webClickElement(tabArcsPersSummApps$, "clicking applications tab") <> 0 then
+		goto nextIteration
+	endif
+	pause 2
+	if webValidateElement(lnkArcsFinalResult$, "final results link", "clicking applications tab") <> 1 then
+		goto nextIteration
+	endif
+
+
+	'-------------------- click link to open application
+	if webClickElement(lnkArcsSubmittedApp$, "clicking app status link") <> 0 then
+		goto nextIteration
+	endif
+	pause 5
+	if webValidateElement(btnArcsCloseNoHire$, "close button", "clicking app status link") <> 1 then
+		goto nextIteration
+	endif
+
+
+    '-------------------- click hire permanent button
+    if webClickElement(btnArcsHirePerm$, "clicking hire permanent") <> 0 then
+        goto nextIteration
+    endif
+    pause 2
+	if webValidateElement(selArcsEmplStatus$, "employ status dropdown", "clicking hire permanent") <> 1 then
+		goto nextIteration
+	endif
+
+
+
+    '-------------------- select permanent
+    if webSelectItem(selArcsEmplStatus$, "permanent", "select status") <> 0 then
+        goto nextIteration
+    endif
+    pause 2
+    if webValidateText(selArcsEmplStatus$, "2", "select status") <> 0 then
+        goto nextIteration
+    endif
+
+
+	'-------------------- enter hire date
+	if webPasteText(inputArcsEmplPermHireDate$, introApptTime$, "entering hire date") <> 0 then
+		goto nextIteration
+	endif
+	pause 2
+
+
+    '-------------------- click save
+	usewindow(wndArcsPersSummary$, 1)
+	movemouse(560, 690, absolute)
+	clickmouse(left, double, 560, 690, absolute)
+    pause 2
+
+
+    logWorkflowSuccess("workflow completed; applicant set to permanent employee successfully")
+    iCompletedCnt = iCompletedCnt + 1
+    closebrowser()
+
+
+nextIteration:
+
+
+i = i + 1
+	
+
+until i = 5000	'iterate through all rows in array
+
+
+'###############################################################################################################################################
+'##   													script end
+'###############################################################################################################################################
+
+arcsHirePermLogStats()

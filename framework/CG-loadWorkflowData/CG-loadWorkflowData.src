@@ -46,6 +46,7 @@ Dim arrIntroApptTime$(5000)
 Dim tablearr$(50)
 
 
+
 function LoadWorkflowData(str_script$)
 	local str_script$, cnt, r
 '--------------------------------------------------------------------------------------------- load global elements
@@ -484,11 +485,126 @@ function LoadWorkflowData(str_script$)
 		endif
 
 	endif
+'--------------------------------------------------------------------------------------------- load arcsHireProv elements
+	if str_script$ = "CG-arcsHireProv" then
 
+		'-------------------- ssn
+		r = readexcel (employmentInquiryPath$, wsSSNCol$, arrApplicantSSN$())
+		if instr(str$(r), "-") <> 0 then
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading ssn column.  error_code: [" + str$(r) + "]", crlf)
+			LoadWorkflowData = 1
+			exitfunction
+		endif
+		'-------------------- background check
+		r = readexcel (employmentInquiryPath$, wsBackGroundChkCol$, arrBackGroundChk$())
+		if instr(str$(r), "-") <> 0 then
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading background check column.  error_code: [" + str$(r) + "]", crlf)
+			LoadWorkflowData = 1
+			exitfunction
+		endif
+		'-------------------- intro date
+		r = readexcel (employmentInquiryPath$, wsIntroApptTimeCol$, arrIntroApptTime$())
+		if instr(str$(r), "-") <> 0 then
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading intro appt date column.  error_code: [" + str$(r) + "]", crlf)
+			LoadWorkflowData = 1
+			exitfunction
+		endif
+
+	endif
+'--------------------------------------------------------------------------------------------- load arcsHirePerm elements
+	if str_script$ = "CG-arcsHirePerm" then
+
+		'-------------------- ssn
+		r = readexcel (employmentInquiryPath$, wsSSNCol$, arrApplicantSSN$())
+		if instr(str$(r), "-") <> 0 then
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading ssn column.  error_code: [" + str$(r) + "]", crlf)
+			LoadWorkflowData = 1
+			exitfunction
+		endif
+		'-------------------- background check
+		r = readexcel (employmentInquiryPath$, wsBackGroundChkCol$, arrBackGroundChk$())
+		if instr(str$(r), "-") <> 0 then
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading background check column.  error_code: [" + str$(r) + "]", crlf)
+			LoadWorkflowData = 1
+			exitfunction
+		endif
+		'-------------------- intro date
+		r = readexcel (employmentInquiryPath$, wsIntroApptTimeCol$, arrIntroApptTime$())
+		if instr(str$(r), "-") <> 0 then
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading intro appt date column.  error_code: [" + str$(r) + "]", crlf)
+			LoadWorkflowData = 1
+			exitfunction
+		endif
+
+	endif
+'--------------------------------------------------------------------------------------------- load arcsTermEmployee elements
+	if str_script$ = "CG-arcsTermEmployee" then
+
+		'-------------------- ssn
+		r = readexcel (employmentInquiryPath$, wsSSNCol$, arrApplicantSSN$())
+		if instr(str$(r), "-") <> 0 then
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading ssn column.  error_code: [" + str$(r) + "]", crlf)
+			LoadWorkflowData = 1
+			exitfunction
+		endif
+		'-------------------- background check
+		r = readexcel (employmentInquiryPath$, wsBackGroundChkCol$, arrBackGroundChk$())
+		if instr(str$(r), "-") <> 0 then
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading background check column.  error_code: [" + str$(r) + "]", crlf)
+			LoadWorkflowData = 1
+			exitfunction
+		endif
+		'-------------------- loa/termed date
+		r = readexcel (employmentInquiryPath$, wsTermedLOADateCol$, arrTermedLOADate$())
+		if instr(str$(r), "-") <> 0 then
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": error reading loa/termed date column.  error_code: [" + str$(r) + "]", crlf)
+			LoadWorkflowData = 1
+			exitfunction
+		endif
+
+	endif
+
+	
 	LoadWorkflowData = 0
 
 endfunction
 
+
+
+'=============================================================================================================================================================
+'== function name:              zwInitGetData
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                get worksheet data used by script for the current row
+    '==
+    '== input parms:            none
+    '==
+    '== returns:                int:    0 - success
+    '==
+    '== notes:                  none
+    '==
+'=============================================================================================================================================================
+function zwInitGetData()
+
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": getting worksheet data for current row", crlf)
+
+    applicantID$ = arrApplicantID$(i)
+    applicantFName$ = arrApplicantFName$(i)
+    applicantLName$ = arrApplicantLName$(i)
+    applicantEmail$ = arrApplicantEmail$(i)
+    applicantPhone$ = arrApplicantPhone$(i)
+    applicant1stApp$ = arrApplicant1stApp$(i)
+    textmsgStatus$ = arrTextmsgStatus$(i)
+    currentStage$ = arrCurrentStage$ (i)
+    applicantFullName$ = applicantFName$ + " " + applicantLName$
+
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: [" + applicantID$ + "]", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: [" + applicantFName$ + " " + applicantLName$ + "]", crlf)
+
+    zwInitGetData = 0
+
+endfunction
 
 '=============================================================================================================================================================
 '== function name:              adobeCancelGetData
@@ -497,7 +613,7 @@ endfunction
     '==
     '== notes:                  none
     '==
-'=============================================================================================================================================================*/
+'=============================================================================================================================================================
 function adobeCancelGetData()
 
     write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": getting worksheet data for current row", crlf)
@@ -521,7 +637,7 @@ endfunction
     '==
     '== notes:                  none
     '==
-'=============================================================================================================================================================*/
+'=============================================================================================================================================================
 function adobeSendGetData()
     applicantID$ = arrApplicantID$(i)
     applicantFName$ = arrApplicantFName$(i)
@@ -548,7 +664,7 @@ endfunction
 	'==
 	'== notes:                  none
 	'==
-'=============================================================================================================================================================*/
+'=============================================================================================================================================================
 function gmsSubmitGetData()
 
     write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": getting worksheet data for current row", crlf)
@@ -594,7 +710,7 @@ endfunction
 	'==
 	'== notes:                  none
 	'==
-'=============================================================================================================================================================*/
+'=============================================================================================================================================================
 function gmsTermsGetData()
 
 	applicantID$ = arrApplicantID$(i)
@@ -621,7 +737,7 @@ endfunction
 	'==
 	'== notes:                  none
 	'==
-'=============================================================================================================================================================*/
+'=============================================================================================================================================================
 function gmsAddLegalGetData()
 	applicantID$ = arrApplicantID$(i)
 	applicantFName$ = arrApplicantFName$(i)
@@ -633,7 +749,7 @@ function gmsAddLegalGetData()
 endfunction
 
 '=============================================================================================================================================================
-'== function name:              arcsSubmitAppGetCurrData
+'== function name:              arcsSubmitAppGetData
     '==
     '== developer:              todd busch
     '==
@@ -646,7 +762,7 @@ endfunction
     '== notes:                  none
     '==
 '===============================================================================================================================================================
-function arcsSubAppGetCurrData()
+function arcsSubmitAppGetData()
 
     applicantID$ = arrApplicantID$(i)                               'worksheet row id number
     applicantFName$ = arrApplicantFName$(i)                         'first name
@@ -674,12 +790,12 @@ function arcsSubAppGetCurrData()
     applicantYrTo$ = arrApplicantYrTo$(i)                           'yr to
     applicantPhone$ = arrApplicantPhone$(i)                         'phone
 
-    arcsSubAppGetCurrData = 0
+    arcsSubmitAppGetData = 0
 
 endfunction
 
 '=============================================================================================================================================================
-'== function name:              arcsGetBackupGetCurrData
+'== function name:              arcsGetBackupGetData
     '==
     '== developer:              todd busch
     '==
@@ -692,7 +808,7 @@ endfunction
     '== notes:                  none
     '==
 '===============================================================================================================================================================
-function arcsGetBackupGetCurrData()
+function arcsGetBackupGetData()
 
     write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": getting worksheet data for current row", crlf)
 
@@ -706,12 +822,12 @@ function arcsGetBackupGetCurrData()
 	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: [" + applicantFName$ + " " + applicantLName$ + "]", crlf)
 	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ssn: [" + applicantSSN$ + "]", crlf)
 
-    arcsGetBackupGetCurrData = 0
+    arcsGetBackupGetData = 0
 
 endfunction
 
 '=============================================================================================================================================================
-'== function name:              arcsCloseAppGetCurrData
+'== function name:              arcsCloseAppGetData
     '==
     '== developer:              todd busch
     '==
@@ -724,7 +840,7 @@ endfunction
     '== notes:                  none
     '==
 '===============================================================================================================================================================
-function arcsCloseAppGetCurrData()
+function arcsCloseAppGetData()
 
     write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": getting worksheet data for current row", crlf)
 
@@ -738,12 +854,12 @@ function arcsCloseAppGetCurrData()
 	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: [" + applicantFName$ + " " + applicantLName$ + "]", crlf)
 	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ssn: [" + applicantSSN$ + "]", crlf)
 
-    arcsCloseAppGetCurrData = 0
+    arcsCloseAppGetData = 0
 
 endfunction
 
 '=============================================================================================================================================================
-'== function name:              arcsEnterFPrintGetCurrData
+'== function name:              arcsEnterFPrintGetData
     '==
     '== developer:              todd busch
     '==
@@ -756,7 +872,7 @@ endfunction
     '== notes:                  none
     '==
 '===============================================================================================================================================================
-function arcsEnterFPrintGetCurrData()
+function arcsEnterFPrintGetData()
 
     write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": getting worksheet data for current row", crlf)
 
@@ -772,6 +888,105 @@ function arcsEnterFPrintGetCurrData()
 	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: [" + applicantFName$ + " " + applicantLName$ + "]", crlf)
 	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ssn: [" + applicantSSN$ + "]", crlf)
 
-    arcsEnterFPrintGetCurrData = 0
+    arcsEnterFPrintGetData = 0
+
+endfunction
+
+'=============================================================================================================================================================
+'== function name:              arcsHireProvGetData
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                retrieves the values of all the employment list worksheet columns needed for the current row being processed
+    '==
+    '== input parms:            none
+    '==
+    '== returns:                int:    0 - success
+    '==
+    '== notes:                  none
+    '==
+'===============================================================================================================================================================
+function arcsHireProvGetData()
+
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": getting worksheet data for current row", crlf)
+
+    applicantID$ = arrApplicantID$(i)                               'worksheet row id number
+    applicantFName$ = arrApplicantFName$(i)                         'first name
+    applicantLName$ = arrApplicantLName$(i)                         'last name
+    applicantSSN$ = arrApplicantSSN$(i)                             'social security number
+    backGroundChk$ = arrBackGroundChk$(i)                           'background check status column
+	introApptTime$ = arrIntroApptTime$(i)							'intro appointment date/time
+
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: [" + applicantID$ + "]", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: [" + applicantFName$ + " " + applicantLName$ + "]", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ssn: [" + applicantSSN$ + "]", crlf)
+
+    arcsHireProvGetData = 0
+
+endfunction
+
+'=============================================================================================================================================================
+'== function name:              arcsHirePermGetData
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                retrieves the values of all the employment list worksheet columns needed for the current row being processed
+    '==
+    '== input parms:            none
+    '==
+    '== returns:                int:    0 - success
+    '==
+    '== notes:                  none
+    '==
+'===============================================================================================================================================================
+function arcsHirePermGetData()
+
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": getting worksheet data for current row", crlf)
+
+    applicantID$ = arrApplicantID$(i)                               'worksheet row id number
+    applicantFName$ = arrApplicantFName$(i)                         'first name
+    applicantLName$ = arrApplicantLName$(i)                         'last name
+    applicantSSN$ = arrApplicantSSN$(i)                             'social security number
+    backGroundChk$ = arrBackGroundChk$(i)                           'background check status column
+	introApptTime$ = arrIntroApptTime$(i)							'intro appointment date/time
+
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: [" + applicantID$ + "]", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: [" + applicantFName$ + " " + applicantLName$ + "]", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ssn: [" + applicantSSN$ + "]", crlf)
+
+    arcsHirePermGetData = 0
+
+endfunction
+
+'=============================================================================================================================================================
+'== function name:              arcsTermEmployeeGetData
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                retrieves the values of all the employment list worksheet columns needed for the current row being processed
+    '==
+    '== input parms:            none
+    '==
+    '== returns:                int:    0 - success
+    '==
+    '== notes:                  none
+    '==
+'===============================================================================================================================================================
+function arcsTermEmployeeGetData()
+
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": getting worksheet data for current row", crlf)
+
+    applicantID$ = arrApplicantID$(i)                               'worksheet row id number
+    applicantFName$ = arrApplicantFName$(i)                         'first name
+    applicantLName$ = arrApplicantLName$(i)                         'last name
+    applicantSSN$ = arrApplicantSSN$(i)                             'social security number
+    backGroundChk$ = arrBackGroundChk$(i)                           'background check status column
+	termedLOADate$ = arrTermedLOADate$(i)							'intro appointment date/time
+
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: [" + applicantID$ + "]", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: [" + applicantFName$ + " " + applicantLName$ + "]", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ssn: [" + applicantSSN$ + "]", crlf)
+
+    arcsTermEmployeeGetData = 0
 
 endfunction

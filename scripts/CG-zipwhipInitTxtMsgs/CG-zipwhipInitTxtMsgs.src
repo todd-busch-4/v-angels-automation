@@ -45,7 +45,7 @@ endif
 '###############################################################################################################################################
 
 
-logStartScript("zipwhip init msgs")
+logStartScript("send/schedule initial texts")
 
 
 '-------------------------------------------------------------------------------------------------------------------------------- begin iterating through change event column
@@ -73,16 +73,14 @@ repeat
 
 		if zwInitStageChk() = 0 then
 			iStageCnt = iStageCnt + 1
-			logStageMatch()
 		else
-			logStageBypass()
+			iBypassedCnt = iBypassedCnt + 1
 			goto nextIteration
 		endif
 
 
 		'-------------------- get data values for current row
 		zwInitGetData()
-		logDataValues()
 
 
 		'-------------------- check for scheduled appointment
@@ -110,7 +108,10 @@ repeat
 
 		'-------------------- check txt messages status column
 		if zwInitStatusChk() = 1 then
+			iBypassedCnt = iBypassedCnt + 1
 			goto nextIteration
+		else
+			iTriggeredCnt = iTriggeredCnt + 1
 		endif
 
 '------------------------------------------------------------------------------------------------------------------------------ log in
@@ -506,7 +507,7 @@ dayOfConfirm:
 		logWorkflowSuccess("day of confirm scheduled successfully; workflow complete")
 
 
-		iCompleted = iCompleted + 1
+        iCompletedCnt = iCompletedCnt + 1
 		closebrowser()
 
 

@@ -54,11 +54,20 @@ pgArcsPersSummary$ = "ARCS Person Summary"
 btnArcsEdit$ = "BUTTON[INNERTEXT='Edit']"
 btnArcsAddNewApplication$ = "BUTTON[INNERTEXT='Add New Application']"
 btnArcsCaseNotes$ = "BUTTON[INNERTEXT='Case Notes']"
-tabArcsPersSummApps$ = "A[INNERTEXT='Applications',INDEX=2]"
 
 '========================================================================================== person summary page | applications tab
+tabArcsPersSummApps$ = "A[INNERTEXT='Applications',INDEX=2]"
 lnkArcsSubmittedApp$ = "A[INNERTEXT='Submitted']"
 lnkAppStatus$ = "A[INNERTEXT='Not Yet Submitted',INDEX=2]"
+
+'========================================================================================== person summary page | employment tab
+tabArcsPersSummEmpl$ = "A[INNERTEXT='Employment']"
+btnArcsEmplEdit$ = "BUTTON[INNERTEXT='Edit',INDEX=2]"
+selArcsEmplStatus$ = "SELECT[NAME='EmploymentStatusId']"
+inputArcsEmplEndDate$ = "INPUT TEXT[NAME='EndDate']"
+inputArcsEmplPermHireDate$ = "INPUT TEXT[NAME='HireDatePermanent']"
+btnArcsEmplSave$ = "BUTTON[INNERTEXT='Save',INDEX=2]"
+
 
 '========================================================================================== new applicant form | profile - personal & demographic
 wndArcsProfileDemo$ = "FIREFOX.EXE|MozillaWindowClass|ARCS Create Applicant Profile - — Mozilla Firefox"
@@ -157,6 +166,8 @@ inputArcsFPrintDate$ = "INPUT TEXT[NAME='FingerprintDate']"
 btnArcsSave$ = "BUTTON[INNERTEXT='Save']"
 btnArcsHireProv$ = "BUTTON[INNERTEXT='Hire Provisionally']"
 btnArcsHirePerm$ = "BUTTON[INNERTEXT='Hire Permanently']"
+inputArcsProvHireDate$ = "INPUT TEXT[NAME='HireDateProvisional']"
+lnkArcsProvEmployee$ = "A[INNERTEXT='Provisional Employee']"
 
 
 '========================================================================================== sams.gov

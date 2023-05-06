@@ -102,8 +102,11 @@ endfunction
 function nullDataElementChk(str_object$)
 	local str_object$
 
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": call to nullDataElementCheck()", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": checking: [" + str_object$ + "] for a value", crlf)
+
 	if str_object$ = "" or str_object$ = "[]" then
-		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": " + str_object$ + " did not contain a value for the current row", crlf)
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": [" + str_object$ + "] did not contain a value for the current row", crlf)
 		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": record id: " + applicantID$, crlf)
 		write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant: " + applicantFName$ + " " + applicantLName$, crlf)
@@ -111,6 +114,7 @@ function nullDataElementChk(str_object$)
 		nullDataElementChk = 1
 		exitfunction
 	else
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": value was found for specified data element", crlf)
 		nullDataElementChk = 0
 	endif
 

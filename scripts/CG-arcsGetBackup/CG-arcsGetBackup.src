@@ -43,7 +43,7 @@ endif
 '###############################################################################################################################################
 '##   													script start																		  
 '###############################################################################################################################################
-logStartScript(currScript$)
+logStartScript("arcs get backup")
 
 
 '------------------------------------------------------------------------------------------------------------------------------ begin iterating through change event column
@@ -78,8 +78,7 @@ repeat
 		endif
 
 		'-------------------- get data values for current record
-		arcsGetBackupGetCurrData()
-		logDataValues()
+		arcsGetBackupGetData()
 
 
 		'-------------------- verify ssn is formatted properly

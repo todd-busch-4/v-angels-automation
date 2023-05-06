@@ -40,7 +40,7 @@ endif
 '###############################################################################################################################################
 '##   													script start																		  
 '###############################################################################################################################################
-logStartScript(currScript$)
+logStartScript("arcs submit application")
 
 '------------------------------------------------------------------------------------------------------------------------------ begin iterating through change event column
 
@@ -74,7 +74,7 @@ repeat
 		endif
 
 		'-------------------- get data values for current record
-		arcsSubAppGetCurrData()
+		arcsSubmitAppGetData()
 		logDataValues()
 		stateNm$ = convStateToName$(applicantState$)
 		stateCode$ = convStateToCode$(applicantState$)

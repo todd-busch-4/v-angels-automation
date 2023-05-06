@@ -23,43 +23,19 @@
 '=============================================================================================================================================================*/
 function zwInitStageChk()
 
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": checking stage for triggering value", crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage: [" + curr_stage$ + "]", crlf)
+
     if curr_stage$ = "1st Interview" then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage value does trigger the wrokflow", crlf)
         zwInitStageChk = 0
         exitfunction
     else
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage value does not trigger workflow", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
         zwInitStageChk = 1
         exitfunction
     endif
-
-endfunction
-
-'=============================================================================================================================================================
-'== function name:              zwInitGetData
-    '==
-    '== developer:              todd busch
-    '==
-    '== purpose:                get worksheet data used by script for the current row
-    '==
-    '== input parms:            none
-    '==
-    '== returns:                int:    0 - success
-    '==
-    '== notes:                  none
-    '==
-'=============================================================================================================================================================*/
-function zwInitGetData()
-
-    applicantID$ = arrApplicantID$(i)
-    applicantFName$ = arrApplicantFName$(i)
-    applicantLName$ = arrApplicantLName$(i)
-    applicantEmail$ = arrApplicantEmail$(i)
-    applicantPhone$ = arrApplicantPhone$(i)
-    applicant1stApp$ = arrApplicant1stApp$(i)
-    textmsgStatus$ = arrTextmsgStatus$(i)
-    currentStage$ = arrCurrentStage$ (i)
-    applicantFullName$ = applicantFName$ + " " + applicantLName$
-
-    zwInitGetData = 0
 
 endfunction
 
@@ -80,11 +56,18 @@ endfunction
 function zwNonStdPhoneFormatChk()
     local r
 
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": call to zwNonStdPhoneFormatChk()", crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": checking format of phone data element", crlf)
+
     r = instr(applicantPhone$, "[tel:")
     if r <> 0 then
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": applicant phone is in non-standard format: '" + applicantPhone$ + "'", crlf)
         applicantPhone$ = Left$(applicantPhone$, r - 1)
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": phone has been reformatted: '" + applicantPhone$ + "'", crlf)
+        zwNonStdPhoneFormatChk = 0
+        exitfunction
+    else
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": value was in acceptable format", crlf)
         zwNonStdPhoneFormatChk = 0
         exitfunction
     endif
@@ -251,15 +234,16 @@ endfunction
 '===============================================================================================================================================================
 function zwInitStatusChk()
 
-    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": checking status of text msg column", crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": checking text msg column for triggering value", crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": txt msgs: [" + textmsgStatus$ + "]", crlf)
 
     if textmsgStatus$ <> "" then
-        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status field was not null", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status field was not null which does not trigger the workflow", crlf)
         write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
         zwInitStatusChk = 1
         exitfunction
     else
-        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status was null; continuing workflow", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status was null which does trigger the workflow", crlf)
         zwInitStatusChk = 0
         exitfunction
     endif
@@ -501,14 +485,32 @@ endfunction
 '===============================================================================================================================================================
 function zwInitLogState()
 
-    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ", crlf) 
-    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf) 
-    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events detected:            " + str$(iChangeCnt), crlf)
-    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": events with '1st interview' stage: " + str$(iStageCnt), crlf)
-    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": records msgs sent for:             " + str$(iCompleted), crlf)
-    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
-    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
-    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf + crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events detected:            " + str$(iEventCnt), crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage matches detected:            " + str$(iStageCnt), crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflows triggered:               " + str$(iTriggeredCnt), crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage/status bypassed:             " + str$(iBypassedCnt), crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": rows processed:                    " + str$(iCompletedCnt), crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ==================================== end workflow =======================================", crlf + crlf)
+
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf)
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf)
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events detected:            " + str$(iEventCnt), crlf)
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage matches detected:            " + str$(iStageCnt), crlf)
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflows triggered:               " + str$(iTriggeredCnt), crlf)
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage/status bypassed:             " + str$(iBypassedCnt), crlf)
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": rows processed:                    " + str$(iCompletedCnt), crlf)
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ==================================== end workflow =======================================", crlf + crlf)
+    
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events detected:            " + str$(iEventCnt), crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage matches detected:            " + str$(iStageCnt), crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflows triggered:               " + str$(iTriggeredCnt), crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage/status bypassed:             " + str$(iBypassedCnt), crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": rows processed:                    " + str$(iCompletedCnt), crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ==================================== end workflow =======================================", crlf + crlf)
 
     zwInitLogState = 0
 endfunction

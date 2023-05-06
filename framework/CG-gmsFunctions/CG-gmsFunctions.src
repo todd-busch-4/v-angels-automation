@@ -542,32 +542,47 @@ function gmsSubmitFormLogStats()
     write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf)
     write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events detected:            " + str$(iEventCnt), crlf)
     write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage matches detected:            " + str$(iStageCnt), crlf)
-    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Triggering change events:          " + str$(iTriggeredCnt), crlf)
-    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Stage/Status bypassed:             " + str$(iBypassedCnt), crlf)
-    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Applications closed:               " + str$(iCompletedCnt), crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflows triggered:               " + str$(iTriggeredCnt), crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage/status bypassed:             " + str$(iBypassedCnt), crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": forms submitted:                   " + str$(iCompletedCnt), crlf)
     write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ==================================== end workflow =======================================", crlf + crlf)
 
     write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf)
     write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf)
     write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events detected:            " + str$(iEventCnt), crlf)
     write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage matches detected:            " + str$(iStageCnt), crlf)
-    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Triggering change events:          " + str$(iTriggeredCnt), crlf)
-    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Stage/Status bypassed:             " + str$(iBypassedCnt), crlf)
-    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Applications closed:               " + str$(iCompletedCnt), crlf)
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflows triggered:               " + str$(iTriggeredCnt), crlf)
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage/status bypassed:             " + str$(iBypassedCnt), crlf)
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": forms submitted:                   " + str$(iCompletedCnt), crlf)
     write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ==================================== end workflow =======================================", crlf + crlf)
     
     write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf)
     write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf)
     write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events detected:            " + str$(iEventCnt), crlf)
     write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage matches detected:            " + str$(iStageCnt), crlf)
-    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Triggering change events:          " + str$(iTriggeredCnt), crlf)
-    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Stage/Status bypassed:             " + str$(iBypassedCnt), crlf)
-    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": Applications closed:               " + str$(iCompletedCnt), crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflows triggered:               " + str$(iTriggeredCnt), crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage/status bypassed:             " + str$(iBypassedCnt), crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": forms submitted:                   " + str$(iCompletedCnt), crlf)
     write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ==================================== end workflow =======================================", crlf + crlf)
 
 	gmsSubmitFormLogStats = 0
 	
 endfunction
+
+'=============================================================================================================================================================
+'== function name:				gmsTermsFmtDates
+	'==
+	'== developer:              todd busch
+	'==
+	'== purpose:                logs the end of workflow messages/data to log files for SubmitForm script
+	'==
+	'== input parms:            none
+	'==
+	'== returns:                int:	0 - success
+	'==
+	'== notes:                  none
+	'==
+'=============================================================================================================================================================*/
 
 function gmsTermsFmtDates$()
 	local r

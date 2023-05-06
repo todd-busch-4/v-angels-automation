@@ -1,0 +1,259 @@
+'###############################################################################################################################################
+'## developer:				todd busch
+'##
+'## description:            processes change events in employment inquiry list. for rows with triggering stage/column status values it 
+'##							searches for employee in arcs, navs to employment page, changes status to separated and enters loa/termed date
+'##
+'## run in:					firefox
+'##
+'## notes:                  none
+'##							
+'###############################################################################################################################################
+
+'###############################################################################################################################################
+'##   													script prep																			  
+'###############################################################################################################################################
+include "C:\v-angels-automation\framework\CG-loadWorkflowData\CG-loadWorkflowData.src"
+include "C:\v-angels-automation\framework\CG-globalFunctions\CG-globalFunctions.src"
+include "C:\v-angels-automation\framework\CG-arcsFunctions\CG-arcsFunctions.src"
+include "c:\v-angels-automation\framework\CG-globalWinFunctions\CG-globalWinFunctions.src"
+include "c:\v-angels-automation\framework\CG-globalWebFunctions\CG-globalWebFunctions.src"
+include "c:\v-angels-automation\framework\CG-globalWebValidations\CG-globalWebValidations.src"
+include "C:\v-angels-automation\framework\CG-globalLogging\CG-globalLogging.src"
+include "C:\v-angels-automation\framework\CG-globalSubDefinitions\CG-globalSubDefinitions.src"
+include "C:\v-angels-automation\framework\CG-globalVariables\CG-globalVariables.src"
+include "C:\v-angels-automation\object-repos\arcs\arcsObjectRepository.src"
+
+
+currScript$ = "CG-arcsTermEmployee"
+
+
+#IgnoreErrors = 1
+
+
+'------------------------------------------------------------------------------------------------------------------------------  read in columns from employment inquiry doc
+if LoadWorkflowData(currScript$) = 1 then
+	criticalStop()
+endif
+
+
+'###############################################################################################################################################
+'##   													script start																		  
+'###############################################################################################################################################
+logStartScript("terminate employee")
+
+'------------------------------------------------------------------------------------------------------------------------------ begin iterating through change event column
+
+i = 0
+
+
+repeat
+
+
+	'-------------------- get change status of current row
+	curr_status$ = arrChangeEvents$(i)
+
+
+	if curr_status$ = "Yes" then
+		iEventCnt = iEventCnt + 1
+		iExcelRow = i + 2
+		logEventFound()
+    else
+        goto nextIteration
+    endif
+
+
+'------------------------------------------------------------------------------------------------------------------------------ stage check
+
+    '-------------------- get stage for current change event
+    curr_stage$ = arrCurrentStage$(i)
+
+
+    if arcsTermEmployeeStageChk() = 0 then
+        iStageCnt = iStageCnt + 1
+    else
+        iBypassedCnt = iBypassedCnt + 1
+        goto nextIteration
+    endif
+
+
+	'-------------------- get data values for current record
+	arcsTermEmployeeGetData()
+
+
+	'-------------------- verify ssn is formatted properly
+	applicantSSN$ = formatSSN$(applicantSSN$)
+
+
+    '-------------------- check for null and format loa/termed date
+    if nullDataElementChk("termedLOADate$") = 1 then
+        closebrowser()
+        goto nextIteration
+    endif
+    termedLOADate$ = fmtDateTimeToDate$(termedLOADate$)
+
+
+'------------------------------------------------------------------------------------------------------------------------------ status check
+
+	'-------------------- check status for trigger value
+	if arcsTermEmployeeStatusChk() <> 0 then
+		iBypassedCnt = iBypassedCnt + 1
+		goto nextIteration
+	else
+		iTriggeredCnt = iTriggeredCnt + 1
+	endif
+
+
+'------------------------------------------------------------------------------------------------------------------------------  log in
+
+	'-------------------- invoke browser
+	if webInvokeBrowser("FF", arcsURL$) = 1 then
+		nextScript()
+		goto nextIteration
+	endif
+
+
+	'-------------------- enter username
+	usepage(pgArcsLogin$)
+	if webEnterText(inputArcsUsername$, arcsUsername$, "entering username") <> 0 then
+		goto nextIteration
+	endif
+	if webValidateText(inputArcsUsername$, arcsUsername$, "entering username") <> 0 then
+		goto nextIteration
+	endif
+
+			
+	'-------------------- enter password
+	if webEnterText(inputArcsPassword$, arcsPassword$, "entering password") <> 0 then
+		goto nextIteration
+	endif
+	if webValidateText(inputArcsPassword$, arcsPassword$, "entering password") <> 0 then
+		goto nextIteration
+	endif
+
+			
+	'-------------------- click login button
+	if webClickElement(btnArcsLogin$, "clicking login") <> 0 then
+		goto nextIteration
+	endif
+	if webValidateElement(imgARCSLogo$, "arcs logo", "clicking login") <> 1 then
+		goto nextIteration
+	endif
+	pause 3
+
+	'-------------------- accept end user agreement if presented
+	if arcsSubAppAcceptUsrAgree() <> 0 then
+		nextScript()
+		goto nextIteration
+	endif
+
+'------------------------------------------------------------------------------------------------------------------------------ applicant search
+
+	'-------------------- navigate to person search page
+	if webNavigate(urlArcsPersonSrc$, "nav to person search") <> 0 then
+		goto nextIteration
+	endif
+	pause 2
+	if webValidateCurrPage(pgArcsPersonSrc$, "nav to person search") <> 0 then
+		goto nextIteration
+	endif
+
+
+	'-------------------- enter ssn
+	usepage(pgArcsPersonSrc$)
+	if webPasteText(inputArcsSSN$, applicantSSN$, "entering ssn") <> 0 then
+		goto nextIteration
+	endif
+	pause 2
+	if webValidateText(inputArcsSSN$, applicantSSN$, "entering ssn") <> 0 then
+		goto nextIteration
+	endif
+
+
+	'-------------------- enter last name
+	if webPasteText(inputArcsLName$, applicantLName$, "entering last name") <> 0 then
+		goto nextIteration
+	endif
+	pause 2
+	if webValidateText(inputArcsLName$, applicantLName$, "entering last name") <> 0 then
+		goto nextIteration
+	endif
+
+
+	'-------------------- click search button
+	if webClickElement(btnArcsSearch$, "clicking search button") <> 0 then
+		goto nextIteration
+	endif
+	pause 2
+	if webValidateCurrPage(pgArcsPersSummary$, "clicking search button") <> 0 then
+		goto nextIteration
+	endif
+
+'------------------------------------------------------------------------------------------------------------------------------ terminate employee
+
+	'--------------------click the employment tab
+	if webClickElement(tabArcsPersSummEmpl$, "clicking employment tab") <> 0 then
+		goto nextIteration
+	endif
+	pause 2
+	if webValidateElement(btnArcsEmplEdit$, "edit button", "clicking employment tab") <> 1 then
+		goto nextIteration
+	endif
+
+
+    '-------------------- click edit button
+    if webClickElement(btnArcsEmplEdit$, "clicking edit") <> 0 then
+        goto nextIteration
+    endif
+    pause 2
+    if webValidateElement(selArcsEmplStatus$, "status droprdown", "clicking edit") <> 1 then
+        goto nextIteration
+    endif
+
+
+    '-------------------- select separated
+    if webSelectItem(selArcsEmplStatus$, "separated", "select status") <> 0 then
+        goto nextIteration
+    endif
+    pause 2
+    if webValidateText(selArcsEmplStatus$, "3", "select status") <> 0 then
+        goto nextIteration
+    endif
+
+
+    '-------------------- enter term date
+    if webPasteText(inputArcsEmplEndDate$, termedLOADate$, "entering term date") <> 0 then
+        goto nextIteration
+    endif
+    pause 2
+    if webValidateText(inputArcsEmplEndDate$, termedLOADate$, "entering term date") <> 0 then
+        goto nextIteration
+    endif
+
+
+    '-------------------- click save
+    if webClickElement(btnArcsEmplSave$, "clicking save") <> 0 then
+        goto nextIteration
+    endif
+    pause 2
+
+
+    logWorkflowSuccess("workflow completed; employee terminated successfully")
+    iCompletedCnt = iCompletedCnt + 1
+    closebrowser()
+
+
+nextIteration:
+
+
+i = i + 1
+	
+
+until i = 5000	'iterate through all rows in array
+
+
+'###############################################################################################################################################
+'##   													script end
+'###############################################################################################################################################
+
+arcsTermEmployeeLogStats()
