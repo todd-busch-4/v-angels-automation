@@ -119,16 +119,19 @@ write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ----------
 '#############################################################################################################################
 '##   													scan start									 						##
 '#############################################################################################################################
-run(scriptsPath$ + "CG-zipwhipInitTxtMsgs\CG-zipwhipInitTxtMsgs.rob")
-run(scriptsPath$ + "CG-adobeSendPackets\CG-adobeSendPackets.rob")
-run(scriptsPath$ + "CG-gmsSubmitForm\CG-gmsSubmitForm.rob")
 run(scriptsPath$ + "CG-arcsSubmitApp\CG-arcsSubmitApp.rob")
-run(scriptsPath$ + "CG-adobeCancelPackets\CG-adobeCancelPackets.rob")
-run(scriptsPath$ + "CG-gmsAddLegalFee\CG-gmsAddLegalFee.rob")
+run(scriptsPath$ + "CG-zipwhipInitTxtMsgs\CG-zipwhipInitTxtMsgs.rob")
 run(scriptsPath$ + "CG-arcsGetBackup\CG-arcsGetBackup.rob")
-run(scriptsPath$ + "CG-gmsTerminations\CG-gmsTerminations.rob")
-run(scriptsPath$ + "CG-arcsCloseApp\CG-arcsCloseApp.rob")
+run(scriptsPath$ + "CG-adobeSendPackets\CG-adobeSendPackets.rob")
 run(scriptsPath$ + "CG-arcsEnterFPrintDate\CG-arcsEnterFPrintDate.rob")
+run(scriptsPath$ + "CG-gmsSubmitForm\CG-gmsSubmitForm.rob")
+run(scriptsPath$ + "CG-arcsCloseApp\CG-arcsCloseApp.rob")
+run(scriptsPath$ + "CG-gmsAddLegalFee\CG-gmsAddLegalFee.rob")
+run(scriptsPath$ + "CG-arcsHireProv\CG-arcsHireProv.rob")
+run(scriptsPath$ + "CG-adobeCancelPackets\CG-adobeCancelPackets.rob")
+run(scriptsPath$ + "CG-arcsHirePerm\CG-arcsHirePerm.rob")
+run(scriptsPath$ + "CG-gmsTerminations\CG-gmsTerminations.rob")
+run(scriptsPath$ + "CG-arcsTermEmployee\CG-arcsTermEmployee.rob")
 
 
 '#############################################################################################################################
