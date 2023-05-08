@@ -272,24 +272,14 @@ newHire:
 
 
     '-------------------- click hire permanent button
+	usepage(pgArcsHiringDecision$)
     if webClickElement(btnArcsHirePerm$, "clicking hire permanent") <> 0 then
         goto nextIteration
     endif
     pause 2
-	if webValidateElement(selArcsEmplStatus$, "employ status dropdown", "clicking hire permanent") <> 1 then
+	if webValidateElement(selArcsEmplTypeId$, "employ type id dropdown", "clicking hire permanent") <> 1 then
 		goto nextIteration
 	endif
-
-
-
-    '-------------------- select permanent
-    if webSelectItem(selArcsEmplStatus$, "permanent", "select status") <> 0 then
-        goto nextIteration
-    endif
-    pause 2
-    if webValidateText(selArcsEmplStatus$, "2", "select status") <> 0 then
-        goto nextIteration
-    endif
 
 
 	'-------------------- enter hire date
@@ -299,10 +289,15 @@ newHire:
 	pause 2
 
 
+	'-------------------- close date picker control
+	usewindow(wndArcsHiringDecision$, 1)
+	sendkeys("<tab>", noactivate)
+	pause 2
+
+
     '-------------------- click save
-	usewindow(wndArcsPersSummary$, 1)
-	movemouse(560, 690, absolute)
-	clickmouse(left, double, 560, 690, absolute)
+	movemouse(620, 700, absolute)
+	clickmouse(left, double, 620, 700, absolute)
     pause 2
 
 

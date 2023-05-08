@@ -1,2 +1,22 @@
 
 
+
+UsePage("ARCS Hiring Decision")
+	ClickHTMLElement("BUTTON[INNERTEXT='Hire Permanently']")
+	ClickHTMLElement("DIV[OUTERTEXT='* Position:Nurse']")
+
+
+
+UsePage("ARCS Hiring Decision")
+	ClickHTMLElement("DIV[OUTERTEXT='* Employee']")
+
+
+"INPUT TEXT[NAME='HireDatePermanent']"
+
+UsePage("ARCS Hiring Decision")
+	ClickHTMLElement("DIV[OUTERTEXT='Hire',INDEX=2]")
+"SELECT[NAME='EmployeeTypeId']"
+
+"FIREFOX.EXE|MozillaWindowClass|ARCS Hiring Decision — Mozilla Firefox"
+
+"BUTTON[INNERTEXT='Save']"

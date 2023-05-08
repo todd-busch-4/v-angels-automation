@@ -138,34 +138,41 @@ endfunction
 function formatPhoneDashes$(str_phone$)
 	local r, str_phone$
 
-	'check for sycronist formatted phone
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": call to: formatPhoneDashes", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": formatting phone with dashed between area, exchange, and line #", crlf)
+
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": starting format: [" + str_phone$ + "]", crlf)
+
+	'check for syncronist formatting
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": checking for syncronist formatting", crlf)
 	r = instr(str_phone$, "[tel:")
 	if r <> 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": removing syncronist formatting", crlf)
 		str_phone$ = left$(str_phone$, r - 1)
 	endif
 
 	'remove parentheses around area code
-	r = instr(str_phone$, ")")
-	if r <> 0 then
-		str_phone$ = replace$(str_phone$, "(", "")
-		str_phone$ = replace$(str_phone$, ")", "")
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": removing all parentheses", crlf)
+	str_phone$ = replace$(str_phone$, "(", "")
+	str_phone$ = replace$(str_phone$, ")", "")
 
-		'replace space created by removal of leading parenthases
-		str_phone$ = replace$(str_phone$, " ", "-")
-	endif
+	'remove any spaces
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": removing all spacing", crlf)
+	str_phone$ = replace$(str_phone$, " ", "")
 
-	'check if contains no dashes
-	r = instr(str_phone$, "-")
-	if r = 0 then
-		iPart1$ = left$(str_phone$, 3)
-		iPart2$ = mid$(str_phone$, 4, 3)
-		iPart3$ = right$(str_phone$, 4)
-		str_phone$ = iPart1$ + "-" + iPart2$ + "-" + iPart3$
-	endif
+	'remove all dashes
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": removing any existing dashes", crlf)
+	str_phone$ = replace$(str_phone$, "-", "")
 
+	'build phone string
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": parsing and rebuilding string", crlf)
+	iPart1$ = left$(str_phone$, 3)
+	iPart2$ = mid$(str_phone$, 4, 3)
+	iPart3$ = mid$(str_phone$, 7, 4)
+	str_phone$ = iPart1$ + "-" + iPart2$ + "-" + iPart3$
 
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": reformatted phone: [" + str_phone$ + "]", crlf)
 	formatPhoneDashes$ = str_phone$
-
 
 endfunction
 
