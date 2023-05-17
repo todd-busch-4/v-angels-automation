@@ -487,7 +487,15 @@ function gmsAddLegalStatusChk()
 			gmsAddLegalStatusChk = 0
 			exitfunction
 		endif
-	else
+		if instr(gmsStatus$, "Active") = 0 and instr(gmsStatus$, "I-9 ready for review") = 0 then
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status values are not set to trigger workflow", crlf)
+			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
+			gmsAddLegalStatusChk = 1
+			exitfunction
+		endif
+	endif
+
+	if gmsLegalShield$ <> "-1" then
 		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": status values are not set to trigger workflow", crlf)
 		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": resuming scan for next change event", crlf + crlf)
 		gmsAddLegalStatusChk = 1

@@ -16,16 +16,14 @@
 '###############################################################################################################################################
 '##   													script prep																			  
 '###############################################################################################################################################
-include "C:\v-angels-automation\framework\CG-globalDimDeclarations\CG-globalDimDeclarations.src"
 include "C:\v-angels-automation\framework\CG-loadWorkflowData\CG-loadWorkflowData.src"
-include "C:\v-angels-automation\framework\CG-heyFunctions\CG-heyFunctions.src"
-include "C:\v-angels-automation\framework\CG-globalDataLoaders\CG-globalDataLoaders.src"
 include "C:\v-angels-automation\framework\CG-globalFunctions\CG-globalFunctions.src"
 include "c:\v-angels-automation\framework\CG-globalWinFunctions\CG-globalWinFunctions.src"
 include "c:\v-angels-automation\framework\CG-globalWebFunctions\CG-globalWebFunctions.src"
 include "c:\v-angels-automation\framework\CG-globalWebValidations\CG-globalWebValidations.src"
 include "C:\v-angels-automation\framework\CG-globalLogging\CG-globalLogging.src"
 include "C:\v-angels-automation\framework\CG-globalSubDefinitions\CG-globalSubDefinitions.src"
+include "C:\v-angels-automation\framework\CG-heyFunctions\CG-heyFunctions.src"
 include "C:\v-angels-automation\framework\CG-globalVariables\CG-globalVariables.src"
 include "C:\v-angels-automation\object-repos\heymarket\heyObjectRepository.src"
 
@@ -34,6 +32,9 @@ currScript$ = "CG-heyInitTxtMsgs"
 
 
 #ignoreerrors = 1					'turn off errors
+
+
+logStartScript("send/schedule initial texts")
 
 
 '-------------------------------------------------------------------------------------------------------------------------------- read in data from employment inquiry doc
@@ -45,10 +46,6 @@ endif
 '###############################################################################################################################################
 '##   													script start																			  
 '###############################################################################################################################################
-
-
-logStartScript("send/schedule initial texts")
-
 
 '-------------------------------------------------------------------------------------------------------------------------------- begin iterating through change event column
 
@@ -62,189 +59,337 @@ repeat
 	curr_status$ = arrChangeEvents$(i)
 
 
-	if curr_status$ = "Yes" then
+	if curr_status$ = "Yes" or curr_status$ = "yes" then
 		iChangeCnt = iChangeCnt + 1
 		iExcelRow = i + 2
 		logEventFound()
+    else
+        goto nextIteration
+    endif
 
 '------------------------------------------------------------------------------------------------------------------------------ stage check
 
-		'-------------------- get stage of current change event
-		curr_stage$ = arrCurrentStage$(i)
+	'-------------------- get stage of current change event
+	curr_stage$ = arrCurrentStage$(i)
 
 
-		if heyInitStageChk() = 0 then
-			iStageCnt = iStageCnt + 1
-			logStageMatch()
-		else
-			logStageBypass()
-			goto nextIteration
-		endif
+	if heyInitStageChk() = 0 then
+		iStageCnt = iStageCnt + 1
+	else
+		goto nextIteration
+	endif
 
 
-		'-------------------- get data values for current row
-		heyInitGetData()
-		logDataValues()
+	'-------------------- get data values for current row
+	heyInitGetData()
+	logDataValues()
 
 
-		'-------------------- prep dates in app format
-		dtFirstApptDate$ = heyFmtFirstApptDate$(applicant1stApp$)
-		dtDayBefore$ = heyFmtDayPriorFirstAppt$(applicant1stApp$)
-		dtFirstApptTime$ = heyFmtFirstApptTime$(applicant1stApp$)
+	'-------------------- data conversion/formatting required by heymarket
+	dt1stApptComplDate$ = fmtDateTimeStampToShortDate$(applicant1stApp$)
+	sApptTxtMo$ = getMonthNameFromShortDate$(dt1stApptComplDate$)
+	dtFirstApptTime$ = getTimeFromDateTimeStamp_hhmm$(applicant1stApp$)
+	sApptDayNight$ = getAmPmFromDateTimeStamp$(applicant1stApp$)
+	sApptDay$ = getDayFromShortDate$(dt1stApptComplDate$)
+	sDayPriorAppt$ = getDayPriorFromShortDate$(dt1stApptComplDate$)
+	sApptHr$ = left$(dtFirstApptTime$, 2)
+	sApptMin$ = right$(dtFirstApptTime$, 2)
 
 '------------------------------------------------------------------------------------------------------------------------------ status check
 
-		'-------------------- check txt messages status column
-		if heyInitStatusChk() = 1 then
-			goto nextIteration
-		endif
+	'-------------------- check txt messages status column
+	if heyInitStatusChk() = 1 then
+		goto nextIteration
+	endif
 
 '------------------------------------------------------------------------------------------------------------------------------ log in
 
-		'-------------------- invoke browser
-		if webInvokeBrowser("FF", heyURL$) = 1 then
-			nextScript()
-			goto nextIteration
-		endif
+	'-------------------- invoke browser
+	if webInvokeBrowser("FF", heyURL$) = 1 then
+		nextScript()
+		goto nextIteration
+	endif
 
 
-		'-------------------- check if logged in
-		if heyLogin() = 1 then
-			nextScript()
-			goto nextIteration
-		endif
+	'-------------------- check if logged in
+	if heyLogin() = 1 then
+		nextScript()
+		goto nextIteration
+	endif
 
 '------------------------------------------------------------------------------------------------------------------------------ create contact
-		'-------------------- navigate to contacts page
-		if webNavigate(urlHeyContacts$, "contacts") <> 0 then
-			goto nextIteration
-		endif
-		pause 2
-		if webValidateCurrPage(pgHeyContacts$, "navigating to contacts") <> 0 then
-			goto nextIteration
-		endif
+	'-------------------- navigate to contacts page
+	if webNavigate(urlHeyContacts$, "contacts") <> 0 then
+		goto nextIteration
+	endif
+	pause 2
+	if webValidateCurrPage(pgHeyContacts$, "navigating to contacts") <> 0 then
+		goto nextIteration
+	endif
 
 
-		'-------------------- get contact count
-		gethtmlattribute(txtHeyContactCount$, "OUTERTEXT", preCount$)
+	'-------------------- get contact count
+	preCount$ = heyGetContactCount$()
 
 
-		'-------------------- click 'add contact' button
-		if webClickElement(btnHeyCreateContact$, "clicking create contact") <> 0 then
-			goto nextIteration
-		endif
-		pause 1
-		if webValidateElement(inputHeyName$, "name textfield", "clicking create contact") <> 1 then
-			goto nextIteration
-		endif
+	'-------------------- click 'add contact' button
+	if webClickElement(btnHeyCreateContact$, "clicking create contact") <> 0 then
+		goto nextIteration
+	endif
+	pause 1
+	if webValidateElement(inputHeyName$, "name textfield", "clicking create contact") <> 1 then
+		goto nextIteration
+	endif
 
 
-		'-------------------- enter applicant name
-		if webPasteText(inputHeyName$, applicantFName$ + " " + applicantLName$, "entering contact name") <> 0 then
-			goto nextIteration
-		endif
-		pause 1
+	'-------------------- enter applicant name
+	if webPasteText(inputHeyName$, applicantFName$ + " " + applicantLName$, "entering contact name") <> 0 then
+		goto nextIteration
+	endif
+	pause 1
 
 
-		'-------------------- enter phone
-		if webPasteText(inputHeyPhone$, applicantPhone$, "entering contact phone") <> 0 then
-			goto nextIteration
-		endif
-		pause 1
+	'-------------------- enter phone
+	if webPasteText(inputHeyPhone$, applicantPhone$, "entering contact phone") <> 0 then
+		goto nextIteration
+	endif
+	pause 1
 
 
-		'-------------------- enter email
-		if webPasteText(inputHeyEmail$, applicantEmail$, "entering contact email") <> 0 then
-			goto nextIteration
-		endif
-		pause 1
+	'-------------------- enter email
+	if webPasteText(inputHeyEmail$, applicantEmail$, "entering contact email") <> 0 then
+		goto nextIteration
+	endif
+	pause 1
 
 
-		'-------------------- save contact
-		if webClickElement(btnHeySaveContact$, "clicking save contact") <> 0 then
-			goto nextIteration
-		endif
-		pause 2
-		navigate(urlHeyContacts$)
-		pause 3
-		if heyVerifyAddedContact(preCount$) = 1 then
-			closebrowser()
-			goto nextIteration
-		endif
+	'-------------------- save contact
+	if webClickElement(btnHeySaveContact$, "clicking save contact") <> 0 then
+		goto nextIteration
+	endif
+	pause 2
+	navigate(urlHeyContacts$)
+	pause 3
+	if heyVerifyAddedContact(preCount$) = 1 then
+		closebrowser()
+		goto nextIteration
+	endif
 
 '------------------------------------------------------------------------------------------------------------------------------ send initial text
 
-		'-------------------- navigate to chats
-		if webNavigate(urlHeyChats$, "chats") <> 0 then
-			goto nextIteration
-		endif
-		pause 2
-		if webValidateCurrPage(pgHeyChats$, "navigating to chats") <> 0 then
-			goto nextIteration
-		endif
-
-		'-------------------- click compose button
-		if webClickElement(btnHeyCompose$, "clicking compose") <> 0 then
-			goto nextIteration
-		endif
-		pause 2
-
-
-		'-------------------- enter search criteria
-		if webPasteText(inputHeyContactSrc$, applicantPhone$, "entering phone for search") <> 0 then
-			goto nextIteration
-		endif
-		pause 2
-
-
-		'-------------------- select returned contact
-		rowHeySrcResult$ = heyGenDynSrcResObj$(applicantPhone$)
-		if webClickElement(rowHeySrcResult$, "selecting contact") <> 0 then
-			goto nextIteration
-		endif
-		pause 2
-		if webValidateElement(inputHeyCompName$, "row in result table", "selecting returned contact record") <> 1 then
-			goto nextIteration
-		endif
-
-
-		'-------------------- format initial msg template
-		initMsg$ = heyFmtInitMsgTxt$(applicantFName$, firstAppDate$, firstAppTime$)
-
-
-		'-------------------- compose initial text
-		if webPasteText(inputHeyCompMsgArea$, initMsg$, "composing inital text") <> 0 then
-			goto nextIteration
-		endif
-		pause 2
-
-
-		'-------------------- click send now
-		if webClickElement(btnHeyCompSendNow$, "clicking send") <> 0 then
-			goto nextIteration
-		endif
-		pause 2
-		
-
-
-
-
-		
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+	'-------------------- navigate to chats
+	if webNavigate(urlHeyChats$, "chats") <> 0 then
+		goto nextIteration
 	endif
+	pause 2
+	if webValidateCurrPage(pgHeyChats$, "navigating to chats") <> 0 then
+		goto nextIteration
+	endif
+
+	'-------------------- click compose button
+	if webClickElement(btnHeyCompose$, "clicking compose") <> 0 then
+		goto nextIteration
+	endif
+	pause 2
+
+
+	'-------------------- enter search criteria
+	if webPasteText(inputHeyContactSrc$, applicantPhone$, "entering phone for search") <> 0 then
+		goto nextIteration
+	endif
+	pause 2
+
+
+	'-------------------- select returned contact
+	rowHeySrcResult$ = heyGenDynSrcResObj$(applicantPhone$)
+	if webClickElement(rowHeySrcResult$, "selecting contact") <> 0 then
+		goto nextIteration
+	endif
+	pause 2
+	if webValidateElement(inputHeyCompName$, "row in result table", "selecting returned contact record") <> 1 then
+		goto nextIteration
+	endif
+
+
+	'-------------------- format initial msg template
+	initMsg$ = heyFmtInitMsgTxt$(applicantFName$, dt1stApptComplDate$, dtFirstApptTime$)
+
+
+	'-------------------- compose initial text
+	if webPasteText(inputHeyCompMsgArea$, initMsg$, "composing inital text") <> 0 then
+		goto nextIteration
+	endif
+	pause 2
+
+
+	'-------------------- click send now
+	if webClickElement(btnHeyCompSendNow$, "clicking send") <> 0 then
+		goto nextIteration
+	endif
+	pause 2
+	
+	'------------------------------------------------------------------------------------------------------------------------------ schedule day before confirm
+
+	'-------------------- check if day prior confirm txt is needed
+	if heyPriorDayChk() = 0 then
+		goto dayOfConfirm
+	endif
+
+
+	'-------------------- format day prior msg template
+	dayPriorMsg$ = heyFmtDayPriorMsgTxt$(applicantFName$, dt1stApptComplDate$, dtFirstApptTime$)
+
+
+	'-------------------- compose text
+	if webPasteText(inputHeyCompMsgArea$, dayPriorMsg$, "composing day prior text") <> 0 then
+		goto nextIteration
+	endif
+	pause 2
+
+
+	'-------------------- click schedule button
+	if webClickElement(btnHeyCompSchedule$, "clicking schedule later button") <> 0 then
+		goto nextIteration
+	endif
+	pause 2
+	if webValidateElement(selHeySchedMonth$, "month selector of schedule popup", "clicking schedule later button") <> 1 then
+		goto nextIteration
+	endif
+
+
+	'-------------------- select appt month
+	if webSelectItem(selHeySchedMonth$, "June", "selecting month") <> 0 then
+		goto nextIteration
+	endif
+	pause 2
+
+
+	'-------------------- build dynamic object for day selection
+	btnHeySchedPriorDay$ = heyBuildDayObj$(sDayPriorAppt$)
+
+
+	'-------------------- select day prior
+	if webClickElement(btnHeySchedPriorDay$, "clicking calendar day") <> 0 then
+		goto nextIteration
+	endif
+
+
+	'-------------------- select hour
+	if webSelectItem(selHeySchedHour$, dayPriorAppHour$, "selecting hour") <> 0 then
+		goto nextIteration
+	endif
+	pause 2
+	if webValidateText(selHeySchedHour$, dayPriorAppHour$, "selecting hour") <> 0 then
+		goto nextIteration
+	endif
+
+
+	'-------------------- select minute
+	if webSelectItem(selHeySchedMin$, dayPriorAppMinutes$, "selecting minute") <> 0 then
+		goto nextIteration
+	endif
+	pause 2
+	if webValidateText(selHeySchedMin$, dayPriorAppMinutes$, "selecting minute") <> 0 then
+		goto nextIteration
+	endif
+
+
+	'-------------------- select day/night
+	if webSelectItem(selHeySchedDayNight$, dayPriorDayNight$, "selecting am/pm") <> 0 then
+		goto nextIteration
+	endif
+	pause 2
+
+
+	'-------------------- click save
+	if webClickElement(btnHeySchedSave$, "clicking save") <> 0 then
+		goto nextIteration
+	endif
+	pause 2
+	if webValidateElement(rowHeySchedMsg$, "rowHeySchedMsg", "clicking save") <> 1 then
+		goto nextIteration
+	endif
+
+	'------------------------------------------------------------------------------------------------------------------------------ schedule day of confirm
+
+dayOfConfirm:
+
+	'-------------------- format day of msg template
+	dayOfMsg$ = heyFmtDayOfApptMsgTxt$(applicantFName$, dtFirstApptTime$)
+
+
+	'-------------------- compose text
+	if webPasteText(inputHeyCompMsgArea$, dayOfMsg$, "composing day of text") <> 0 then
+		goto nextIteration
+	endif
+	pause 2
+
+
+	'-------------------- click schedule button
+	if webClickElement(btnHeyCompSchedule$, "clicking schedule later button") <> 0 then
+		goto nextIteration
+	endif
+	pause 2
+	if webValidateElement(selHeySchedMonth$, "month selector of schedule popup", "clicking schedule later button") <> 1 then
+		goto nextIteration
+	endif
+
+
+	'-------------------- select appt month
+	if webSelectItem(selHeySchedMonth$, "June", "selecting month") <> 0 then
+		goto nextIteration
+	endif
+	pause 2
+
+
+	'-------------------- build dynamic object for day selection
+	btnHeySchedDay$ = heyBuildDayObj$(sDayPriorAppt$)
+
+
+	'-------------------- select day of
+	if webClickElement(btnHeySchedDay$, "clicking calendar day") <> 0 then
+		goto nextIteration
+	endif
+
+
+	'-------------------- select hour
+	if webSelectItem(selHeySchedHour$, dayOfAppHour$, "selecting hour") <> 0 then
+		goto nextIteration
+	endif
+	pause 2
+	if webValidateText(selHeySchedHour$, dayOfAppHour$, "selecting hour") <> 0 then
+		goto nextIteration
+	endif
+
+
+	'-------------------- select minute
+	if webSelectItem(selHeySchedMin$, dayOfAppMinutes$, "selecting minute") <> 0 then
+		goto nextIteration
+	endif
+	pause 2
+	if webValidateText(selHeySchedMin$, dayOfAppMinutes$, "selecting minute") <> 0 then
+		goto nextIteration
+	endif
+
+
+	'-------------------- select day/night
+	if webSelectItem(selHeySchedDayNight$, dayOfDayNight$, "selecting am/pm") <> 0 then
+		goto nextIteration
+	endif
+	pause 2
+
+
+	'-------------------- click save
+	if webClickElement(btnHeySchedSave$, "clicking save") <> 0 then
+		goto nextIteration
+	endif
+	pause 2
+
+
+    logWorkflowSuccess("workflow completed; contact created and texts sent/scheduled successfully")
+    iCompletedCnt = iCompletedCnt + 1
+    closebrowser()
+
 
 nextIteration:
 
@@ -258,3 +403,5 @@ until i = 5000
 '##############################################################
 '##   			script end									 ##
 '##############################################################
+
+heyInitLogStats()

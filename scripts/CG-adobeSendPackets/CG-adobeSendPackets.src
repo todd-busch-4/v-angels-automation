@@ -57,7 +57,7 @@ repeat
 	curr_status$ = arrChangeEvents$(i)
 
 
-	if curr_status$ = "Yes" then
+	if curr_status$ = "Yes" or curr_status$ = "yes" then
 		iEventCnt = iEventCnt + 1
 		iExcelRow = i + 2
 		logEventFound()
@@ -101,6 +101,7 @@ repeat
 				goto nextIteration
 			endif
 
+
 			'-------------------- click select files button
 			UsePage(pgAdobeMain$)
 			if webClickElement(btnAdobeSelFiles$, "clicking 'select files' button") <> 0 then
@@ -112,28 +113,28 @@ repeat
 
 			'-------------------- select 'automated' folder
 			usewindow(wndAdobeMainPage$)
-			winMouseLeftClick(835, 615, "selecting 'automated' folder")
+			winMouseLeftClick(800, 550, "selecting 'automated' folder")
 			pause 2
 			endpause
 
 
 			'-------------------- select 'employee forms' folder
 			usewindow(wndAdobeMainPage$)
-			winMouseLeftClick(835, 615, "selecting 'employee forms' folder")
+			winMouseLeftClick(800, 630, "selecting 'employee forms' folder")
 			pause 2
 			endpause
 
 
 			'-------------------- select 'applicant to new hire forms' folder
 			usewindow(wndAdobeMainPage$)
-			winMouseLeftClick(835, 615, "selecting 'applicant to new hire forms' folder")
+			winMouseLeftClick(800, 500, "selecting 'applicant to new hire forms' folder")
 			pause 2
 			endpause
 
 
 			'-------------------- select pre 1st int packet
 			usewindow(wndAdobeMainPage$)
-			winMouseLeftClick(835, 615, "selecting  pre 1st int pkt")
+			winMouseLeftClick(800, 630, "selecting  pre 1st int pkt")
 			pause 3
 			endpause
 
@@ -149,7 +150,8 @@ repeat
 			if webValidateElement(lblAdobeStatusAdd$, "'add' status label", "packet load") <> 1 then
 				goto nextIteration
 			endif
-
+			pause 3
+			
 
 			'-------------------- enter applicant email
 			if winSendKeys(applicantEmail$, "entering applicant email") <> 0 then
@@ -164,7 +166,7 @@ repeat
 				goto nextIteration
 			endif
 			pause 1
-			if winSendKeys("<tab><tab><tab><tab>", "set focus on corp email") <> 0 then
+			if winSendKeys("<tab><tab><tab><tab><tab>", "set focus on corp email") <> 0 then
 				goto nextIteration
 			endif
 			pause 2
@@ -178,7 +180,11 @@ repeat
 
 
 			'-------------------- set focus to message title field
-			if winSendKeys("<tab><tab><tab><tab><tab><tab><left>", "set focus to message title input field") <> 0 then
+			if winSendKeys("<esc>", "clear email tooltip in applicant email inputfield") <> 0 then
+				goto nextIteration
+			endif
+			pause 1
+			if winSendKeys("<tab><tab><tab><tab><tab><tab><tab><tab><left>", "set focus to message title input field") <> 0 then
 				goto nextIteration
 			endif
 			pause 2
@@ -251,28 +257,28 @@ firstInterviewSend:
 
 			'-------------------- select 'automated' folder
 			usewindow(wndAdobeMainPage$)
-			winMouseLeftClick(835, 615, "selecting 'automated' folder")
+			winMouseLeftClick(800, 550, "selecting 'automated' folder")
 			pause 2
 			endpause
 
 
 			'-------------------- select 'employee forms' folder
 			usewindow(wndAdobeMainPage$)
-			winMouseLeftClick(835, 615, "selecting 'employee forms' folder")
+			winMouseLeftClick(800, 630, "selecting 'employee forms' folder")
 			pause 2
 			endpause
 
 
 			'-------------------- select 'applicant to new hire forms' folder
 			usewindow(wndAdobeMainPage$)
-			winMouseLeftClick(835, 615, "selecting 'applicant to new hire forms' folder")
+			winMouseLeftClick(800, 500, "selecting 'applicant to new hire forms' folder")
 			pause 2
 			endpause
 
 
 			'-------------------- select 1st int packet
 			usewindow(wndAdobeMainPage$)
-			winMouseLeftClick(950, 480, "selecting 1st int pkt")
+			winMouseLeftClick(800, 500, "selecting 1st int pkt")
 			pause 3
 			endpause
 			
@@ -288,6 +294,7 @@ firstInterviewSend:
 			if webValidateElement(lblAdobeStatusAdd$, "'add' status label", "validate packet load") <> 1 then
 				goto nextIteration
 			endif
+			pause 3
 
 
 			'-------------------- enter applicant email
@@ -303,7 +310,7 @@ firstInterviewSend:
 				goto nextIteration
 			endif
 			pause 1
-			if winSendKeys("<tab><tab><tab><tab>", "set focus on corp email") <> 0 then
+			if winSendKeys("<tab><tab><tab><tab><tab>", "set focus on corp email") <> 0 then
 				goto nextIteration
 			endif
 			pause 2
@@ -317,7 +324,11 @@ firstInterviewSend:
 
 
 			'-------------------- set focus to message title field
-			if winSendKeys("<tab><tab><tab><tab><tab><tab><left>", "set focus to message title input field") <> 0 then
+			if winSendKeys("<esc>", "clear email tooltip in applicant email inputfield") <> 0 then
+				goto nextIteration
+			endif
+			pause 1
+			if winSendKeys("<tab><tab><tab><tab><tab><tab><tab><tab><left>", "set focus to message title input field") <> 0 then
 				goto nextIteration
 			endif
 			pause 2
@@ -402,33 +413,31 @@ firstInterviewSend:
 			pause 2
 			endpause
 
+
 			'-------------------- select 'automated' folder
 			usewindow(wndAdobeMainPage$)
-			clickmouse(left, double, 835, 615, absolute)
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicked automated folder", crlf)			
+			winMouseLeftClick(800, 550, "selecting 'automated' folder")
 			pause 2
 			endpause
 
+
 			'-------------------- select 'employee forms' folder
 			usewindow(wndAdobeMainPage$)
-			clickmouse(left, double, 835, 615, absolute)
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicked employee forms folder", crlf)			
+			winMouseLeftClick(800, 630, "selecting 'employee forms' folder")
 			pause 2
 			endpause
 
 
 			'-------------------- select 'applicant to new hire forms' folder
 			usewindow(wndAdobeMainPage$)
-			clickmouse(left, double, 835, 615, absolute)
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": clicked applicant to new hire forms folder", crlf)			
+			winMouseLeftClick(800, 500, "selecting 'applicant to new hire forms' folder")
 			pause 2
 			endpause
 
+
 			'-------------------- select 2nd int packet
 			usewindow(wndAdobeMainPage$)
-			clickmouse(left, down, 835, 565, absolute)
-			clickmouse(left, up, 835, 565, absolute)
-			write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": selected 2nd int pkt", crlf)			
+			winMouseLeftClick(800, 570, "selecting 2nd int pkt")
 			pause 3
 			endpause
 			
@@ -444,6 +453,7 @@ firstInterviewSend:
 			if webValidateElement(lblAdobeStatusAdd$, "'add' status label", "validate packet load") <> 1 then
 				goto nextIteration
 			endif
+			pause 3
 
 
 			'-------------------- enter applicant email
@@ -459,7 +469,7 @@ firstInterviewSend:
 				goto nextIteration
 			endif
 			pause 1
-			if winSendKeys("<tab><tab><tab><tab>", "set focus on corp email") <> 0 then
+			if winSendKeys("<tab><tab><tab><tab><tab>", "set focus on corp email") <> 0 then
 				goto nextIteration
 			endif
 			pause 2
@@ -473,7 +483,11 @@ firstInterviewSend:
 
 
 			'-------------------- set focus to message title field
-			if winSendKeys("<tab><tab><tab><tab><tab><tab><left>", "set focus to message title input field") <> 0 then
+			if winSendKeys("<esc>", "clear email tooltip in applicant email inputfield") <> 0 then
+				goto nextIteration
+			endif
+			pause 1
+			if winSendKeys("<tab><tab><tab><tab><tab><tab><tab><tab><left>", "set focus to message title input field") <> 0 then
 				goto nextIteration
 			endif
 			pause 2

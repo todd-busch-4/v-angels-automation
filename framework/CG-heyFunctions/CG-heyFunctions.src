@@ -580,3 +580,424 @@ function heyFmtDayOfApptMsgTxt$(fname$, appt_time$)
     local fname$, appt_time$
     heyFmtDayOfApptMsgTxt$ = "Good morning " + fname$ + ", this is Visiting Angels reminding you of your interview today at " + appt_time$ + ". Please reply to confirm as our office runs on confirmed appointments only.<Enter>Please text '1' to confirm, '2' to reschedule, or '3' to cancel.<Enter>Thank you and we look forward to seeing you."
 endfunction
+
+'=============================================================================================================================================================
+'== function name:              fmtDateTimeStampToShortDate$
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                terseDescription
+    '==
+    '== input parms:            none
+    '==
+    '== returns:                int:    0 - success
+    '==                                 1 - failure
+    '==
+    '== notes:                  none
+    '==
+'===============================================================================================================================================================
+function fmtDateTimeStampToShortDate$(dt_date$)
+    local r, p, dtDateOnly$, dtMonth$, dtDay$, dtYr$, dt_date$
+
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": call to: fmtDateTimeStampToShortDate()..........", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": formatting a datetimestamp to just date in short format", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": original value: [" + dt_date$ + "]", crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": disecting value into parts", crlf)
+    
+	'original format 1/20/2023  10:30:00 AM
+    '------- month
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": getting month", crlf)
+	r = instrrev(dt_date$, "/")							'find second "/" in string
+    r = r + 4											'add 4 for year to find end of date
+    dtDateOnly$ = left$(dt_date$, r)					'extract just date
+    dtMonth$ = left$(dtDateOnly$, 2)			        'extract just month
+    if instr(dtMonth$,"/") <> 0 then					'zero pad if single digit                                  
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": zero padding since single digit", crlf)
+        dtMonth$ = left$(dtMonth$, 1)
+        dtMonth$ = "0" + dtMonth$
+    endif
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": extracted month: [" + dtMonth$ + "]", crlf)
+
+    '------- day
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": getting day", crlf)
+    p = instr(dt_date$, "/")					        'find starting point to extract day
+    dtDay$ = mid$(dt_date$, p + 1, 2)		        	'extract just day
+    if instr(dtDay$,"/") <> 0 then						'zero pad if single digit
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": zero padding since single digit", crlf)
+    	dtDay$ = left$(dtDay$, 1) 
+        dtDay$ = "0" + dtDay$
+    endif
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": extracted day: [" + dtDay$ + "]", crlf)
+
+    '------- year
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": getting year", crlf)
+	dtYr$ = right$(dtDateOnly$, 4)						'extract just year
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": extracted year: [" + dtYr$ + "]", crlf)
+
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": assembling parts into short format", crlf)
+    dtFormattedDate$ = dtMonth$ + "/" + dtDay$ + "/" + dtYr$
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": formatted value: [" + dtFormattedDate$ + "]", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ..........EndFunction [fmtDateTimeStampToShortDate]", crlf)
+    fmtDateTimeStampToShortDate$ = dtMonth$ + "/" + dtDay$ + "/" + dtYr$
+
+endfunction
+
+'=============================================================================================================================================================
+'== function name:				getMonthNameFromShortDate$
+	'==
+	'== developer:              todd busch
+	'==
+	'== purpose:                terseDescription
+	'==
+	'== input parms:            none
+	'==
+	'== returns:                int:	0 - success
+	'==									1 - failure
+	'==
+	'== notes:                  none
+	'==
+'===============================================================================================================================================================
+function getMonthNameFromShortDate$(dt_date$)
+    local dt_date$, sIntMo$, sTxtMo$
+
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": call to: getMonthNameFromShortDate()..........", crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": getting the text value of month in short formatted date", crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": starting format: [" + dt_date$ + "]", crlf)
+
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": extracting month from date", crlf)
+    if instr(dt_date$, "/") = 2 then
+        sIntMo$ = left$(dt_date$, 1)
+    else
+        sIntMo$ = left$(dt_date$, 2)
+    endif
+	if instr(sIntMo$, "0") <> 0 then
+		write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stripping leading zero", crlf)
+		sIntMo$ = right$(sIntMo$, 1)
+	endif
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": extracted month: [" + sIntMo$ + "]", crlf)
+
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": converting value to month name", crlf)
+    select case sIntMo$
+        case "1"
+            sTxtMo$ = "January"
+        case "2"
+            sTxtMo$ = "February"
+        case "3"
+            sTxtMo$ = "March"
+        case "4"
+            sTxtMo$ = "April"
+        case "5"
+            sTxtMo$ = "May"
+        case "6"
+            sTxtMo$ = "June"
+        case "7"
+            sTxtMo$ = "July"
+        case "8"
+            sTxtMo$ = "August"
+        case "9"
+            sTxtMo$ = "September"
+        case "10"
+            sTxtMo$ = "October"
+        case "11"
+            sTxtMo$ = "November"
+        case "12"
+            sTxtMo$ = "December"
+    endselect
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": converted value: [" + sTxtMo$ + "]", crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ..........EndFunction [getMonthNameFromShortDate]", crlf)
+
+	getMonthNameFromShortDate$ = sTxtMo$
+
+EndFunction
+
+'=============================================================================================================================================================
+'== function name:				getTimeFromDateTimeStamp_hhmm$
+	'==
+	'== developer:              todd busch
+	'==
+	'== purpose:                terseDescription
+	'==
+	'== input parms:            none
+	'==
+	'== returns:                int:	0 - success
+	'==									1 - failure
+	'==
+	'== notes:                  none
+	'==
+'===============================================================================================================================================================
+function getTimeFromDateTimeStamp_hhmm$(dt_date$)
+	local dt_date$, sLongTime$, sAmPm$, sHrMin$
+
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": call to: getTimeFromDateTimeStamp_hhmm()..........", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": getting time in HH:MM format from a datetimestamp", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": starting value: [" + dt_date$ + "]", crlf)
+
+	'original format 1/20/2023  10:30:00 AM
+    sLongTime$ = right$(dt_date$, 11)				'extract just time (w/am-pm)
+
+    sAmPm$ = right$(sLongTime$, 2)					'extract am/pm designator
+
+    sHrMin$ = left$(sLongTime$, 5)					'extract time minus secs
+
+    sHrMin$ = ltrim$(sHrMin$)						'trim whitespace caused by single hour values
+
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": extracted value: [" + sHrMin$ + "]", crlf)
+
+	getTimeFromDateTimeStamp_hhmm$ = sHrMin$
+
+endfunction
+
+'=============================================================================================================================================================
+'== function name:				getAmPmFromDateTimeStamp$
+	'==
+	'== developer:              todd busch
+	'==
+	'== purpose:                terseDescription
+	'==
+	'== input parms:            none
+	'==
+	'== returns:                int:	0 - success
+	'==									1 - failure
+	'==
+	'== notes:                  none
+	'==
+'===============================================================================================================================================================
+function getAmPmFromDateTimeStamp$(dt_date$)
+	local dt_date$, sAmPm$
+
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": call to: getAmPmFromDateTimeStamp()..........", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": getting the day/night designator from a datetimestamp", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": starting value: [" + dt_date$ + "]", crlf)
+
+	'original format 1/20/2023  10:30:00 AM
+    sAmPm$ = right$(dt_date$, 2)					'extract am/pm designator
+
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": extracted value: [" + sAmPm$ + "]", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ..........EndFunction [getAmPmFromDateTimeStamp]", crlf)
+
+	getAmPmFromDateTimeStamp$ = sAmPm$
+
+endfunction
+
+'=============================================================================================================================================================
+'== function name:				getDayFromShortDate$
+	'==
+	'== developer:              todd busch
+	'==
+	'== purpose:                terseDescription
+	'==
+	'== input parms:            none
+	'==
+	'== returns:                int:	0 - success
+	'==									1 - failure
+	'==
+	'== notes:                  none
+	'==
+'===============================================================================================================================================================
+function getDayFromShortDate$(dt_date$)
+	local dt_date$
+
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": call to: getDayFromShortDate()..........", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": getting the day value from a short date string", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": original value: [" + dt_date$ + "]", crlf)
+
+	sDay$ = mid$(dt_date$, 4, 2)
+
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": extracted value: [" + sDay$ + "]", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ..........EndFunction [getDayFromShortDate]", crlf)
+
+	getDayNameFromShortDate$ = sDay$
+
+endfunction
+
+'=============================================================================================================================================================
+'== function name:				getDayPriorFromShortDate$
+	'==
+	'== developer:              todd busch
+	'==
+	'== purpose:                terseDescription
+	'==
+	'== input parms:            none
+	'==
+	'== returns:                int:	0 - success
+	'==									1 - failure
+	'==
+	'== notes:                  none
+	'==
+'===============================================================================================================================================================
+function getDayPriorFromShortDate$(dt_date$)
+	local dt_date$
+
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": call to: getDayPriorFromShortDate()..........", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": getting the day prior to the value from a short date string", crlf)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": original value: [" + dt_date$ + "]", crlf)
+
+	sDay$ = mid$(dt_date$, 4, 2)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": extracted value: [" + sDay$ + "]", crlf)
+
+	iDay = val(sDay$)
+	iDayPrior = iDay - 1
+	sDayPrior$ = str$(iDayPrior)
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": converted value: [" + sDayPrior$ + "]", crlf)
+
+	write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ..........EndFunction [getDayPriorFromShortDate]", crlf)
+
+	getDayPriorFromShortDate$ = sDay$
+
+endfunction
+
+'=============================================================================================================================================================
+'== function name:              heyGetContactCount
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                terseDescription
+    '==
+    '== input parms:            none
+    '==
+    '== returns:                int:    0 - success
+    '==                                 1 - failure
+    '==
+    '== notes:                  none
+    '==
+'===============================================================================================================================================================
+function heyGetContactCount$()
+    local var$
+
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": call to: heyGetContactCount()..........", crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": getting number of current contacts", crlf)
+    
+    gethtmlattribute(txtHeyContactCount$, "OUTERTEXT", var$)
+
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": current count: [" + var$ + "]", crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ..........EndFunction [heyGetContactCount]", crlf)
+    heyGetContactCount$ = var$
+
+endfunction
+
+'=============================================================================================================================================================
+'== function name:              heyPriorDayChk
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                terseDescription
+    '==
+    '== input parms:            none
+    '==
+    '== returns:                int:    0 - success
+    '==                                 1 - failure
+    '==
+    '== notes:                  none
+    '==
+'===============================================================================================================================================================
+function heyPriorDayChk()
+
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": call to: heyPriorDayChk()..........", crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": checking appt date to determine if a prior day reminder text is needed", crlf)
+
+    'is it in the upcoming month
+    sApptMonth$ = left$(dt1stApptComplDate$, 2)
+    sCurrMonth$ = month$()
+    if sApptMonth$ > sCurrMonth$ then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": appt is not until next month; scheduling the day before confirmation", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ..........EndFunction [heyPriorDayChk]", crlf)
+        heyPriorDayChk = 1
+        exitfunction
+    endif
+
+    'if not, compare days
+    sAppDay$ = mid$(dt1stApptComplDate$, 4, 2)
+    iAppDay = val(sAppDay$)
+
+    sCurrDay$ = day$()
+    iCurrDay = val(sCurrDay$)
+
+    if iCurrDay = iAppDay or iCurrDay = iAppDay - 1 then
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": appt is within a day, skipping the day before confirmation", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ..........EndFunction [heyPriorDayChk]", crlf)
+        heyPriorDayChk = 0
+        exitfunction
+    else
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": appt is more than a day out, scheduling the day before confirmation", crlf)
+        write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ..........EndFunction [heyPriorDayChk]", crlf)
+        heyPriorDayChk = 1
+        exitfunction
+    endif
+
+endfunction
+
+'=============================================================================================================================================================
+'== function name:              heyBuildDayObj
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                terseDescription
+    '==
+    '== input parms:            none
+    '==
+    '== returns:                int:    0 - success
+    '==                                 1 - failure
+    '==
+    '== notes:                  none
+    '==
+'===============================================================================================================================================================
+function heyBuildDayObj$(dt_date$)
+    local dt_date$
+
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": call to: heyBuildDayObj()..........", crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": building the dynamic description for the day calendar object", crlf)
+
+    sDayObjectDesc$ = "BUTTON[INNERTEXT='" + dt_date$ + "']"
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": object description: [" + sDayObjectDesc$ + "]", crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ..........EndFunction [heyBuildDayObj]", crlf)
+
+    heyBuildDayObj$ = sDayObjectDesc$
+
+EndFunction
+
+'=============================================================================================================================================================
+'== function name:              heyInitLogStats
+    '==
+    '== developer:              todd busch
+    '==
+    '== purpose:                terseDescription
+    '==
+    '== input parms:            none
+    '==
+    '== returns:                int:    0 - success
+    '==                                 1 - failure
+    '==
+    '== notes:                  none
+    '==
+'===============================================================================================================================================================
+function heyInitLogStats()
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events detected:            " + str$(iEventCnt), crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage matches detected:            " + str$(iStageCnt), crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflows triggered:               " + str$(iTriggeredCnt), crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage/status bypassed:             " + str$(iBypassedCnt), crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": rows processed:                    " + str$(iCompletedCnt), crlf)
+    write(debugLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ==================================== end workflow =======================================", crlf + crlf)
+
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf)
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf)
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events detected:            " + str$(iEventCnt), crlf)
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage matches detected:            " + str$(iStageCnt), crlf)
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflows triggered:               " + str$(iTriggeredCnt), crlf)
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage/status bypassed:             " + str$(iBypassedCnt), crlf)
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": rows processed:                    " + str$(iCompletedCnt), crlf)
+    write(scanFailuresPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ==================================== end workflow =======================================", crlf + crlf)
+    
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflow scan completed", crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ------------------------------------------------------", crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": change events detected:            " + str$(iEventCnt), crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage matches detected:            " + str$(iStageCnt), crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": workflows triggered:               " + str$(iTriggeredCnt), crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": stage/status bypassed:             " + str$(iBypassedCnt), crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": rows processed:                    " + str$(iCompletedCnt), crlf)
+    write(successLogPath$, basicLogHdr$ + Time$() + ": " + currScript$ + ": ==================================== end workflow =======================================", crlf + crlf)
+
+    heyInitLogStats = 0
+
+endfunction

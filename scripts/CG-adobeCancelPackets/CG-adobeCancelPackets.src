@@ -123,9 +123,6 @@ repeat
 		clickmouse(left, down, 745, 300, absolute)
 		clickmouse(left, up, 745, 300, absolute)
 		pause 3
-		if webValidateElement(lblAdobeStatus$, "status field label", "select packet") <> 1 then
-			goto firstInterviewCancel
-		endif
 
 
 		'-------------------- make sure packet not already cancelled
@@ -136,18 +133,15 @@ repeat
 '------------------------------------------------------------------------------------------------------------------------------ pre 1st pkt start cancel
 
 		'-------------------- click cancel
-		if adobeClickCancel("pre 1st") = 1 then
-			goto firstInterviewCancel
-		endif
-		if webValidateElement(diaAdobeCancelPktPopup$, "cancel popup dialogbox", "clicking cancel btn") <> 1 then
-			goto firstInterviewCancel
-		endif
+		clickmouse(left, down, 1685, 443, absolute)
+		clickmouse(left, up, 1685, 443, absolute)
+		pause 3
 
 		
 		'-------------------- enter cancel text
 		reason$ = adobeCancelGetReason$()
-		if webPasteText(diaAdobeCancelPktPopup$, reason$, "enter cancel reason") <> 0 then
-			goto nextIteration
+		if winSendKeys(reason$, "cancel reason") <> 0 then
+			goto firstInterviewCancel
 		endif
 		pause 2
 
@@ -161,10 +155,9 @@ repeat
 
 
 		'-------------------- click cancel agreement button
-		if webClickElement(btnAdobeCancelAgreement$, "cancel agreement") <> 0 then
-			goto firstInterviewCancel
-		endif
-		pause 2
+		clickmouse(left, down, 1045, 650, absolute)
+		clickmouse(left, up, 1045, 650, absolute)
+		pause 3
 		if webValidateElement(txtAdobePktStatus$, "packet status", "cancel agreement") <> 1 then
 			goto firstInterviewCancel
 		else
@@ -227,9 +220,6 @@ firstInterviewCancel:
 		clickmouse(left, down, 745, 300, absolute)
 		clickmouse(left, up, 745, 300, absolute)
 		pause 3
-		if webValidateElement(lblAdobeStatus$, "status field label", "select packet") <> 1 then
-			goto secondInterviewCancel
-		endif
 
 
 		'-------------------- make sure packet not already cancelled
@@ -248,6 +238,7 @@ firstInterviewCancel:
 
 
 		'-------------------- enter cancel text
+		reason$ = adobeCancelGetReason$()
 		if webPasteText(diaAdobeCancelPktPopup$, reason$, "enter cancel reason") <> 0 then
 			goto secondInterviewCancel
 		endif
@@ -359,6 +350,7 @@ secondInterviewCancel:
 
 
 		'-------------------- enter cancel text
+		reason$ = adobeCancelGetReason$()
 		if webPasteText(diaAdobeCancelPktPopup$, reason$, "enter cancel reason") <> 0 then
 			goto nextIteration
 		endif
